@@ -80,6 +80,7 @@ shortloop	jsr	updateframe
 endlessloop	jmp	endlessloop
 
 
+
 *******************************************************************************
 * Point to next anim frame, point to 0 if we wrapped
 *******************************************************************************
@@ -109,6 +110,11 @@ loadframe	ldd	animindex
 animindex	fdb	$0000
 anim		fdb	slime161,slime162,slime163,slime164,slime165,$0000
 
+;animindex	fdb	$0000
+;anim		fdb	coolspotlk01,coolspotlk02,coolspotlk03,coolspotlk04,coolspotlk05,coolspotlk06
+;		fdb	coolspotlk06,coolspotlk05,coolspotlk04,coolspotlk03,coolspotlk02,coolspotlk01,$0000
+
+
 bouncyPalette	fcb	$00,$00,$07,$38,$3F,$06,$30,$36,$01,$08,$09,$02,$10,$12,$04,$24
 blackPalette 	fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 
@@ -121,11 +127,19 @@ blackPalette 	fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 		include palette.asm
 		include bouncygfx.asm
 		include tilecircuit.inc
+
 		include slime161.asm
 		include slime162.asm
 		include slime163.asm
 		include slime164.asm
 		include slime165.asm
+
+;		include coolspotlk01.asm
+;		include coolspotlk02.asm
+;		include coolspotlk03.asm
+;		include coolspotlk04.asm
+;		include coolspotlk05.asm
+;		include coolspotlk06.asm
 
 		include sdrip.asm
 		

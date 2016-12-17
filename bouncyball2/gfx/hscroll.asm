@@ -22,16 +22,6 @@ HIGHSPEED	equ	$FFD9
 		
 start		orcc	#$50
 
-****************
-;test code I use to load into edtasm and inspect results, commented out for actual program
-;		jsr	setRGBPalette
-;		ldd	#$0		; set position sprite
-;		std	xpos		; store sprite position
-;		ldu	#ball01		; point to sprite
-;		jsr	blit		; show the sprite
-;		swi
-****************
-		
 ;		sta	HIGHSPEED	; high speed poke...doesn't matter what you store
 
 		ldx	#blackPalette	; hide everything 
@@ -385,7 +375,8 @@ blackPalette 	fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 * contain
 *******************************************************************************
 
-		include	ball01.inc
+;		include	redball.inc
+		include ball01.inc
 		include tilecircuit.inc
 		include block_red.inc
 

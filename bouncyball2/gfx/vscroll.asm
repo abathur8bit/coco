@@ -6,8 +6,8 @@
 * Tabs set to 8 and using real tabs, not spaces.
 * 
 * Compile: 
-* lwasm -9 -b -o hscroll.bin hscroll.asm && writecocofile --verbose gfx.dsk hscroll.bin && coco3 `pwd`/gfx.dsk hscroll
-* lwasm -l -9 -b -o hscroll.bin hscroll.asm > hscroll.lst && writecocofile --verbose gfx.dsk hscroll.bin && coco3 `pwd`/gfx.dsk hscroll
+* lwasm -9 -b -o vscroll.bin vscroll.asm && writecocofile --verbose gfx.dsk vscroll.bin && coco3 `pwd`/gfx.dsk vscroll
+* lwasm -l -9 -b -o vscroll.bin vscroll.asm > vscroll.lst && writecocofile --verbose gfx.dsk vscroll.bin && coco3 `pwd`/gfx.dsk vscroll
 * 
 * This is just a test to see how to set the video mode, and a hacky blit routine
 * to display something.
@@ -74,70 +74,20 @@ start		orcc	#$50
 blittest
 		ldd	#$4050		; sprite x,y position
 		ldu	#ball01		; point to sprite
-		jsr	blit		; show the sprite
+		;jsr	blit		; show the sprite
 		;jmp	endlessloop
-		jmp	vscroll
-		
-hscroll		
-		; VMODE
-		; 76543210 
-		; AxxxxBBB A sets graphics B sets # lines per row
-		; A 1=Graphics 0=Text
-		; xxxx just leave as 0000
-		; BBB Lines per row
-		;   00x=one line per row
-		;   010=two lines per row
-		;   011=eight lines per row
-		;   100=nine lines per row
-		;   101=ten lines per row
-		;   110=eleven lines per row
-		;   111=*infinite lines per row
-		lda	#%10000010
-		sta	$ff98		; VMODE
-		
-		; VRES
-		; 76543210 
-		; xAABBBCC
-		; x Unused
-		; AA scan lines 
-		;   00=192 
-		;   01=200 
-		;   10=undefined 
-		;   11=225
-		; BBB HRES bytes per row
-		;   000=16 bytes per row 
-		;   001=20 bytes per row 
-		;   010=32 bytes per row 
-		;   011=40 bytes per row
-		;   100=64 bytes per row
-		;   101=80 bytes per row
-		;   110=128 bytes per row
-		;   111=160 bytes per row
-		; CC CRES # colors in graphics mode
-		;   00=2 colors (8 pixels per byte)
-		;   01=4 colors (4 pixels per byte)
-		;   10=16 colors (2 pixels per byte)
-		;   11=Undefined (would have been 256 colors)		 
-		lda	#%01111110	
-		sta	$ff99		; VRES
-		
-b@		lda	#%10000000	; bit 7 enables HVEN 6-0 offset * 2
-a@		sta	HVEN		; $FF9F
-		jsr	longdelay
-		inca
-		bne	a@		; wrapped to 0? no keep going, yes fall through
-		bra	b@
-		jmp	endlessloop		
 		
 vscroll		; scroll up
 b@		ldd	#$C000
 a@		std	VOFFSET
-		jsr	vsync
-		addd	#$10		; scrolls up 1 pixel
+		
+		jsr	layblock
+		;jsr	vsync
+		addd	#$20		; scrolls up 1 pixel
 		cmpd	#$cc00		; 192 pixels ($C0 * 10)
 		bls	a@
 		; now scroll back down
-c@		subd	#$10		; scrolls down 1 pixel
+c@		subd	#$20		; scrolls down 1 pixel
 		cmpd	#$c000		; back at the top?
 		beq	b@
 		std	VOFFSET
@@ -145,17 +95,15 @@ c@		subd	#$10		; scrolls down 1 pixel
 		bra	c@
 		
 		
-		; vert1
-b@		ldb	#$c0		
-a@		stb	$ff9d		; vert msb
-		jsr	longdelay
-		incb
-		cmpb	#$D0		; did we go far enough?
-		bne	a@
-		bra	b@
+		jmp	endlessloop	; never get here
 		
-		
-		jmp	endlessloop
+layblock	pshs	d
+		jsr	mmupage2
+		ldu	#ball01
+		ldd	#$4050
+		jsr	blit
+		puls	d
+		rts		
 
 off1		fcb	0
 *******************************************************************************

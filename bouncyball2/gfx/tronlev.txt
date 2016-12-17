@@ -1,0 +1,16 @@
+render the level
+render the offscreen col
+scrollx = $80	; used to set HVEN
+do
+	vsync
+	HVEN = scrollx
+	scrollx++
+	scrollx |= $80
+	
+	countx++
+	if countx >=16
+		countx=0
+		leveloffset++
+		render offscreen
+	endif
+while leveloffset < 255

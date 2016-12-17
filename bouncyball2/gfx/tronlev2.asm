@@ -73,13 +73,11 @@ bouncy
 * Show and scroll the level.
 *******************************************************************************
 mainloop
-		jsr	longdelay
-		
 		jsr	vsync			; a bit of a delay
         	lda	scrollx
 		sta	HVEN
 		inca
-		ora	#$80			; make sure if we wrapped to 0, that HVEN bit is set
+		ora	$80			; make sure if we wrapped to 0, that HVEN bit is set
 		sta	scrollx
 
 		lda	countx			; countx++
@@ -94,14 +92,7 @@ mainloop
 		ldd	leveloffset
 		addd	#1
 		std	leveloffset
-		
-		; just rerender the screen
-		jsr	renderLevel
 		jsr	renderOffscreen
-		lda	#$80
-		sta	scrollx
-		sta	HVEN
-		bra	mainloop
 		
 m3		jsr	vsync			; a bit of a delay
         	lda	scrollx

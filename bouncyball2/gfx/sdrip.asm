@@ -1,6 +1,13 @@
-sdripanim	fdb	$0000
-sdripanimframes	fdb	sdrip01,sdrip02,sdrip03,sdrip04,sdrip05,$0000
+*******************************************************************************    
+* Animation is defined as:
+* BYTE	COMMENT
+* 0-1	Frame index
+* 2-258	Buffer to store BG to
+* 259-*	Pointer to frames
 
+sdripanim	fdb	$0000
+sdripbuffer     rmb 	256
+sdripanimframes	fdb	sdrip01,sdrip02,sdrip03,sdrip04,sdrip05,$0000
 
 * sdrip01 (16x16) 
 sdrip01         fcb $08,$10  ; (8x16) image width,height in byte coords
