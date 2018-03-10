@@ -1,11 +1,9 @@
 # tabs=8 
 # lwasm -3 -b -o hello.bin hello.asm && writecocofile --verbose hello.dsk hello.bin && coco3 `pwd`/hello.dsk hello
             	org	3584
-start	jmp	gogo
-status	fcb	$ff
+start	
 
-
-gogo	ldx	#msg
+	ldx	#msg
 	jsr	pmsg
 
 gotime	
@@ -13,10 +11,6 @@ gotime
 	bne	is309	; this is a 6309
 	ldx	#msgnot6309
 	jsr	pmsg
-	rts
-	
-	clra		; not a 6309
-	sta	status
 	rts
 	
 	
@@ -61,7 +55,7 @@ x@	rts
 * 6309 ROUTINES
 ************************************************
 
-* Curtis suggests: checking for a 6309 is as simple as ldd #$FFFF / CLR
+* Curtis suggests checking for a 6309 is as simple as ldd #$FFFF / CLR
 * CLRD command will zero out both A and B, 
 * but on a 6809 it will skip the first byte of the CLRD instruction, 
 * and only CLRA (which is what the 2nd byte of the instuction looks 
@@ -69,39 +63,10 @@ x@	rts
 
 * Determine whether processor is 6309 or 6809 
 * Returns Z clear if 6309, set if 6809 
-chk309 	PSHS 	D 	;Save Reg-D
-	FDB 	$1043 	;6309 COMD instruction (COMA on 6809) 
-	CMPB 	1,S 	;not equal if 6309 
-	PULS 	D,PC 	;exit, restoring D
-
-* Determine whether processor is in Emulation Mode or Native Mode 
-* Works for 6809 or 6309.
-* Returns Z clear if Emulation (or 6809), Z set if Native 
-CHKNTV 	PSHSW 		;Ignored on 6809 (no stack data) 
-	PSHS	U,Y,X,DP,D,CC 	*Save all registers 
-	LEAU 	CHKX68,PCR 	*Special exit for 6809 processor 
-	LDY 	#0 
-	PSHS 	U,Y,X,D 	*Push 6809 trap, Native marker, PC temps 
-	ORCC 	#$D0 	*Set CC.E (entire), no interrupts 
-	PSHS 	U,Y,X,DP,D,CC 	*Save regs 
-	LEAX 	CHKXIT,PCR
-	STX	10,S 	*Preset Emulation mode PC slot 
-	STX 	12,S	*Preset Native mode PC slot 
-	RTI 		*End up at CHKXIT next 
-CHKXIT	LDX 	,S++ 	*In NATIVE, get 0; in EMULATION, non-zero 
-	BEQ 	CHKNT9 
-	LEAS 	2,S 	*Discard native marker in EMULATION mode 
-CHKNT9 	TFR 	CC,A 
-	ANDA 	#$0F 	;Keep low CC value 
-*	AIM 	#$F0,0,S 	;Keep high bits of stacked CC 
-	ORA 	2,S 	*Combine CC values (skip over 6809 trap) 
-	STA 	2,S 	; and save on stack 
-	PULSW 		;Pull bogus W (does RTS to CHKX68 on 6809) 
-	PULS 	CC,D,DP,X,Y,U 	;Restore 6309 registers and return 
-	PULSW 
-	RTS
-CHKX68	PULS	CC,D,DP,X,Y,U,PC	;Restore 6809 registers and return
-
+chk309 	pshs 	d 	;save reg-d
+	fdb 	$1043 	;6309 comd instruction (coma on 6809) 
+	cmpb 	1,s 	;not equal if 6309 
+	puls 	d,pc 	;exit, restoring d
 
 ************************************************
 * A will contain the value of the NM bit. All other registers are preserved. 
@@ -123,6 +88,9 @@ l1	bsr	l2	; set return point for RTI when NM=0
 l2	pshs	u,y,x,dp,d,cc	; push emulation mode machine state
 	rti
 
+************************************************
+* strings
+************************************************
 
 msg	fcc	"CHECKING FOR 6309..."
 	fcb	13,0
