@@ -24,17 +24,47 @@ clearscreen
 loop@		std	,x++
                 cmpx	#$0600
                 bne	loop@
-                ldd	#$0400
-                std	cursorxy
+                ldd	#$0000
+                jsr	setcursorxy
                 rts
 
 
+
+*******************************************************************************
+* Sets the current cursor position to the x,y position. This updates color
+* basics position so the next call to print will be at this position.
+*
+* A - xpos
+* B - ypos
+*******************************************************************************
+setcursorxy	std	cursorxy		;store to use later
+		jsr	cursoraddr		;calculate what the address is
+		stu	cbcurpos		;store to the color basic curpos
+		rts
+
+*******************************************************************************
+* Returns the address that cursorxy point to.
+* Return:	U - Address cursorxy points to.
+* D is used but restored.
+*******************************************************************************
+cursoraddr	std	cursoraddrD
+		ldu	#scrn_addr		;screen address
+		lda	#scrn_width		;width of screen
+		ldb	cursorxy+1		;load the ypos
+		mul				;d=y*width
+		leau	d,u			
+		lda	cursorxy		; xpos
+		leau	a,u			;U points to correct offset
+cursoraddrD	ldd	#$0000			;restore D (self mod)
+		rts
+
+		
 *******************************************************************************
 * Display a null terminated string using the stdout hook.
 *******************************************************************************
 print		lda	,x+			;grab a character from string
                 beq	doneloop@		;null at end of string?
-                jsr	[40962]			;print char using stdout hook
+                jsr	[cbchrout]		;print char using stdout hook
                 bra	print			;keep printing
 doneloop@	rts				;return to caller
 
@@ -102,11 +132,11 @@ printstringX	ldx	#$0000			;self mod
 
 printchar	std	printcharD+1
                 stx	printcharX+1
-                ldx	cursorxy
+                ldx	cursorpos
                 sta	,x
-                ldd	cursorxy
+                ldd	cursorpos
                 addd	#1
-                std	cursorxy
+                std	cursorpos
 printcharD	ldd	#$0000			;self mod
 printcharX	ldx	#$0000			;self mod
                 rts
@@ -117,6 +147,15 @@ printcharX	ldx	#$0000			;self mod
 * Need to use chars with green background
 hexdigits	fcb	112,113,114,115,116,117,118,119,120,121
                 fcc	"ABCDEF"
+CHR_SPACE	equ	32
+scrn_width	equ	32
+scrn_addr	equ	$0400
 
-cursorxy	fdb	$0400
+cursorpos	fdb	$0400
+cursorxy	fdb	$0000
+
+cbcls		fdb	$a928
+cbchrout	equ	$a002
+cbcurpos	equ	$88
+
 
