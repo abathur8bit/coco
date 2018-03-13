@@ -27,16 +27,31 @@ is309	ldx	#msgis6309
 	bne	notnm	; nope
 yesnm	ldx	#msgwentnm
 	jsr	pmsg
-	jmp	done
+	jmp	x@
 notnm	ldx	#msgfailednm
 	jsr	pmsg
+x@
 	
 	
-done	ldx	#msgdone
+	jsr	divtest
+	
+done	
+	
+	ldx	#msgdone
 	jsr	pmsg
 	rts
 
-	
+divtest	ldx	#msgdivq
+	jsr	pmsg
+	ldq	#$2000
+	divq	#$1000
+	cmpw	#$1000
+	bne	n@
+	ldx	#msgdivworked
+	jsr	pmsg
+	rts
+n@	ldx	#msgdivfailed
+	jsr	pmsg
 	rts
 	
 ************************************************
@@ -103,6 +118,12 @@ msgfailednm	fcc	"DIDN'T GO NATIVE"
 msgwentnm	fcc	"WENT NATIVE"
 	fcb	13,0
 msgswitched	fcc	"SWITCHED. TESTING..."
+	fcb	13,0
+msgdivq	fcc	"DOING DIVQ"
+	fcb	13,0
+msgdivworked	fcc	"DIVQ OKAY"
+	fcb	13,0
+msgdivfailed	fcc	"DIVQ FAILED"
 	fcb	13,0
 msgdone	fcc	"DONE"
 	fcb	13,0

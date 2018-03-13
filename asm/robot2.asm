@@ -9,20 +9,26 @@
             	org	$0e00
 
 start
+
 		jsr	clearscreen
 		jsr	showtitle
-		jsr	wait
-		
+b@		jsr	[$a000]
+		bne	a@
+		jsr	rnd15
+		bra	b@
+a@
 
 game
 		jsr	clearscreen
-		jsr	clearminefield		
-		
+		jsr	setupminefield
+		ldx	#header
+		jsr	print
+
 gameloop	jsr	drawminefield
 		jsr	gethumanmove
 		lda	endgameflag		;game end?
 		beq	gameloop		;loop if not (endgame=0)
-		
+
 		jsr	clearscreen
 		ldx	#thanks
 		jsr	print
@@ -30,36 +36,72 @@ gameloop	jsr	drawminefield
 
 
 ****************
-clearminefield	lda	#empty
+* Initialize the minefield to empty spaces
+****************
+setupminefield	lda	#empty
 		ldb	#field_width*field_height
 		ldx	#minefield
 a@		sta	,x+
 		decb
 		bne	a@
+
+		jsr	rnd15			;random number for xpos
+		stb	xpos
+		jsr	rnd15			;random number for ypos
+		cmpb	#15			;<15?
+		blt	a@			;yup
+		decb				;make less then 15
+a@		stb	ypos
+		ldd	xpos
+		jsr	calcfieldpos
 		lda	#human			;place player
-		sta	minefield
+		sta	,u
 		rts
 
 
 ****************
+* Returns a random number from 0-15 inclusive in D
+* Modifies A,B,X,U.
+****************
+rnd15		ldy	#0
+		jsr	$bf1f		;rnd
+		andb	#3		;only want 2 bits
+		leay	b,y		;remember them
+		jsr	$bf1f		;grab another 2 bits
+		andb	#3
+		aslb			;shift up so we can add to the first 2 bits
+		aslb
+		leay	b,y		;or with first 2 bits
+		tfr	y,d		;random number in D
+		jsr	printnum
+		ldx	#space
+		jsr	print
+;		bra	rnd15
+		rts
+
+
+****************
+* Draw the minefield
+****************
 drawminefield
 		jsr	showtally
-		ldu	#$400+32		;third line down
-		ldx	#minefield		
-		ldd	#$0c0c
+		ldu	#$400+64		;third line down
+		ldx	#minefield
+		lda	#field_width
+		ldb	#field_height
 		std	xpos			;x&y pos loop counters
 a@		lda	,x+
 		sta	,u+
 		dec	xpos
 		bne	a@
-		lda	#12
+		lda	#field_width
 		sta	xpos
-		leau	32-12,u			;point to next line
+		leau	32-field_width,u			;point to next line
 		dec	ypos			;dec counter
 		bne	a@			;loop if not 0
 		rts
-		
-		
+
+
 ****************
 gethumanmove	jsr	wait
 		cmpa	#'S'
@@ -71,7 +113,7 @@ gethumanmove	jsr	wait
 		cmpa	#'E'
 		beq	moveright
 		rts				;no valid key pressed
-		
+
 movedown
 		ldd	humanx			;load human x&y position
 		std 	oldhumanx		;keep old position
@@ -98,7 +140,7 @@ moveup
 		ldd	humanx			;load human x&y position
 		std 	oldhumanx		;keep old position
 		decb				;move y down
-		cmpb	#255			;still in bounds? 255 means we wrapped 
+		cmpb	#255			;still in bounds? 255 means we wrapped
 		bne	a@			;yup
 		rts				;return with no change
 a@		stb	humany			;store new position
@@ -109,7 +151,7 @@ moveleft
 		ldd	humanx			;load human x&y position
 		std 	oldhumanx		;keep old position
 		deca				;move y down
-		cmpa	#255			;still in bounds? 255 means we wrapped 
+		cmpa	#255			;still in bounds? 255 means we wrapped
 		bne	a@			;yup
 		rts				;return with no change
 a@		sta	humanx			;store new position
@@ -117,7 +159,7 @@ a@		sta	humanx			;store new position
 		rts
 
 		;erase human from minefield so we can move him
-		lda	humanx			;where the human is as an offset		
+		lda	humanx			;where the human is as an offset
 		ldu	#minefield		;minefield array
 		leau	a,u			;point to correct location in minefield
 		lda	#empty
@@ -136,14 +178,14 @@ a@		sta	humanx			;store new position
 
 ****************
 *erase from old location in minefield and draw at new one
-*
+****************
 updatehuman	ldd	oldhumanx		;old position
 		jsr	calcfieldpos		;fine position in minefield
-		lda	#empty			;replace with empty 
+		lda	#empty			;replace with empty
 		sta	,u			;place empty
 		ldd	humanx			;new position
 		jsr	calcfieldpos		;find position in minefield
-		lda	#human			
+		lda	#human
 		sta	,u			;place human
 		rts
 
@@ -155,7 +197,7 @@ updatehuman	ldd	oldhumanx		;old position
 * B - y position
 * RETURNS:
 * U - position in minefield
-*
+****************
 calcfieldpos	std	xpos
 		lda	#field_width
 		mul
@@ -164,8 +206,13 @@ calcfieldpos	std	xpos
 		lda	xpos			;xpos
 		leau	a,u			;U=yos*field_width+xpos
 		rts
-			
-showtitle				
+
+
+
+****************
+* Output the title page
+****************
+showtitle
 		ldx	#title
 		jsr	print
 		ldx	#blankline
@@ -175,22 +222,28 @@ showtitle
 		ldx	#blankline
 		jsr	print
 		ldx	#originalauthor
-		jsr	print	
-		jsr 	wait
+		jsr	print
 		rts
+
+
 ****************
-showtally	ldd	#0			;put cursor at top of screen
+* Show the players score
+****************
+showtally	ldd	#$0101			;put cursor at top of screen
 		jsr	setcursorxy
 		ldx	#tallymsg
-		jsr	print
-		lda	kills
+		jsr	cbprintstring
+		ldd	kills
 		jsr	printnum
 		rts
-		
-		
-		
+
+*******************************************************************************
+* Data and constants
+*******************************************************************************
+
 *			"                                "	32 columns
 blankline    	fcb	13,0
+space		fcb	32,0
 title		fcc	"ROBOT MINEFIELD"
 	    	fcb	13,0
 agameby		fcc	"A GAME BY LEE PATTERSON"
@@ -211,10 +264,12 @@ done		fcc	"DONE"
 		fcb	13,0
 movehuman	fcc	"MOVING HUMAN"
 		fcb	13,0
-		
-tallymsg	fcc	"DEAD ROBOT TALLY: "
+header		fcc	"ROBOT MINEFIELD"
 		fcb	0
-				
+
+tallymsg	fcc	" SCORE:"
+		fcb	0
+
 human		equ	'H'
 humanx		fcb	0		; center of the screen
 humany		fcb	0
@@ -226,20 +281,24 @@ robot		equ	'$'
 mine		equ	'*'
 empty		equ	'.'+64
 
-field_width	equ	12
-field_height	equ	12
-minefield	fcb	0,0,0,0,0,0,0,0,0,0,0,0
-		fcb	0,0,0,0,0,0,0,0,0,0,0,0
-		fcb	0,0,0,0,0,0,0,0,0,0,0,0
-		fcb	0,0,0,0,0,0,0,0,0,0,0,0
-		fcb	0,0,0,0,0,0,0,0,0,0,0,0
-		fcb	0,0,0,0,0,0,0,0,0,0,0,0
-		fcb	0,0,0,0,0,0,0,0,0,0,0,0
-		fcb	0,0,0,0,0,0,0,0,0,0,0,0
-		fcb	0,0,0,0,0,0,0,0,0,0,0,0
-		fcb	0,0,0,0,0,0,0,0,0,0,0,0
-		fcb	0,0,0,0,0,0,0,0,0,0,0,0
-		fcb	0,0,0,0,0,0,0,0,0,0,0,0
+field_width	equ	16
+field_height	equ	14
+minefield	;rmb	field_width*field_height
+		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 
 minefieldend	fcb	0
 
@@ -248,6 +307,8 @@ endgameflag	fcb	0
 ;temp variables
 xpos		fcb	0
 ypos		fcb	0
+
+
 		include	text.asm
-	
+
 		end	start

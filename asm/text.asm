@@ -57,20 +57,19 @@ setcursorxy	std	cursorxy		;store to use later
 * Return:	U - Address cursorxy points to.
 * D is used but restored.
 *******************************************************************************
-cursoraddr	std	cursoraddrD
-		ldu	#scrn_addr		;screen address
+cursoraddr	ldu	#scrn_addr		;screen address
 		lda	#scrn_width		;width of screen
 		ldb	cursorxy+1		;load the ypos
 		mul				;d=y*width
 		leau	d,u			
 		lda	cursorxy		; xpos
 		leau	a,u			;U points to correct offset
-cursoraddrD	ldd	#$0000			;restore D (self mod)
 		rts
 
 		
 *******************************************************************************
 * Display a null terminated string using the stdout hook.
+* Modifies A,X. Maybe others in teh CHROUT BASIC routine.
 *******************************************************************************
 print		lda	,x+			;grab a character from string
                 beq	doneloop@		;null at end of string?
@@ -78,11 +77,17 @@ print		lda	,x+			;grab a character from string
                 bra	print			;keep printing
 doneloop@	rts				;return to caller
 
-
-printnum	jsr	cbprintnum
+cbprintstring	jsr	$b99c
 		rts
 		
-		
+*******************************************************************************
+* Display 2's complement number in D.
+* Modifies A,B,X,U.
+*******************************************************************************
+printnum	jsr	cbprintnum
+		rts
+
+
 *******************************************************************************
 * Display an unsigned byte number in hexidecimal format, not using stdout hook.
 *******************************************************************************
