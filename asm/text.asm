@@ -79,6 +79,10 @@ print		lda	,x+			;grab a character from string
 doneloop@	rts				;return to caller
 
 
+printnum	jsr	cbprintnum
+		rts
+		
+		
 *******************************************************************************
 * Display an unsigned byte number in hexidecimal format, not using stdout hook.
 *******************************************************************************
@@ -166,6 +170,7 @@ cursorxy	fdb	$0000
 
 cbcls		fdb	$a928
 cbchrout	equ	$a002
+cbprintnum	equ	$bdcc
 cbcurpos	equ	$88
 
 
