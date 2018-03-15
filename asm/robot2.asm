@@ -1,3 +1,4 @@
+*******************************************************************************
 * lwasm -3 -b -o robot2.bin robot2.asm && writecocofile -b robot.dsk robot2.bin && coco3 robot.dsk robot2
 * 8 character tabs
 * This program comes from the Robot Minefield game found in Tim Hartnell's Giant Book of Computer Games.
@@ -46,10 +47,10 @@ gameloop	jsr	drawminefield
 a@		lda	endgameflag		;game end?
 		beq	gameloop		;loop if not (endgame=0)
 
-		jsr	clearscreen
+		jsr	clearscreen		;game ending
 		ldx	#thanks
 		jsr	print
-		rts
+		rts				;back to basic
 
 playerkilled
 		ldd	#0
@@ -89,6 +90,8 @@ a@		sta	,x+
 		decb	
 		bne	a@
 		rts
+
+
 
 ****************
 * Initialize the minefield to empty spaces
@@ -397,20 +400,20 @@ minemsg		fcc	"A MINE"
 		fcb	0
 spacemsg	fcc	" <SPACE>"
 		fcb	0
-		
-
 tallymsg	fcc	"   SCORE:"
 		fcb	0
 
-killedby	fcb	0	;0=not dead, killed by otherwise
 human		equ	'H'
 humandead	equ	'X'
 spacechar	equ	' '+64
+
 humanx		fcb	0		
 humany		fcb	0
 oldhumanx	fcb	0
 oldhumany	fcb	0
+
 kills		fdb	$0000
+killedby	fcb	0	;0=not dead, killed by specified value otherwise
 
 robot		equ	'$'+64
 mine		equ	'*'+64
@@ -424,23 +427,6 @@ roboty		rmb	robots_max
 field_width	equ	16
 field_height	equ	14
 minefield	rmb	field_width*field_height
-;		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-;		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-;		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-;		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-;		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-;		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-;		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-;		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-;		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-;		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-;		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-;		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-;		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-;		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-;		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-
-minefieldend	fcb	0
 
 endgameflag	fcb	0
 
