@@ -3,7 +3,18 @@
 * This program comes from the Robot Minefield game found in Tim Hartnell's Giant Book of Computer Games.
 * I am converting it to assembly as a learning excersize.
 *
+* Copyright (c) 2018, Lee Patterson
 * http://8BitCoder.com
+*
+* Robot Minefield is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+* 
+* This software is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
 *
 
             	org	$0e00
@@ -12,25 +23,12 @@ start
 
 		jsr	clearscreen
 		jsr	showtitle
-		jsr	wait
-		
-		jsr 	InitRandom
-		jmp	b@
-d@		fcb	0
-b@		lda	#255
-		sta	d@
-a@		lda	#10
-		jsr 	rnd
-		tfr	a,b
-		clra
-		jsr	printnum
-		ldx	#space
-		jsr	print
-		dec	d@
-		bne	a@
-;		ldx	#done
-;		jsr	print
-		rts
+reseed		inc	Random_MSB		;change the seed for random generator
+		jsr	rnd
+checkkey	jsr	[$a000]			;DECB check for key Z=0 no, Z=1 yes
+		bne	game			;key has been pressed, Z=1
+		jmp	reseed
+
 
 
 game
@@ -60,41 +58,85 @@ a@		sta	,x+
 		decb
 		bne	a@
 
-		jsr	rnd15			;random number for xpos
-		stb	xpos
-		jsr	rnd15			;random number for ypos
-		cmpb	#15			;<15?
-		blt	a@			;yup
-		decb				;make less then 15
-a@		stb	ypos
-		ldd	xpos
-		jsr	calcfieldpos
+placehuman
+		lda	#field_width		;range for xpos 0-field_width
+		jsr	rnd			;get random number
+		sta	xpos			;remember it
+		
+		lda	#field_height		;range for ypos 0-field_height
+		jsr	rnd			;get random number
+		sta	ypos			;remember it
+		
+		ldd	xpos			;load both x and y
+		std	humanx			;put into human position variable
+		jsr	calcfieldpos		;calc where it is in the minefield
 		lda	#human			;place player
 		sta	,u
+		
+placemines	
+		ldy	#10			;loop counter for the specified number of mines
+		lda	#mine
+		jsr	placeitems
+				
+placerobots
+		clr	robot_index
+		ldy	#robots_max		;loop counter for specified number of robots to generate
+placerobotloop	lda	#field_width		;range for xpos 0-field_width
+		jsr	rnd			;get random number
+		sta	xpos			;remember it
+		lda	#field_height		;range for ypos 0-field_height
+		jsr	rnd			;get random number
+		sta	ypos			;remember it
+		ldd	xpos			;get x&y
+		jsr	calcfieldpos		;calc where it is in the minefield
+		lda	,u			;look what's there
+		cmpa	#empty			;is it empty?
+		bne	placerobotloop		;no, figure out another location
+		
+		; store coords in robot array
+		ldb	robot_index		;current robot index
+		ldx	#robotx			;robotx array
+		lda	xpos			;robot's xpos
+		sta	b,x			;store in array
+		ldx	#roboty			;roboty array
+		lda	ypos			;robot's ypos
+		sta	b,x			;store in array
+		
+		; store robot in minefield
+		lda	#robot			;grab the item...
+		sta	,u			;...store to the minefield
+		leay	-1,y			;dec loop counter
+		bne	placerobotloop		;not 0 yet, keep looping
 		rts
 
 
+
 ****************
-* Returns a random number from 0-15 inclusive in D
-* Modifies A,B,X,U.
-****************
-rnd15		ldy	#0
-		jsr	$bf1f		;rnd
-		andb	#3		;only want 2 bits
-		leay	b,y		;remember them
-		jsr	$bf1f		;grab another 2 bits
-		andb	#3
-		aslb			;shift up so we can add to the first 2 bits
-		aslb
-		leay	b,y		;or with first 2 bits
-		tfr	y,d		;random number in D
-		jsr	printnum
-		ldx	#space
-		jsr	print
-;		bra	rnd15
+* Places item in A to a random empty minefield location, Y reg times.
+* A - Item to place into minefield
+* Y - The number of times to place item.
+*
+itemtoplace	fcb	1
+placeitems	sta	itemtoplace		;remember the item
+placeitemsloop	lda	#field_width		;range for xpos 0-field_width
+		jsr	rnd			;get random number
+		sta	xpos			;remember it
+		lda	#field_height		;range for ypos 0-field_height
+		jsr	rnd			;get random number
+		sta	ypos			;remember it
+		ldd	xpos			;get x&y
+		jsr	calcfieldpos		;calc where it is in the minefield
+		lda	,u			;look what's there
+		cmpa	#empty			;is it empty?
+		bne	placeitemsloop		;no, figure out another location
+		lda	itemtoplace		;grab the item...
+		sta	,u			;...store to the minefield
+		leay	-1,y			;dec loop counter
+		bne	placeitemsloop		;not 0 yet, keep looping
 		rts
-
-
+		
+		
+		
 ****************
 * Draw the minefield
 ****************
@@ -290,34 +332,39 @@ tallymsg	fcc	" SCORE:"
 		fcb	0
 
 human		equ	'H'
-humanx		fcb	0		; center of the screen
+humanx		fcb	0		
 humany		fcb	0
 oldhumanx	fcb	0
 oldhumany	fcb	0
-kills		fdb	$0001
+kills		fdb	$0000
 
-robot		equ	'$'
-mine		equ	'*'
+robot		equ	'$'+64
+mine		equ	'*'+64
 empty		equ	'.'+64
+
+robots_max	equ	4
+robot_index	fcb	0
+robotx		rmb	robots_max
+roboty		rmb	robots_max
 
 field_width	equ	16
 field_height	equ	14
-minefield	;rmb	field_width*field_height
-		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+minefield	rmb	field_width*field_height
+;		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+;		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+;		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+;		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+;		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+;		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+;		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+;		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+;		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+;		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+;		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+;		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+;		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+;		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+;		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 
 minefieldend	fcb	0
 

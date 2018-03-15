@@ -31,28 +31,63 @@ yesnm		ldx	#msgwentnm
 		jsr	pmsg
 
 ;(D) Direct (I) Inherent (R) Relative (M) Immediate (X) Indexed (E) extened
-testdivq	ldq	valueq
-		divq	#10
-		stw	resultw
-		std	resultd
+testdivq	
+
+;		leax	valueq,pcr
+		
+;		ldq	#15
+;		divq	#10
+;		stw	resultw
+;		std	resultd
         	
-		ldx	#msgresultw
-		jsr	print
-		ldd	resultw
-		jsr	printnum
+;		ldx	#msgresultw
+;		jsr	print
+;		ldd	resultw
+;		jsr	printnum
 		
-		ldx	#msgresultd
-		jsr	print
-		ldd	resultd
-		jsr	printnum
+;		ldx	#msgresultd
+;		jsr	print
+;		ldd	resultd
+;		jsr	printnum
 		
-		;divq	#2	; (M) immediate
-		;ldq	#80000
-		;ldx	#divisor
-		;divq	,x	; (X) indexed
-		;ldq	#80000
-		;divq	<1	; (D) direct	loads the data at addr 0001 and 0002
-		;divq	>$0E00	; (E) extended	loads the data at pointed to by 0600, in this case 0001
+;		ldx	#msgblankline
+;		jsr	print
+		
+		;immediate
+		ldq	#$7f00		;q=$7f00 (32512) / 5
+		divq	#$5		;(M) immediate w=$1966 (6502) d=2
+		
+		;indexed
+		; 0 or 5 bit signed offset is just 3 bytes. 8 bit offset is 4 bytes. 16 bit offset would be 5 bytes
+		ldq	#80000		;q=80000 ($13880)
+		ldx	#divisor	;*x=8
+		divq	,x		;(X) indexed 80000/8 = 10000 ($2710)
+		divq	0,x		;0  bit?
+		divq	1,x		;0  bit?
+		divq	,y		;0  bit?
+		divq	0,y		;0  bit?
+		divq	1,y		;0  bit?
+		divq	,w
+		divq	%10000,x	;5  bit
+		divq	$21,x		;8  bit %0010 0001
+		divq	$21,y		;8  bit %0010 0001
+		divq	$21,w		;8  bit %0010 0001
+		
+
+		divq	$1000,x		;16 bit
+		divq	$1000,y
+		
+		
+		;direct
+		ldd	#$200		;512
+		std	<3
+		ldq	#$1000		;4096
+		divq	<3		;(D) direct	loads the data at addr 0003 0004 $1000/$200 w=8 d=0
+
+		;extended		
+		ldq	#$17A21
+		divq	>$0E00		;(E) extended	loads the data at pointed to by 0600, in this case $BD0E (the first instruction at the start of the program
+					; w=2 d=5
 		
 done		ldx	#msgdone
 		jsr	pmsg
@@ -113,7 +148,7 @@ l2		pshs	u,y,x,dp,d,cc	; push emulation mode machine state
 * strings
 ************************************************
 
-msg		fcc	"CHECKING FOR 6309..."
+msg		fcc	"CHECKING FOR 6309......"
 		fcb	13,0
 msgnot6309	fcc	"NOT A 6309"
 		fcb	13,0
@@ -125,11 +160,16 @@ msgwentnm	fcc	"WENT NATIVE"
 		fcb	13,0
 msgswitched	fcc	"SWITCHED. TESTING..."
 		fcb	13,0
-msgdone	fcc	"DONE"
+msgdone		fcb	13,13
+		fcc	"DONE"
 		fcb	13,0
-msgresultw	fcc	" W REG:"
+msgresultw	fcb	13
+		fcc	"W REG:"
 		fcb	13,0
-msgresultd	fcc	" D REG:"
+msgresultd	fcb	13
+		fcc	"D REG:"
+		fcb	13,0
+msgblankline	fcc	" "
 		fcb	13,0
 
 nope		fcc	"NOPE"
@@ -139,7 +179,7 @@ graphic		fcb	$B9
 divisor		fdb	$0008
 resultw		fdb	$FFFF
 resultd		fdb	$AAAA
-valueq		fdb	$00010002
+valueq		fdb	$0000,$7f00
 
 		include "text.asm"
 	
