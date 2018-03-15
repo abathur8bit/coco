@@ -12,11 +12,26 @@ start
 
 		jsr	clearscreen
 		jsr	showtitle
-b@		jsr	[$a000]
+		jsr	wait
+		
+		jsr 	InitRandom
+		jmp	b@
+d@		fcb	0
+b@		lda	#255
+		sta	d@
+a@		lda	#10
+		jsr 	rnd
+		tfr	a,b
+		clra
+		jsr	printnum
+		ldx	#space
+		jsr	print
+		dec	d@
 		bne	a@
-		jsr	rnd15
-		bra	b@
-a@
+;		ldx	#done
+;		jsr	print
+		rts
+
 
 game
 		jsr	clearscreen
@@ -237,6 +252,10 @@ showtally	ldd	#$0101			;put cursor at top of screen
 		jsr	printnum
 		rts
 
+
+
+
+
 *******************************************************************************
 * Data and constants
 *******************************************************************************
@@ -310,5 +329,6 @@ ypos		fcb	0
 
 
 		include	text.asm
+		include random.asm
 
 		end	start
