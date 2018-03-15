@@ -39,7 +39,11 @@ game
 
 gameloop	jsr	drawminefield
 		jsr	gethumanmove
-		lda	endgameflag		;game end?
+		jsr	drawminefield
+		lda	killedby		;check if player was killed
+		beq	a@			;branch if not killed
+		jsr	playerkilled		;player was killed
+a@		lda	endgameflag		;game end?
 		beq	gameloop		;loop if not (endgame=0)
 
 		jsr	clearscreen
@@ -47,6 +51,44 @@ gameloop	jsr	drawminefield
 		jsr	print
 		rts
 
+playerkilled
+		ldd	#0
+		jsr	setcursorxy
+		ldx	#killedbymsg
+		jsr	print
+		lda	killedby
+		cmpa	#robot
+		beq	r@
+		ldx	#minemsg
+		jsr	print
+		jmp	b@
+r@		ldx 	#robotmsg
+		jsr 	print
+b@		ldx	#spacemsg
+		jsr	print
+a@		jsr	[$a000]			;check for a keypress
+		beq	a@			;none yet
+		cmpa	#' '			;check if it's the space bar
+		bne	a@			;nope, keep checking
+		clr	killedby
+		jsr	clearstatus
+		jsr	setupminefield
+		ldd	#0
+		jsr	setcursorxy
+		ldx	#header
+		jsr	print
+		rts
+
+****************
+* Clear the status line
+****************
+clearstatus	ldx	#$400			;video 
+		lda	#spacechar
+		ldb	#32
+a@		sta	,x+
+		decb	
+		bne	a@
+		rts
 
 ****************
 * Initialize the minefield to empty spaces
@@ -59,6 +101,7 @@ a@		sta	,x+
 		bne	a@
 
 placehuman
+		clr	killedby		;set player alive
 		lda	#field_width		;range for xpos 0-field_width
 		jsr	rnd			;get random number
 		sta	xpos			;remember it
@@ -236,10 +279,29 @@ a@		sta	humanx			;store new position
 ****************
 *erase from old location in minefield and draw at new one
 ****************
-updatehuman	ldd	oldhumanx		;old position
+updatehuman	
+		
+		
+		ldd	oldhumanx		;old position
 		jsr	calcfieldpos		;fine position in minefield
 		lda	#empty			;replace with empty
 		sta	,u			;place empty
+
+		ldd	humanx			;check new location to see if it is empty
+		jsr	calcfieldpos		;position in minefield
+		lda	,u			;grab whats there
+		cmpa	#empty			;is it empty?
+		beq	updateokay		;yup, empty
+		;not empty, set human is now dead and we need to figure out what killed, and set him as dead
+		ldd	humanx			
+		jsr	calcfieldpos		;mine field...
+		lda	,u			;what is at humans new location
+		sta	killedby		;remember what killed human
+		lda	#humandead		;...
+		sta	,u			;...X for dead human
+		rts
+
+updateokay
 		ldd	humanx			;new position
 		jsr	calcfieldpos		;find position in minefield
 		lda	#human
@@ -327,11 +389,23 @@ movehuman	fcc	"MOVING HUMAN"
 		fcb	13,0
 header		fcc	"ROBOT MINEFIELD"
 		fcb	0
+killedbymsg	fcc	"KILLED BY "
+		fcb	0
+robotmsg	fcc	"A ROBOT"
+		fcb	0
+minemsg		fcc	"A MINE"		
+		fcb	0
+spacemsg	fcc	" <SPACE>"
+		fcb	0
+		
 
-tallymsg	fcc	" SCORE:"
+tallymsg	fcc	"   SCORE:"
 		fcb	0
 
+killedby	fcb	0	;0=not dead, killed by otherwise
 human		equ	'H'
+humandead	equ	'X'
+spacechar	equ	' '+64
 humanx		fcb	0		
 humany		fcb	0
 oldhumanx	fcb	0
