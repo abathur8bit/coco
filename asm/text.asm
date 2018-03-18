@@ -82,9 +82,11 @@ cbprintstring	jsr	$b99c
 		
 *******************************************************************************
 * Display 2's complement number in D.
-* Modifies A,B,X,U.
+* All registers are saved and restored
 *******************************************************************************
-printnum	jsr	cbprintnum
+printnum	pshs	u,y,x,d
+		jsr	cbprintnum
+		puls	d,x,y,u
 		rts
 
 

@@ -17,24 +17,54 @@
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU General Public License for more details.
 *
+printm		macro		; define the macro
+		pshs	d,x,y,u
+		ldx	\1
+		jsr	print
+		puls	u,y,x,b,a
+		endm
+
+		
+;Note that cleard is a cycle slower then `ldd #0` but it clears the carry flag.
+cleard		macro		
+		clra
+		clrb
+		endm
+
+pushall		macro
+		pshs	a,b,x,y,u
+		endm
+		
+popall		macro
+		puls	a,b,x,y,u
+		endm
+				
 
             	org	$0e00
 
 start
-
+;		printm	#title
+;		jsr	showrobotxy
+;		rts
+		
 		jsr	clearscreen
 		jsr	showtitle
 reseed		inc	Random_MSB		;change the seed for random generator
 		jsr	rnd
-checkkey	jsr	[$a000]			;DECB check for key Z=0 no, Z=1 yes
-		bne	game			;key has been pressed, Z=1
-		jmp	reseed
+;checkkey	jsr	[$a000]			;DECB check for key Z=0 no, Z=1 yes
+;		bne	game			;key has been pressed, Z=1
+;		jmp	reseed
 
 
 
 game
 		jsr	clearscreen
 		jsr	setupminefield
+		
+;		jsr	showrobotxy		;XXX
+;		jsr	wait
+;		jsr	clearscreen
+		
 		ldx	#header
 		jsr	print
 
@@ -44,7 +74,8 @@ gameloop	jsr	drawminefield
 		lda	killedby		;check if player was killed
 		beq	a@			;branch if not killed
 		jsr	playerkilled		;player was killed
-a@		lda	endgameflag		;game end?
+a@		jsr	computermove
+		lda	endgameflag		;game end?
 		beq	gameloop		;loop if not (endgame=0)
 
 		jsr	clearscreen		;game ending
@@ -52,6 +83,53 @@ a@		lda	endgameflag		;game end?
 		jsr	print
 		rts				;back to basic
 
+****************
+* Dump the robot array
+****************
+showrobotxy	
+;		ldd	#100
+;		jsr	printnum
+;		ldx	#blankline
+;		jsr	print
+;		rts
+
+		ldb	#0
+		stb	robot_index
+showxy_l1	ldx	#robotxy	
+		aslb	
+		leax	b,x
+		ldd	,x			;D=robotxy[robot_index]
+		std	xpos			;remember it
+		
+		;show xpos
+		clra
+		ldb	xpos			;xpos
+		ldx	#xmsg
+		jsr	print
+		jsr	printnum
+
+
+		printm	#ymsg
+		clra
+		ldb	xpos+1
+		jsr	printnum
+		printm	#blankline
+		
+		inc	robot_index
+		ldb	robot_index
+		cmpb	#robots_max
+		bne	showxy_l1
+		
+		;show index
+		printm	#indexmsg
+		clra	
+		ldb	robot_index
+		jsr	printnum
+		printm	#blankline
+		
+		rts
+		
+****************
 playerkilled
 		ldd	#0
 		jsr	setcursorxy
@@ -125,8 +203,9 @@ placemines
 		jsr	placeitems
 				
 placerobots
-		clr	robot_index
-		ldy	#robots_max		;loop counter for specified number of robots to generate
+		;generate a random position in xpos and ypos, making sure the space is empty
+		clrb	
+		stb	robot_index		;loop counter
 placerobotloop	lda	#field_width		;range for xpos 0-field_width
 		jsr	rnd			;get random number
 		sta	xpos			;remember it
@@ -139,19 +218,20 @@ placerobotloop	lda	#field_width		;range for xpos 0-field_width
 		cmpa	#empty			;is it empty?
 		bne	placerobotloop		;no, figure out another location
 		
-		; store coords in robot array
+		;store coords in robot array
+		ldx	#robotxy		;robot coordinate array
 		ldb	robot_index		;current robot index
-		ldx	#robotx			;robotx array
-		lda	xpos			;robot's xpos
-		sta	b,x			;store in array
-		ldx	#roboty			;roboty array
-		lda	ypos			;robot's ypos
-		sta	b,x			;store in array
+		aslb				;2 bytes per index
+		leax	b,x			;point into array
+		ldd	xpos			;robot's xpos
+		std	,x			;store in array
 		
-		; store robot in minefield
+		;store robot in minefield
 		lda	#robot			;grab the item...
 		sta	,u			;...store to the minefield
-		leay	-1,y			;dec loop counter
+		inc	robot_index
+		ldb	robot_index
+		cmpb	#robots_max		;end of loop?
 		bne	placerobotloop		;not 0 yet, keep looping
 		rts
 
@@ -205,6 +285,156 @@ a@		lda	,x+
 		rts
 
 
+
+****************
+* Computer move
+*
+* X points to robot coord array
+* U points to the minefield
+* A,B,D used for looking at coordinate and what in in the minefield
+****************
+computermove	
+;		jsr	clearscreen
+;		clra
+;		printm	#humanmsg		;show human x,y
+;		printm	#xmsg
+;		ldb	humanx
+;		jsr	printnum
+;
+;		printm	#ymsg
+;		ldb	humany
+;		jsr	printnum
+;		printm	#blankline
+		
+;		jsr	showrobotxy
+;		printm	#blankline
+;		jsr 	wait
+		
+		clrb				;start with first robot
+		stb	robot_index
+robotloop	
+		ldx	#robotxy		;robot coord array
+		ldb	robot_index
+		aslb				;array is 2 bytes per coord
+		leax	b,x			;point to location in array
+		ldd	,x			;grab robot x&y
+
+;		pshs	a,b,x,y,u		;xxx show what robot we are dealing with
+;		clra
+;		ldb	robot_index
+;		printm	#findinghuman
+;		printm	#space
+;		jsr	printnum
+;		printm  #xmsg
+;		clra
+;		ldb	,s			;grab what B was, xpos
+;		jsr	printnum		;print x
+;		printm	#ymsg
+;		clra
+;		ldb	1,s			;grab what B was, ypos
+;		jsr	printnum
+;		printm	#blankline
+;		jsr	wait
+;		puls	u,y,x,b,a		;xxx done showing
+		
+		cmpa	#$ff			;is this robot inactive?
+		beq	nextrobot		;nope, skip this one
+		std	xpos			;xpos&ypos now contain robots location
+		std	oldx			;remember old location
+		
+		;Remove robot from current position in the minefield
+		jsr	calcfieldpos		;find position in minefield
+		lda	#empty
+		sta	,u			;erase robot from minefield
+		
+		;check which way human is, and move towards him
+		;
+		;assumptions: 
+		;	1 human will never be out of bounds, so we can safely move towards them no matter what
+		;	2 we first check if we are lined up with human, otherwise #1 is out the window
+	
+checkhorz	lda	xpos			;load the robots position again
+		cmpa	humanx			;first check where human is on horz line
+		beq	checkvert		;we are on the same line, check the vert now
+		bgt	towest			;human is to the left
+toeast		
+		inc	xpos			;move bot to the right
+		bra	checkvert
+towest		
+		dec	xpos			;move bot to the left
+		
+checkvert	lda	ypos
+		cmpa	humany			;check where human is on vert line 
+		beq	donehumanchecks		;we are on the same line
+		bgt	tonorth			;human is to north
+tosouth
+		inc	ypos			;move bot south
+		jmp	donehumanchecks
+tonorth
+		dec	ypos			;move bot north
+		
+		;check if bot has landed on a mine or the human
+		;a mine will deactivate the robot and it is removed from the mienfield
+		;a human will kill the player and end the round. game should restart
+donehumanchecks					;check if we are on empty space, and if so just move to the next robot
+		ldd	xpos			;grab new position
+		std	,x			;store to robot position
+		jsr	calcfieldpos		;find loc on field
+		lda	#robot
+		sta	,u			;put robot on field
+		bra	nextrobot
+		
+;		ldd	xpos			;grab the new positon and ...
+;		std	,x			;... put new position into robot array
+;		jsr	calcfieldpos		;find location on minefield
+;		lda	#robot
+;		sta	,u			;put robot on the minefield
+;		sta	$400+32*8+20
+		
+;		jsr	calcfieldpos		;get position in minefield
+;		lda	,u			;get whats in that position
+;		cmpa	#empty			;is it empty?
+;		beq	nextrobot		;yes, move onto the next robot
+;		cmpa	#mine			;did we hit a mine?
+;		beq	hitmine			;yes, terminate this robot
+;		cmpa	#human			;did we hit a human?
+;		beq	hithuman		;yes, kill human
+		jmp	nextrobot	
+hitmine						;robot is no longer active and should be removed from minefield
+		ldd	,x			;get old position so we can remove him from the minefield
+		jsr	calcfieldpos
+		lda	#18			;TODO should be empty, but looking at where robot was
+		sta	,u
+		ldd	#$FFFF			;disable the robot
+		std	,x
+		jmp	nextrobot
+hithuman
+			
+nextrobot	
+;		printm	#newbotposmsg		;print new robot position x,y
+;		printm	#xmsg
+;		clra
+;		ldb	xpos
+;		jsr	printnum
+;		printm	#ymsg
+;		ldb	ypos
+;		jsr	printnum
+;		printm	#blankline
+;		jsr	wait
+		
+		ldb	robot_index		;current index
+		incb				;next index
+		stb	robot_index
+		cmpb	#robots_max		;at the end?
+		lbne	robotloop		;nope, continue loop. B reg used in top of loop
+		
+		rts
+		
+		
+		
+****************
+* Get input from player, then update his location based on key pressed.
+* Also make sure that they don't go off the minefield. 
 ****************
 gethumanmove	jsr	wait
 		cmpa	#'S'
@@ -283,8 +513,6 @@ a@		sta	humanx			;store new position
 *erase from old location in minefield and draw at new one
 ****************
 updatehuman	
-		
-		
 		ldd	oldhumanx		;old position
 		jsr	calcfieldpos		;fine position in minefield
 		lda	#empty			;replace with empty
@@ -317,8 +545,11 @@ updateokay
 * Calculate the minefield position given x&y.
 * A - x position
 * B - y position
+*
 * RETURNS:
 * U - position in minefield
+*
+* USES: D,U
 ****************
 calcfieldpos	std	xpos
 		lda	#field_width
@@ -368,6 +599,14 @@ showtally	ldd	#$0101			;put cursor at top of screen
 *******************************************************************************
 
 *			"                                "	32 columns
+xmsg		fcc 	" X="
+	    	fcb	0
+ymsg		fcc 	" Y="
+	    	fcb	0
+indexmsg	fcc	" INDEX="	    	
+	    	fcb	0
+humanmsg	fcc	" HUMAN "	    	
+	    	fcb	0
 blankline    	fcb	13,0
 space		fcb	32,0
 title		fcc	"ROBOT MINEFIELD"
@@ -402,6 +641,16 @@ spacemsg	fcc	" <SPACE>"
 		fcb	0
 tallymsg	fcc	"   SCORE:"
 		fcb	0
+findinghuman	fcc	"ROBOT FINDING HUMAN"
+		fcb	0
+humantoeast	fcc	"HUMAN TO EAST"
+		fcb	13,0
+humantowest	fcc	"HUMAN TO WEST"
+		fcb	13,0
+donechecking	fcc	"DONE CHECKING HUMAN"
+		fcb	13,0
+newbotposmsg	fcc	"NEW BOT POS "
+		fcb	0
 
 human		equ	'H'
 humandead	equ	'X'
@@ -421,8 +670,7 @@ empty		equ	'.'+64
 
 robots_max	equ	4
 robot_index	fcb	0
-robotx		rmb	robots_max
-roboty		rmb	robots_max
+robotxy		fcb	11,22,33,44,55,66,77,88	;	rmb robots_max*2
 
 field_width	equ	16
 field_height	equ	14
@@ -433,9 +681,14 @@ endgameflag	fcb	0
 ;temp variables
 xpos		fcb	0
 ypos		fcb	0
-
+oldx		fcb	0
+oldy		fcb	0
 
 		include	text.asm
 		include random.asm
 
+;		printm	#title	; use the macro
+		
+		
 		end	start
+art
