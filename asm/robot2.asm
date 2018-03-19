@@ -51,15 +51,17 @@ start
 		jsr	showtitle
 reseed		inc	Random_MSB		;change the seed for random generator
 		jsr	rnd
-;checkkey	jsr	[$a000]			;DECB check for key Z=0 no, Z=1 yes
-;		bne	game			;key has been pressed, Z=1
-;		jmp	reseed
+checkkey	jsr	[$a000]			;DECB check for key Z=0 no, Z=1 yes
+		bne	game			;key has been pressed, Z=1
+		jmp	reseed
 
 
 
 game
 		jsr	clearscreen
 		jsr	setupminefield
+		ldd	#0
+		std	kills			;reset player score
 		
 ;		jsr	showrobotxy		;XXX
 ;		jsr	wait
@@ -68,21 +70,65 @@ game
 		ldx	#header
 		jsr	print
 
-gameloop	jsr	drawminefield
+gameloop	jsr	hasplayerwon		;check if player has won
+		beq	doplayerwon		;yes, do win
+		jsr	drawminefield
 		jsr	gethumanmove
 		jsr	drawminefield
 		lda	killedby		;check if player was killed
-		beq	a@			;branch if not killed
-		jsr	playerkilled		;player was killed
-a@		jsr	computermove
+		bne	doplayerKilled		;branch if killed
+		jsr	removedeadbots		;remove any of the inverse 'R's used to show a robot died
+		jsr	computermove
+		jsr	drawminefield
+		lda	killedby		;check if player was killed
+		bne	doplayerKilled		;branch if killed
 		lda	endgameflag		;game end?
 		beq	gameloop		;loop if not (endgame=0)
 
-		jsr	clearscreen		;game ending
+game_end	jsr	clearscreen		;game ending
 		ldx	#thanks
 		jsr	print
 		rts				;back to basic
 
+****************
+* Shows player killed and checks if game is done
+****************
+doplayerKilled
+		jsr	playerKilled		;show player they died
+		lda	endgameflag		;game end?
+		bra	game			;no, restart the game
+		bra	game_end		;game is done
+
+
+****************
+* Waits for the player to hit the space bar.
+****************
+waitSpace	jsr	[$a000]			;check for a keypress
+		beq	waitSpace		;none yet
+		cmpa	#' '			;check if it's the space bar
+		bne	waitSpace		;nope, keep checking
+		rts
+		
+
+****************
+* Show player has won, then start game over.
+****************
+doplayerwon	ldd	#0			;position cursor at status line
+		jsr	setcursorxy
+		printm	#playerwonmsg
+		printm	#spacemsg
+		jsr	waitSpace
+		bra	game			;back to the start
+
+
+****************
+* Check if the player has won
+* *This is in a routine in case we need a more complicated check.*
+****************
+hasplayerwon	ldd	kills			;load players score
+		cmpd	#robots_max		;killed all robots?
+		rts				;return with Z flag set according to cmpd
+		
 ****************
 * Dump the robot array
 ****************
@@ -128,13 +174,16 @@ showxy_l1	ldx	#robotxy
 		printm	#blankline
 		
 		rts
+
+
 		
 ****************
-playerkilled
+* Shows player dead and what they were killed by
+****************
+playerKilled
 		ldd	#0
 		jsr	setcursorxy
-		ldx	#killedbymsg
-		jsr	print
+		printm	#killedbymsg
 		lda	killedby
 		cmpa	#robot
 		beq	r@
@@ -145,10 +194,7 @@ r@		ldx 	#robotmsg
 		jsr 	print
 b@		ldx	#spacemsg
 		jsr	print
-a@		jsr	[$a000]			;check for a keypress
-		beq	a@			;none yet
-		cmpa	#' '			;check if it's the space bar
-		bne	a@			;nope, keep checking
+		jsr	waitSpace
 		clr	killedby
 		jsr	clearstatus
 		jsr	setupminefield
@@ -175,10 +221,10 @@ a@		sta	,x+
 * Initialize the minefield to empty spaces
 ****************
 setupminefield	lda	#empty
-		ldb	#field_width*field_height
+		ldy	#field_width*field_height
 		ldx	#minefield
 a@		sta	,x+
-		decb
+		leay	-1,y
 		bne	a@
 
 placehuman
@@ -266,8 +312,7 @@ placeitemsloop	lda	#field_width		;range for xpos 0-field_width
 ****************
 * Draw the minefield
 ****************
-drawminefield
-		jsr	showtally
+drawminefield	jsr	showtally
 		ldu	#$400+64		;third line down
 		ldx	#minefield
 		lda	#field_width
@@ -285,6 +330,21 @@ a@		lda	,x+
 		rts
 
 
+****************
+* Remove dead robots from the minefield
+****************
+removedeadbots	ldx	#minefield		;point to the minefield
+		ldb	#empty			;keep the empty char handy
+b@		lda	,x
+		cmpa	#robotdead
+		bne	a@
+		stb	,x			;replace with an empty char
+a@		leax	1,x			;next iteration
+		cmpx	#minefield+field_width*field_height	;are we at the end of the minefield yet?
+		bne	b@			;keep looping
+		rts
+		
+		
 
 ****************
 * Computer move
@@ -377,38 +437,34 @@ tonorth
 		;a mine will deactivate the robot and it is removed from the mienfield
 		;a human will kill the player and end the round. game should restart
 donehumanchecks					;check if we are on empty space, and if so just move to the next robot
-		ldd	xpos			;grab new position
-		std	,x			;store to robot position
-		jsr	calcfieldpos		;find loc on field
-		lda	#robot
-		sta	,u			;put robot on field
-		bra	nextrobot
-		
-;		ldd	xpos			;grab the new positon and ...
-;		std	,x			;... put new position into robot array
-;		jsr	calcfieldpos		;find location on minefield
-;		lda	#robot
-;		sta	,u			;put robot on the minefield
-;		sta	$400+32*8+20
-		
-;		jsr	calcfieldpos		;get position in minefield
-;		lda	,u			;get whats in that position
-;		cmpa	#empty			;is it empty?
-;		beq	nextrobot		;yes, move onto the next robot
-;		cmpa	#mine			;did we hit a mine?
-;		beq	hitmine			;yes, terminate this robot
-;		cmpa	#human			;did we hit a human?
-;		beq	hithuman		;yes, kill human
+		ldd	xpos			;grab the new positon and ...
+		std	,x			;... put new position into robot array
+		jsr	calcfieldpos		;find new location on minefield
+		lda	,u			;get whats in that new position
+		ldb	#robot			;robot
+		stb	,u			;replace what was there with robot
+		cmpa	#empty			;was space empty before we put the robot there?
+		beq	nextrobot		;yes, move onto the next robot
+		cmpa	#mine			;did we hit a mine?
+		beq	hitmine			;yes, terminate this robot
+		cmpa	#human			;did we hit a human?
+		beq	hithuman		;yes, kill human
 		jmp	nextrobot	
 hitmine						;robot is no longer active and should be removed from minefield
-		ldd	,x			;get old position so we can remove him from the minefield
-		jsr	calcfieldpos
-		lda	#18			;TODO should be empty, but looking at where robot was
-		sta	,u
+
+		ldd	,x			;get position of robot xy
+		jsr	calcfieldpos		;pos in field
+		lda	#robotdead		
+		sta	,u			;robot shows as dead on field
 		ldd	#$FFFF			;disable the robot
 		std	,x
+		inc	kills+1			;increase the player score
 		jmp	nextrobot
 hithuman
+		ldb	#humanDeadRobot		;human was killed by robot character
+		stb	,u			;put on the minefield
+		lda	#robot			;what killed player...
+		sta	killedby		;..store what killed player
 			
 nextrobot	
 ;		printm	#newbotposmsg		;print new robot position x,y
@@ -631,6 +687,8 @@ movehuman	fcc	"MOVING HUMAN"
 		fcb	13,0
 header		fcc	"ROBOT MINEFIELD"
 		fcb	0
+playerwonmsg	fcc	"YOU GOT ALL ROBOTS!"
+		fcb	0
 killedbymsg	fcc	"KILLED BY "
 		fcb	0
 robotmsg	fcc	"A ROBOT"
@@ -652,8 +710,10 @@ donechecking	fcc	"DONE CHECKING HUMAN"
 newbotposmsg	fcc	"NEW BOT POS "
 		fcb	0
 
+
 human		equ	'H'
 humandead	equ	'X'
+humanDeadRobot	equ	8	;inverse H
 spacechar	equ	' '+64
 
 humanx		fcb	0		
@@ -664,7 +724,8 @@ oldhumany	fcb	0
 kills		fdb	$0000
 killedby	fcb	0	;0=not dead, killed by specified value otherwise
 
-robot		equ	'$'+64
+robot		equ	'R'
+robotdead	equ	18	;inverted 'R'
 mine		equ	'*'+64
 empty		equ	'.'+64
 
@@ -672,7 +733,7 @@ robots_max	equ	4
 robot_index	fcb	0
 robotxy		fcb	11,22,33,44,55,66,77,88	;	rmb robots_max*2
 
-field_width	equ	16
+field_width	equ	32
 field_height	equ	14
 minefield	rmb	field_width*field_height
 
