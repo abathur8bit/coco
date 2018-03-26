@@ -164,6 +164,7 @@ void title(BOOL reseed) {
         }
         srand(seed);
     }
+    cls(1);
 }
 
 void humanMove() {
