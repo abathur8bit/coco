@@ -138,12 +138,9 @@ void drawMinefield() {
     printf("%s",TITLE);
     setCursor(0,1);
     printf("SCORE: %03d",score);
-    
-    for(int y=0; y<MINEFIELD_HEIGHT; y++) {
-        yoffset = y*MINEFIELD_WIDTH;
-        for(int x=0; x<MINEFIELD_WIDTH; x++) {
-            *(screen++) = minefield[yoffset+x];
-        }
+
+    for(int i=0; i<sizeof(minefield); i++) {    
+        *(screen++) = minefield[i];
     }
 }
 
