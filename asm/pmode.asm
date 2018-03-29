@@ -1,12 +1,39 @@
+*******************************************************************************
+* 
+* Copyright (c) 2018, Lee Patterson
+* http://8BitCoder.com
+*
+* This is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+* 
+* This software is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+*******************************************************************************
+
 	org	$5800
 start
 *	jsr	preaddemo
 *	jsr	psettest
-	jsr	psetdemo
+*	jsr	psetdemo
 *	jsr	colordemo
 *	jsr	pmodedemo
+	jsr	pmode4demo
 	
 done	swi
+	rts
+	
+************************************************
+*
+pmode4demo	
+	jsr	setpmode4
+	ldd	#0
+	jsr	pcls
+	jsr	wait
 	rts
 
 ************************************************
@@ -165,7 +192,7 @@ wait	jsr	[$a000]
 ************************************************
 * includes
 *	
-	include 	pmode1.asm
+	include 	pmode4.asm
 	
 hold	fcb	$00
 
