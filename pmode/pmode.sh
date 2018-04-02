@@ -1,7 +1,8 @@
 #!/bin/bash
 set -e
 lwasm -9 -b -f obj -o pmode4.o pmode4.asm 
-lwar -c libpmode4.a pmode4.o
+lwasm -9 -b -f obj -o pset.o pset.asm 
+lwar -c libpmode4.a pmode4.o pset.o
 cmoc --org=3F00 pmode.c -L. -lpmode4
 writecocofile -b pmode.dsk pmode.bin 
 mame64 -window -waitvsync -natural -cfg_directory ~/coco -biospath ~/roms coco3 -flop1 pmode.dsk -autoboot_delay 1 -autoboot_command "LOADM\"PMODE\":EXEC\n"

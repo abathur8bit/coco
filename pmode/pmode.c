@@ -11,6 +11,7 @@ void pset(word x,word y);
 void showPage(unsigned page);
 void setPage(unsigned page);
 void setColor(unsigned color);
+void psetTest();
 
 void wait() {
     while(!inkey()) {
@@ -74,15 +75,19 @@ void line(int x1,int y1,int x2,int y2) {
 }
 
 
+/*
+void testGlobal() {
+    setpmode4();
+    clearScreen(0);
+    wait();
+    setPage(1);
+    psetTest();
+    showPage(1);
+    wait();
+}
+*/
 
-int main() {
-	initCoCoSupport();
-	width(32);
-	
-	unsigned a=0;
-	word b=0;
-
-    printf("unsigned size=%d word size=%d\n",sizeof(a),sizeof(b));
+void testPmode() {
     setpmode4();
     clearScreen(0);
     wait();
@@ -111,6 +116,18 @@ int main() {
     setColor(0);
     pset(128,96);
     wait();
+}
+
+int main() {
+	initCoCoSupport();
+	width(32);
+	
+	unsigned a=0;
+	word b=0;
+
+    printf("unsigned size=%d word size=%d\n",sizeof(a),sizeof(b));
+    
+    testPmode();
     
 	return 0;
 }
