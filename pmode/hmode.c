@@ -139,9 +139,12 @@ int main() {
     //setup256allmapped();
 
     setup256();
-    for(word i=0; i<=255; i++) {
-        hcls(i);
-    }
+//    while(1) {
+//        
+//        for(word i=0; i<=255; i++) {
+//            hcls(2);
+//        }
+//    }
     burnAddr(0x8000);
 
 //    byte* addr = 0x8000;

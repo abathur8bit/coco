@@ -52,12 +52,21 @@ _setup256
 	ORCC 	#$50	; disable interrupts
 	lda	#$44
 	sta	$ff90	; GIME INIT0
+
+	; Set video mode to 256x192x1	
 	ldd	#$801A	; 256x192 16 colors 
 	std	$ff98	; GIME VMODE %1000 0000 & VRES 0 00 110 10
 	ldd	#$C000	; $60000/8 = $C000
 	std	$FF9D	; points video memory to $60000
+
+	bsr	mmupage1	; point mmu to mapped memory
+
+	; hcls
+	ldd	#0
+	pshs	d
+	lbsr	_hcls
+	puls	d
 	
-	bsr	mmupage1
 	rts
 	
 _setup256x
@@ -137,14 +146,19 @@ mmupage2
 * void clearScreen(word color);
 *******************************************************************************
 clear_color 	equ	3
-_hcls	lda	clear_color,s	; load color
-clear2	tfr	a,b		* since we only pass in a byte
-;	pshs	x
-	ldx	#$8000		* current page addr
+_hcls	lda	clear_color,s		; load color
+	anda	#$0f		; only lower 4 bits are used
+	sta	clear_color,s		; load lower 4 bits into upper 4 bits
+	lsla	
+	lsla	
+	lsla	
+	lsla	
+	adda	clear_color,s		; A now has lower 4 bits loaded into upper 4 bits
+clear2	tfr	a,b		; D = A
+	ldx	#$8000		; current page addr
 clsp1	std	,x++
 	cmpx	#$8000+$6000
 	bne	clsp1
-;	puls	x
 	rts
 
 *******************************************************************************
