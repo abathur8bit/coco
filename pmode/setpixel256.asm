@@ -22,14 +22,11 @@ _setPixel	export
 * Set pixel in given location to given color
 * void setPixel(int x,int y,int c);
 *******************************************************************************
-setpixel_x	equ	7
-setpixel_y	equ	9
-setpixel_c	equ	11
+setpixel_x	equ	3
+setpixel_y	equ	5
+setpixel_c	equ	7
 
-_setPixel	pshs	u	; 0x4573
-	leau	,s	;U=S loads U with S
-	pshs	u
-	
+_setPixel	
 	lda	setpixel_x,s
 	ldb	setpixel_y,s
 	bsr	pixadr
@@ -40,28 +37,18 @@ _setPixel	pshs	u	; 0x4573
 	lsla
 	lsla
 	lsla
-a@	ldb	,u	* grab current value
-	andb	,x	* zero out the bits we are setting
-	stb	,u
-	ora	,u	* add in our new pixel
-	sta	,u	* store it into video memory
+a@	ldb	,x	* grab current value
+	andb	,y	* zero out the bits we are setting
+	stb	,x
+	ora	,x	* add in our new pixel
+	sta	,x	* store it into video memory
 	
-	puls	u
-	leas	,u	* restore U and return
-	puls	u,pc	
+	rts
 
 
 *******************************************************************************
 * Calculate Pixel Address that xpos and ypos point to. The return is the address you will be storing
 * your pixel to, and the number of bits you need to shift to be in the right spot in the byte.
-*
-* You get the bitmask by using X. Correct pixel value will be in Y.
-*
-*    	jsr	pixadr
-*	lda	,u	* current byte in video memory
-*	anda	,x	* and with mask, a
-*	ora	color	* set color value
-*	sta	,u	* put masked and pixel value back
 *
 * See PixelAddr06 page 93
 *
@@ -70,34 +57,30 @@ a@	ldb	,u	* grab current value
 *
 * Return:
 *
-*  U  : Address that xpos & ypos point to
-*  X  : points to the correct bitmask
+*  X  : Address that xpos & ypos point to
+*  Y  : Points to the correct bitmask
 *
-
 pixadr	std	xpos	* keep X&Y handy
 	
 	* calculate the byte offset
-	ldu	page	* points to start of video buffer
+	ldx	page	* points to start of video buffer
 	lda	#width
 	mul
-	leau	d,u	* add y offset
+	leax	d,x	* add y offset
 	lda	xpos
 	lsra		* divid by 2
-	leau	a,u	* add xpos and now U points to correct byte offset
+	leax	a,x	* add xpos and now X points to correct byte offset
        
 	* calculate the bit shift amount	
 	ldb	#1	* unshifted bit mask
 	andb	xpos	* xpos&1
 
 	* figure out the mask and pixel to set
-	ldx	#msktbl
-	leax	b,x	* X now points to the correct bit mask
-	ldy	#msksft
-	leay	b,y	* Y points to the correct number of bits to shift
+	ldy	#msktbl
+	leay	b,y	* Y now points to the correct bit mask
 pixa99	rts
 
 msktbl	fcb	%00001111,%11110000
-msksft	fcb	4,0
 
 xpos	fcb	0
 ypos	fcb	0
