@@ -5,27 +5,15 @@ INIT0_REG	equ	$ff90
 VMODE_REG	equ	$ff98
 VRES_REG	equ	$FF99
 
-setpixel	macro
-	ldd	\3
-	pshs	d
-	ldd	\2
-	pshs	d
-	ldd	\1
-	pshs	d
-	lbsr	_setPixel
-
-	endm
+	include 	'hmode256.inc'
 	
 	org	$2800
 	
-_setup256	IMPORT
-_hcls	IMPORT 
-_setPixel	IMPORT
 
 	section	code
 
 start	sta	$ffd9
-	lbsr	_setup256
+	lbsr	_initGraphics
 
 	setpixel	#96,#60,#2
 
