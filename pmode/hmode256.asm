@@ -15,18 +15,20 @@
 *
 *******************************************************************************
 
-_setup256	export			; setup graphics to 256x192 16 color
-_hcls	export
+_initGraphics	export		; setup graphics to 256x192 16 color
+_clearScreen	export		; void clearScreen(word color);
+_mmupage1	export		; void mmupage1() - map GIME $60000-65FFF to 64K address space of $8000-$DFFF
+_mmupage2	export		; void mmupage2() - map GIME $66000-6BFFF to 64K address space of $8000-DFFF
 
 *******************************************************************************
 * Select MMU Page 1:
 * Map GIME $60000-65FFF to 64K address space of $8000-$DFFF
 *******************************************************************************
 setmmupage1	macro
-	ldx	#$3031		; GIME address ranges $$60000-$61FFF and $62000-$63FFF...
-	stx	$FFA4		; ...mapped to $8000-$9FFF and $A000-$BFFF
-	lda	#$32		; GIME address range $66000-67FFF...
-	sta	$FFA6		; mapped to $C000-$DFFF
+	ldx	#$3031	; GIME address ranges $60000-$61FFF and $62000-$63FFF...
+	stx	$FFA4	; ...mapped to $8000-$9FFF and $A000-$BFFF
+	lda	#$32	; GIME address range $64000-$65FFF...
+	sta	$FFA6	; mapped to $C000-$DFFF
 	endm
 				
 *******************************************************************************
@@ -34,10 +36,10 @@ setmmupage1	macro
 * Map GIME $66000-6BFFF to 64K address space of $8000-DFFF		
 *******************************************************************************
 setmmupage2	macro
-	ldx	#$3334		; GIME address ranges $66000-$67FFF and $68000-$69FFF...
-	stx	$FFA4		; ...mapped to $8000-$9FFF and $A000-$BFFF
-	lda	#$35		; GIME address range $6A000-$6BFFF...
-	sta	$FFA6		; ...mapped to $C000-$DFFF
+	ldx	#$3334	; GIME address ranges $66000-$67FFF and $68000-$69FFF...
+	stx	$FFA4	; ...mapped to $8000-$9FFF and $A000-$BFFF
+	lda	#$35	; GIME address range $6A000-$6BFFF...
+	sta	$FFA6	; ...mapped to $C000-$DFFF
 	endm
 
 	section	code
@@ -45,11 +47,11 @@ setmmupage2	macro
 
 *******************************************************************************
 * Setup video mode to 256x192 16 colors
-* void setup256();                      
+* void initGraphics();                      
 * from setgfx.asm
 *******************************************************************************
-_setup256
-	ORCC 	#$50	; disable interrupts
+_initGraphics
+	orcc 	#$50	; disable interrupts
 	lda	#$44
 	sta	$ff90	; GIME INIT0
 
@@ -59,73 +61,22 @@ _setup256
 	ldd	#$C000	; $60000/8 = $C000
 	std	$FF9D	; points video memory to $60000
 
-	bsr	mmupage1	; point mmu to mapped memory
+	bsr	_mmupage1	; point mmu to mapped memory
 
-	; hcls
+	; clear screen
 	ldd	#0
 	pshs	d
-	lbsr	_hcls
+	lbsr	_clearScreen
 	puls	d
 	
 	rts
+
 	
-_setup256x
-	lda	#$44
-	sta	$ff90	; GIME INIT0
-
-			; VMODE $FF98
-			; 76543210 
-			; AxxxxBBB A sets graphics B sets # lines per row
-			; A 1=Graphics 0=Text
-			; xxxx just leave as 0000
-			; BBB Lines per row
-			;   00x=one line per row
-			;   010=two lines per row
-			;   011=eight lines per row
-			;   100=nine lines per row
-			;   101=ten lines per row
-			;   110=eleven lines per row
-			;   111=*infinite lines per row
-			
-			; VRES $FF99
-			; 76543210 
-			; xAABBBCC
-			; x Unused
-			; AA scan lines 
-			;   00=192 
-			;   01=200 
-			;   10=undefined 
-			;   11=225
-			; BBB HRES bytes per row
-			;   000=16 bytes per row 
-			;   001=20 bytes per row 
-			;   010=32 bytes per row 
-			;   011=40 bytes per row
-			;   100=64 bytes per row
-			;   101=80 bytes per row
-			;   110=128 bytes per row
-			;   111=160 bytes per row
-			; CC CRES # colors in graphics mode
-			;   00=2 colors (8 pixels per byte)
-			;   01=4 colors (4 pixels per byte)
-			;   10=16 colors (2 pixels per byte)
-			;   11=Undefined (would have been 256 colors)		 
-	ldd	#$801A	; 256x192 16 colors 
-	std	$ff98	; GIME VMODE %1000 0000 & VRES 0 00 110 10
-	
-	ldd	#$C000	; $60000/8 = $C000
-	std	$FF9D
-
-	jsr	mmupage1	
-	
-	rts
-
-
 *******************************************************************************
 * Setup MMU
 *******************************************************************************
 
-mmupage1
+_mmupage1
 	; map GIME $60000-65FFF to 64K address space of $8000-$DFFF
 	ldd	#$3031		; GIME address ranges $$60000-$61FFF and $62000-$63FFF...
 	std	$FFA4		; ...mapped to $8000-$9FFF and $A000-$BFFF
@@ -133,7 +84,7 @@ mmupage1
 	sta	$FFA6		; mapped to $C000-$DFFF
 	rts
 		
-mmupage2		
+_mmupage2		
 	; map GIME $66000-6BFFF to 64K address space of $8000-DFFF
 	ldd	#$3334		; GIME address ranges $66000-$67FFF and $68000-$69FFF...
 	std	$FFA4		; ...mapped to $8000-$9FFF and $A000-$BFFF
@@ -146,7 +97,7 @@ mmupage2
 * void clearScreen(word color);
 *******************************************************************************
 clear_color 	equ	3
-_hcls	lda	clear_color,s		; load color
+_clearScreen	lda	clear_color,s		; load color
 	anda	#$0f		; only lower 4 bits are used
 	sta	clear_color,s		; load lower 4 bits into upper 4 bits
 	lsla	
@@ -168,7 +119,7 @@ clsp1	std	,x++
 color	fcb	$ff
 xpos	fcb	0
 ypos	fcb	0
-page	fdb	$8000		* current page address
+page	equ	$8000		* current page address
 
 *******************************************************************************
 * Constants

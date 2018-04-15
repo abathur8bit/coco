@@ -7,8 +7,12 @@
 
 byte* scrnBuffer = 0x8000;
 
-void setup256();
-void hcls(word color);
+void initGraphics();
+void clearScreen(word color);
+void setPixel(int x,int y,int c);
+void mmupage1();
+void mmupage2();
+
 //3f3c  setup256
 //4006  hcls
 
@@ -130,22 +134,74 @@ void setup256allmapped() {
     burnAddr(0x8000);
 }
 
+void setPixelc(int x,int y,int c) {
+    byte* addr = scrnBuffer+(y*128+x/2);
+    printf("addr=%X\n",addr);
+    if(x&1 == 0) {
+        byte pixel = *(addr);
+        printf("pixel now=%X\n",pixel);
+        
+        pixel &= 0xF;
+        printf("pixel after and %X\n",pixel);
+        
+        c=c<<4;
+        printf("pixel after shift %X\n",pixel);
+        
+        pixel |= c;
+        printf("pixel after or %X\n",pixel);
+        
+        *addr = pixel;
+    } else {
+        byte pixel = *(addr);
+        printf("pixel now=%X\n",pixel);
+
+        pixel &= 0xF0;
+        printf("pixel after and %X\n",pixel);
+        
+        pixel |= c;
+        printf("pixel after or %X\n",pixel);
+        
+        *addr = pixel;
+    }
+}
     
 int main() {
-    initCoCoSupport();
-    asm { sta   $ffd9 }    //hi speed poke
+    //initCoCoSupport();
+    asm { sta   $FFD9 }    //hi speed poke
 
     //setup256c();
     //setup256allmapped();
 
-    setup256();
+    initGraphics();
+    byte* addr=scrnBuffer;
+    //*addr=0x45;
+    //*(addr+1) = 0x67;
+    
+    //setPixel(128,96,1);
+    clearScreen(5);
+    
+    //setPixel(0,0,1);
+    setPixel(1,0,2);
+    setPixel(0,1,3);
+    setPixel(1,1,4);
+    
+    setPixel(128,96,1);
+    setPixel(129,96,2);
+    setPixel(128,97,3);
+    setPixel(129,97,4);
+    
+    setPixel(255,191,1);
+    setPixel(0,191,1);
+    setPixel(255,0,1);
+    
+    //return 0;
 //    while(1) {
 //        
 //        for(word i=0; i<=255; i++) {
 //            hcls(2);
 //        }
 //    }
-    burnAddr(0x8000);
+    burnAddr(0x8003);
 
 //    byte* addr = 0x8000;
 //    for(int i=0; i<3; i++) {
