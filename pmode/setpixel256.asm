@@ -15,7 +15,10 @@
 *
 *******************************************************************************
 
+	include 'hmode256.inc'
+	
 _setPixel	export
+pixadr	export
 
 	section 	code
 *******************************************************************************
@@ -29,7 +32,7 @@ setpixel_c	equ	7
 _setPixel	
 	lda	setpixel_x,s
 	ldb	setpixel_y,s
-	bsr	pixadr
+	lbsr	pixadr
 	lda	setpixel_c,s	* load the color
 	tstb		* IF B==0 CC.Z=1 (if b==0 then we need to shift)
 	bne	a@	* if B was 1 branch to skip shifting
@@ -59,6 +62,7 @@ a@	ldb	,x	* grab current value
 *
 *  X  : Address that xpos & ypos point to
 *  Y  : Points to the correct bitmask
+*  B  : B=0 if we are setting bits 7654 and 1 if we are setting bits 3210.
 *
 pixadr	std	xpos	* keep X&Y handy
 	
@@ -73,7 +77,7 @@ pixadr	std	xpos	* keep X&Y handy
        
 	* calculate the bit shift amount	
 	ldb	#1	* unshifted bit mask
-	andb	xpos	* xpos&1
+	andb	xpos	* B=0 if we are setting odd location, 1 for even. This maps nicely with msktbl, our mask table.
 
 	* figure out the mask and pixel to set
 	ldy	#msktbl

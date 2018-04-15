@@ -8,11 +8,11 @@
 byte* scrnBuffer = 0x8000;
 
 void initGraphics();
-void clearScreen(word color);
-void setPixel(int x,int y,int c);
 void mmupage1();
 void mmupage2();
-
+void clearScreen(word color);
+void setPixel(int x,int y,int c);
+void hline(int x,int y,int w,int c);
 
 //memory window Cmd+D
 
@@ -96,7 +96,7 @@ void setup256c() {
     
     byte* addr = 0x8000;
     for(int i=0; i<3; i++) {
-        *MMU1 = 0x30+i;
+        *MMU1 = 0x30+(byte)i;
         memset(0x8000,0,0x2000);
         *addr = 255;    //show the start of the memory block
     }
@@ -131,7 +131,11 @@ int main() {
     setPixel(9,10,1);
     line(10,10,128,20,2);
     setPixel(129,20,1);
-    
+
+    setPixel(10,29,1);
+    hline(10,30,50,2);
+    setPixel(60,29,1);
+        
     burnAddr(0x8003);
     
     while(1) {}
