@@ -34,6 +34,7 @@ _setPixel
 	ldb	setpixel_y,s
 	lbsr	pixadr
 	lda	setpixel_c,s	* load the color
+	anda	#$F	* keep the lower nibble only
 	tstb		* IF B==0 CC.Z=1 (if b==0 then we need to shift)
 	bne	a@	* if B was 1 branch to skip shifting
 	lsla		* B was 0, shift up 4 times
