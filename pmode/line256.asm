@@ -18,7 +18,7 @@
 
 	include 	'hmode256.inc'
 	
-_hline	export
+;_hline	export
 
 	section 	code
 *******************************************************************************

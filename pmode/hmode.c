@@ -4,17 +4,57 @@
 
 #include "coco.h"
 #include "stdarg.h"
+#include "gfx.h"
 
 byte* scrnBuffer = 0x8000;
+byte bytesPerLine = 128;
 
-void initGraphics();
-void mmupage1();
-void mmupage2();
-void clearScreen(word color);
-void setPixel(int x,int y,int c);
-void hline(int x,int y,int w,int c);
+#define PALETTE_ADDR 0xFFB0
 
-//memory window Cmd+D
+
+
+
+byte blackout[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+byte rgbColorValues[16] = {
+    0,  // 0 black
+    7,  // 1 dark grey
+    56, // 2 light grey
+    63, // 3 white
+    4,  // 4 dark red
+    32, // 5 med red
+    36, // 6 light red
+    2,  // 7 dark green
+    16, // 8 med green
+    18, // 9 light green
+    3,  //10 dark cyan
+    24, //11 med cyan
+    27, //12 light cyan
+    6,  //13 dark yellow
+    48, //14 med yellow
+    54  //15 light yellow
+};
+
+
+//MAME memory window Cmd+D
+
+byte isRGB()
+{
+    byte* addr = PALETTE_ADDR;
+    return *(addr+1)-64 == rgbColorValues[1];
+}
+
+
+void mapColors(byte* colorValues)
+{
+    byte count = sizeof rgbColorValues/sizeof rgbColorValues[0];
+//    printf("WE HAVE %d COLORS\n",count);
+    byte* addr = PALETTE_ADDR;
+    for(byte i=0; i<count; i++)
+    {
+        *(addr+i) = colorValues[i];
+    }
+}
 
 void wait() {
     while(!inkey()) {
@@ -106,17 +146,106 @@ void setup256c() {
 
 int main() {
     initCoCoSupport();
-    asm { sta   $FFD9 }    //hi speed poke
-
-    initGraphics();
-
-    clearScreen(5);
+    if(!isCoCo3) {
+        printf("You need to be running on a Coco 3.\n");
+    }
+    /*
+    byte pixel = 0x44;
+    byte color = 7;
+    printf("SETTING HIGH NIBBLE TO %X = %X\n",color,(pixel & 0x0F) | (color<<4));
+    printf("SETTING LOW  NIBBLE TP %X = %X\n",color,(pixel & 0xF0) | color);
     
+    int x=0;
+    int y=0;
+    byte* addr = scrnBuffer + (y*bytesPerLine+(x>>1));
+    printf("X=%d Y=%d ADDR=%X\n",x,y,addr);
+    x++;
+    addr = scrnBuffer + (y*bytesPerLine+(x>>1));
+    printf("X=%d Y=%d ADDR=%X\n",x,y,addr);
+    x++;
+    addr = scrnBuffer + (y*bytesPerLine+(x>>1));
+    printf("X=%d Y=%d ADDR=%X\n",x,y,addr);
+    wait();
+    */
+    
+    mapColors(blackout);
+    setHighSpeed(1);
+    initGraphics();     
+    clearScreen(DARK_GREY);
+    mapColors(rgbColorValues);
+
+    //clearScreen(5);
+    
+    /*
+    int c=0;
+    for(int x=0; x<256; x++) {
+        csetPixel(x,2,(byte)c);
+        setPixel(x,4,x);
+        ++c;
+        if(c==16)
+            c=0;
+    }
+    */
+    
+    
+    setPixel(0,96,BLACK);
+    setPixel(1,96,BLACK+1);
+    setPixel(2,96,BLACK+2);
+    setPixel(3,96,BLACK+3);
+    setPixel(4,96,BLACK);
+    setPixel(5,96,BLACK+1);
+    setPixel(6,96,BLACK+2);
+    setPixel(7,96,BLACK+3);
+
+    setPixel(0, 96,BLACK);
+    setPixel(0, 97,BLACK+1);
+    setPixel(0, 98,BLACK+2);
+    setPixel(0, 99,BLACK+3);
+    setPixel(0,100,BLACK);
+    setPixel(0,101,BLACK+1);
+    setPixel(0,102,BLACK+2);
+    setPixel(0,103,BLACK+3);
+    
+    hline(0,92,1,DARK_RED);
+    hline(0,93,2,DARK_RED);
+    hline(0,94,3,MED_RED);
+    hline(0,95,4,DARK_GREEN);
+    
+    vline(1,97,1,RED);
+    vline(2,97,2,RED);
+    vline(3,97,3,RED);
+    vline(4,97,4,RED);
+
+
+    byte ballWidth=6;
+    byte ball1[] = {
+        0,0,3,3,0,0,
+        0,3,1,1,3,0,
+        3,1,1,1,1,3,
+        3,1,1,1,1,3,
+        0,3,1,1,3,0,
+        0,0,3,3,0,0
+    };
+    
+    int i=0;
+    for(int y=0; y<ballWidth; y++) {
+        for(int x=0; x<ballWidth; x++) {
+            if(ball1[i]) {
+                setPixel(128+x,96+y,CYAN+ball1[i]-1);
+            }
+            ++i;
+        }
+    }
+    
+    bar(100,100,16,8);
+    rect(100,100,16,8);
+    
+    /*
     //draw small 2x2 pixel block in top left of screen
-    setPixel(0,0,1);    //top left
-    setPixel(1,0,2);   
-    setPixel(0,1,3);   
-    setPixel(1,1,4);
+    setPixel(0,0,MED_RED);    //top left
+    setPixel(1,0,MED_GREEN);   
+    setPixel(0,1,MED_YELLOW);   
+    setPixel(1,1,LIGHT_GREY);
     
     //draw small 2x2 pixel block in center of screen
     setPixel(128,96,1);
@@ -135,7 +264,14 @@ int main() {
     setPixel(10,29,1);
     hline(10,30,50,2);
     setPixel(60,29,1);
-        
+      
+  
+    setPixel(0,96,BLACK);
+    setPixel(1,96,BLACK+1);
+    setPixel(2,96,BLACK+2);
+    setPixel(3,96,BLACK+3);
+    */
+    
     burnAddr(0x8003);
     
     while(1) {}
