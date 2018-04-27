@@ -12,6 +12,6 @@ int addNum(int a);  //function with a param
 int main() {
     int a = getNum();
 	int b = addNum(a);
-	printf("NUMBER=%d ADDNUM=%d\n",a,b);
+	printf("NUMBER = %d ADDNUM = %d\n",a,b);
 	return 0;
 }
