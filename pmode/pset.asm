@@ -1,4 +1,5 @@
 _pset	export
+;_pread	export
 
 color	import
 xpos	import
@@ -11,30 +12,32 @@ page	import
 * Read a pixel from vmem. Will be a value from 0-3.
 * This destroys B,U regs.
 * 
-* 
+* word pread(word x,word y)
+*
 * Return:
 * A   : Pixel value at xpos,ypos
 *
-pread	lda	3,s	* x 
-	ldb	5,s	* y
-	pshs	u
-	bsr	pixadr	* find pixel address
-	lda	,u	* grab the value
-	anda	,x	* mask unwanted bits
-	bne	pread2	* branch if pixel value 0
-	clra		* pixel is 0, set return value
-	puls	u,pc	* pop and return
-pread2	lda	#1	* pixel is 1, set return value
-	puls	u,pc	* pop and return
+;_pread	lda	3,s	* x 
+;	ldb	5,s	* y
+;	pshs	u
+;	bsr	pixadr	* find pixel address
+;	lda	,u	* grab the value
+;	anda	,x	* mask unwanted bits
+;	bne	pread2	* branch if pixel value 0
+;	clra		* pixel is 0, set return value
+;	puls	u,pc	* pop and return
+;pread2	ldd	#1	* pixel is 1, set return value
+;	puls	u,pc	* pop and return
 
-********************************
+
+
+*******************************************************************************
 * Set a pixel at the xpos and ypos location. The color is determined by what is stored in 
-* the memory location at color. Note we use unsigned short here so when we go to 
-* 320x192 16 color, we don't have to make a lot of code changes.
+* the memory location at color. Note we use unsigned short, but we only use the low order byte
+* so when we go to 320x192 16 color, we don't have to make a lot of code changes.
 *
-* void pset(unsigned short x,unsigned short y)
+* void pset(word x,word y)
 *
-* This destroys D,U,X,Y regs.
 *
 _pset	lda	3,s	* x 
 	ldb	5,s	* y
@@ -49,7 +52,8 @@ pset22	sta	,u	* put masked and pixel value back
 	puls	u,pc
 
 
-********************************
+
+*******************************************************************************
 * Calculate Pixel Address that xpos and ypos point to. The return is the address you will be storing
 * your pixel to, and the number of bits you need to shift to be in the right spot in the byte.
 *

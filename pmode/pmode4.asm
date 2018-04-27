@@ -55,7 +55,7 @@ pmode4_done	rts
 ************************************************
 * Show the selected graphics page. Valid 0 or 1.
 *
-* void setPage(unsigned page)
+* void setPage(word page)
 *
 set_page_num	equ	3
 _setPage	lda	set_page_num,s	*grab page
@@ -115,7 +115,7 @@ _showpage2	sta	$ffd2	* 0
 ************************************************
 * Set the current draw color. color can be 0 or 1.
 *
-* void setColor(unsigned color)
+* void setColor(word color)
 * 
 _setColor	lda	hiparam1,s
 	bne	setColor1	* non zero
@@ -128,7 +128,7 @@ setColor1	lda	#1			* non zero will always be 1
 ************************************************
 * Clear the current graphics page. Pmode 4 values are 0 and 255.
 *
-* void clearScreen(unsigned color)
+* void clearScreen(word color)
 *
 clear_color	equ	3			* params start at 2, as the stack has the return address on the stack
 _clearScreen	lda	clear_color,s	* load color
@@ -136,7 +136,6 @@ _clearScreen	lda	clear_color,s	* load color
 	bra 	clear2			* zero
 clear1	lda	#$FF			* set all 1's
 clear2	tfr	a,b			* since we only pass in a byte
-	pshs	x
 	ldx	page			* current page addr
 	cmpx	#page1			* check if we are on page 1
 	bne	pclsp2			* no, clear page 2
@@ -144,13 +143,11 @@ clear2	tfr	a,b			* since we only pass in a byte
 pclsp1	std	,x++
 	cmpx	#page1+pgsize
 	bne	pclsp1
-	puls	x,pc
 	rts
 	
 pclsp2	std	,x++
 	cmpx	#page2+pgsize
 	bne	pclsp2
-	puls	x,pc
 	rts
 
 

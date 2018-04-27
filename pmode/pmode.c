@@ -6,12 +6,13 @@
 #include "stdarg.h"
 
 void setpmode4();
-void clearScreen(unsigned color);
+void clearScreen(word color);
 void pset(word x,word y);
-void showPage(unsigned page);
-void setPage(unsigned page);
-void setColor(unsigned color);
-void psetTest();
+void showPage(word page);
+void setPage(word page);
+void setColor(word color);
+void line(word x1,word y1,word x2,word y2);
+
 
 void wait() {
     while(!inkey()) {
@@ -33,7 +34,7 @@ void swap(int* a,int* b) {
     *b=t;
 }
 
-void line(int x1,int y1,int x2,int y2) {
+void c_line(int x1,int y1,int x2,int y2) {
     int d,dx,dy;
     int Ainc,Binc,Yinc;
     unsigned x,y;
@@ -75,18 +76,6 @@ void line(int x1,int y1,int x2,int y2) {
 }
 
 
-/*
-void testGlobal() {
-    setpmode4();
-    clearScreen(0);
-    wait();
-    setPage(1);
-    psetTest();
-    showPage(1);
-    wait();
-}
-*/
-
 void testPmode() {
     setpmode4();
     clearScreen(0);
@@ -97,7 +86,7 @@ void testPmode() {
     clearScreen(0);
     pset(0,0);
     pset(1,1);
-    line(10,10,100,20);
+    c_line(10,10,100,20);
     wait();
     
     showPage(1);
@@ -109,7 +98,7 @@ void testPmode() {
     setPage(1);
     clearScreen(0);
     pset(128,96);
-    line(10,30,100,25);
+    c_line(10,30,100,25);
     wait();
     
     clearScreen(1);
@@ -118,16 +107,21 @@ void testPmode() {
     wait();
 }
 
-int main() {
-	initCoCoSupport();
-	width(32);
-	
-	unsigned a=0;
-	word b=0;
+void testLine() {
+    //setpmode4();
+    //c_line(10,30,100,25);
+    line(1,2,3,4);
+    //wait();
+}
 
-    printf("unsigned size=%d word size=%d\n",sizeof(a),sizeof(b));
-    
-    testPmode();
+int main() {
+///	initCoCoSupport();
+//	width(32);
+	
+    testLine();
+    word a=1;
+    word b=2;
+    printf("A=%u B=%u\n",a,b);
     
 	return 0;
 }
