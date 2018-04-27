@@ -6,61 +6,22 @@
 #include "stdarg.h"
 #include "gfx.h"
 
-byte* scrnBuffer = 0x8000;
-byte bytesPerLine = 128;
-
-#define PALETTE_ADDR 0xFFB0
+word setupTimerIRQ();
+word timerVal();
 
 
-
-
-byte blackout[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-
-byte rgbColorValues[16] = {
-    0,  // 0 black
-    7,  // 1 dark grey
-    56, // 2 light grey
-    63, // 3 white
-    4,  // 4 dark red
-    32, // 5 med red
-    36, // 6 light red
-    2,  // 7 dark green
-    16, // 8 med green
-    18, // 9 light green
-    3,  //10 dark cyan
-    24, //11 med cyan
-    27, //12 light cyan
-    6,  //13 dark yellow
-    48, //14 med yellow
-    54  //15 light yellow
-};
-
+extern byte blackout[];
+extern byte rgbColorValues[];
 
 //MAME memory window Cmd+D
 
-byte isRGB()
-{
-    byte* addr = PALETTE_ADDR;
-    return *(addr+1)-64 == rgbColorValues[1];
-}
 
 
-void mapColors(byte* colorValues)
-{
-    byte count = sizeof rgbColorValues/sizeof rgbColorValues[0];
-//    printf("WE HAVE %d COLORS\n",count);
-    byte* addr = PALETTE_ADDR;
-    for(byte i=0; i<count; i++)
-    {
-        *(addr+i) = colorValues[i];
-    }
-}
 
 void wait() {
     while(!inkey()) {
     }    
 }
-
 
 
 int abs(int a) {
@@ -115,10 +76,12 @@ void line(int x1,int y1,int x2,int y2,int n) {
 
 //just change a pixel value so you know the program didn't crash, but you want an infinate loop
 void burnAddr(byte* addr) {
+    unsigned short *p = 0x8000;
     while(1) {
-        for(byte i=0; i<=255; i++) {
-            *addr = i;    //same color on both pixels
-        }
+        *p = timerVal();
+//        for(byte i=0; i<=255; i++) {
+//            *addr = i;    //same color on both pixels
+//        }
     }
 }
 
@@ -149,7 +112,23 @@ int main() {
     if(!isCoCo3) {
         printf("You need to be running on a Coco 3.\n");
     }
+    
+    
+    
+    
+    
     /*
+    setupTimerIRQ();
+    unsigned short* p = 0x400;
+    while(1) {
+        *p = timerVal();
+        //printf("TIMER=%u\n",timerVal());
+        
+    }
+
+
+
+
     byte pixel = 0x44;
     byte color = 7;
     printf("SETTING HIGH NIBBLE TO %X = %X\n",color,(pixel & 0x0F) | (color<<4));
@@ -171,7 +150,7 @@ int main() {
     mapColors(blackout);
     setHighSpeed(1);
     initGraphics();     
-    clearScreen(DARK_GREY);
+    clearScreen(MED_CYAN);
     mapColors(rgbColorValues);
 
     //clearScreen(5);
