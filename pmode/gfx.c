@@ -73,6 +73,26 @@ void blitrect(struct SPRITE* image,int x,int y,int width,int height,int srcx,int
     }
 }
 
+void blitFontRect(struct SPRITE* image,int x,int y,int width,int height,int srcx,int srcy) {
+    byte* source = (byte*)(image->data+srcy*image->height);
+    //width = width>>1;   // div by 2
+    int yy=0;
+    byte color;
+    for(yy=0; yy<height; ++yy) 
+    {
+        source = (byte*)image->data+(srcy+yy)*40+srcx/2;
+        for(int xx=0; xx<width; xx+=2) {
+            if(((*source)&0xF0)>>4)
+                setPixel(x+xx,y+yy,currentColor);
+                
+            if(*(source)&0xF)
+                setPixel(x+xx+1,y+yy,currentColor);
+
+            ++source;
+        }
+    }
+}
+
 void blitclr(void* image,int x,int y,int width,int height,int color) {
     byte* ptr = (byte*)image;
     byte c;
@@ -154,4 +174,20 @@ void initgfx() {
     initGraphics();
     clearScreen(NUCLEAR_GREEN);
     defaultColors();
+}
+
+void showPage(byte p) {
+    if(p) {
+        showpage2();
+    } else {
+        showpage1();
+    }
+}
+
+void setPage(byte p) {
+    if(p) {
+        mmupage2();
+    } else {
+        mmupage1();
+    }
 }

@@ -78,6 +78,8 @@ void blackoutColors();
 
 //assembly library functions
 void initGraphics();
+void setPage(byte p);
+void showPage(byte p);
 void mmupage1();
 void mmupage2();
 void showpage1();
@@ -90,5 +92,7 @@ void* loadImage(char* filename);
 void blit(void* image,int x,int y);
 void blitclr(void* image,int x,int y,int width,int height,int color); //blit an image, but use the specfied color instead of what's in the bitmap
 void blitrect(struct SPRITE* image,int x,int y,int width,int height,int srcx,int srcy);
+void tblitrect(struct SPRITE* image,int x,int y,int width,int height,int srcx,int srcy);
+void blitFontRect(struct SPRITE* image,int x,int y,int width,int height,int srcx,int srcy);
 
 #endif

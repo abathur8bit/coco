@@ -23,6 +23,7 @@ _mmupage2	export		; void mmupage2() - map GIME $66000-6BFFF to 64K address space
 _showpage1	export		; void showpage1()
 _showpage2	export		; void showpage2()
 _timerVal	export		; unsigned short timerVal() - Return the current timer value
+_setTimerVal	export		; void setTimerVal(word);
 _setupTimerIRQ	export		; void _setupTimerIRQ() - Setup timer IRQ routine
 
 *******************************************************************************
@@ -71,6 +72,10 @@ timerirq
 * Return the current timer value
 *******************************************************************************
 _timerVal	ldd	timer
+	rts
+	
+_setTimerVal	ldd	2,u
+	std	timer
 	rts
 
 IRQ_VECTOR      equ             $fef7
