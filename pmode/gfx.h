@@ -57,12 +57,14 @@
 
 #define NUCLEAR_GREEN   LIGHT_GREEN
 
-typedef struct  {
-    int x,y;        //position
-    int cx,cy;      //center point
-    int width,height;        //size
-    void* data;     //sprite data
-} SPRITE;
+/**
+ * SPRITE Used for single and multiple frame animations.
+ */
+typedef struct NODE_T {
+    short x,y;                  //position
+    short width,height;         //size of this node in pixels
+    void* data;                 //a horz sprite sheet that contains 1 or more frames of animation.
+} NODE;
 
 //C library functions
 void hline(int x,int y,int w,byte c);
@@ -75,6 +77,8 @@ byte isRGB();
 void initgfx();
 void defaultColors();
 void blackoutColors();
+void setColor(int c);
+void setBGColor(int c);
 
 //assembly library functions
 void initGraphics();
@@ -89,10 +93,10 @@ void setPixel(int x,int y,int c);
 void setColor(int c);
 void setBGColor(int c);
 void* loadImage(char* filename);
-void blit(void* image,int x,int y);
+void blit(NODE* image);
+
 void blitclr(void* image,int x,int y,int width,int height,int color); //blit an image, but use the specfied color instead of what's in the bitmap
-void blitrect(struct SPRITE* image,int x,int y,int width,int height,int srcx,int srcy);
-void tblitrect(struct SPRITE* image,int x,int y,int width,int height,int srcx,int srcy);
-void blitFontRect(struct SPRITE* image,int x,int y,int width,int height,int srcx,int srcy);
+void blitrect(NODE* src,NODE* dest,int x,int y,int width,int height,int srcx,int srcy);
+void tblitrect(NODE* image,int x,int y,int width,int height,int srcx,int srcy);
 
 #endif

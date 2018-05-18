@@ -19,6 +19,7 @@
 	
 _setPixel	export
 pixadr	export
+bltadr	export
 
 	section 	code
 *******************************************************************************
@@ -84,6 +85,41 @@ pixadr	std	xpos	* keep X&Y handy
 	ldy	#msktbl
 	leay	b,y	* Y now points to the correct bit mask
 pixa99	rts
+
+
+
+*******************************************************************************
+* Calculate Pixel Address that xpos and ypos point to. The return is the address you will be storing
+* your pixel to, and if you have an odd or even xpos.
+*
+* This differs from pixadr in that we don't care about shifting or masks.
+*
+* See PixelAddr06 page 93
+*
+*  A  : xpos
+*  B  : ypos
+*
+* Return:
+*
+*  X  : Address that xpos & ypos point to
+*  B  : B=0 if we are setting bits 7654 and 1 if we are setting bits 3210.
+*
+bltadr	std	xpos	* keep X&Y handy
+	
+	* calculate the byte offset
+	ldx	page	* points to start of video buffer
+	lda	#width
+	mul
+	leax	d,x	* add y offset
+	lda	xpos
+	lsra		* divid by 2
+	leax	a,x	* add xpos and now X points to correct byte offset
+       
+	* calculate the bit shift amount	
+	ldb	#1	* unshifted bit mask
+	andb	xpos	* B=0 if we are setting odd location, 1 for even. 
+
+	rts
 
 msktbl	fcb	%00001111,%11110000
 

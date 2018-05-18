@@ -48,108 +48,48 @@ void defaultColors() {
     mapColors(rgbColorValues);
 }
 
+void copyrect(byte* dest,byte* src,int width,int height) {
+    asm
+    {
+        pshs    u
+        lda     width
+        ldx     dest
+        ldy     src
+copyrect_loop:
+        ldd     ,y++
+        std     ,x++        
+        
+        puls    u
+    }
+}
+/*
 //X must be on a byte boundry
-void blitrect(struct SPRITE* image,int x,int y,int width,int height,int srcx,int srcy) {
-    byte* source = (byte*)(image->data+srcy*image->height);
-    //width = width>>1;   // div by 2
+void blitrect(NODE* image,int x,int y,int width,int height,int srcx,int srcy) {
+    byte* source = (byte*)image->data+srcy*(image->width>>1)+(srcx>>1);
+    byte c;
+    int offset = (image->width-width)>>1;
     int yy=0;
-    byte color;
     for(yy=0; yy<height; ++yy) 
     {
-        source = (byte*)image->data+(srcy+yy)*40+srcx/2;
         for(int xx=0; xx<width; xx+=2) {
-            color = ((*source)&0xF0)>>4;
-            setPixel(x+xx,y+yy,color);
-            setPixel(x+xx+1,y+yy,*(source)&0xF);
-            //if(color) {
-            //    setPixel(x+xx,y+yy,color);
-            //}
-            //color = ((*(source))&0xF);
-            //if(color) {
-            //    setPixel(x+xx+1,y+yy,color);
-            //}
-            ++source;
-        }
-    }
-}
-
-void blitFontRect(struct SPRITE* image,int x,int y,int width,int height,int srcx,int srcy) {
-    byte* source = (byte*)(image->data+srcy*image->height);
-    //width = width>>1;   // div by 2
-    int yy=0;
-    byte color;
-    for(yy=0; yy<height; ++yy) 
-    {
-        source = (byte*)image->data+(srcy+yy)*40+srcx/2;
-        for(int xx=0; xx<width; xx+=2) {
-            if(((*source)&0xF0)>>4)
-                setPixel(x+xx,y+yy,currentColor);
+            c = ((*source)&0xF0)>>4; 
+            if(c) 
+            {
+                setPixel(x+xx,y+yy,c);
+            }
                 
-            if(*(source)&0xF)
-                setPixel(x+xx+1,y+yy,currentColor);
-
+            c = *(source)&0xF;   
+            if(c) 
+            {
+                setPixel(x+xx+1,y+yy,c);
+            }
             ++source;
         }
+        source += offset;
     }
 }
+*/
 
-void blitclr(void* image,int x,int y,int width,int height,int color) {
-    byte* ptr = (byte*)image;
-    byte c;
-    for(int h=0; h<height; ++h) {
-        for(int w=0; w<width; w+=2) {
-            setPixel(x+w,y+h,((*ptr)&0xF0)>>4);
-            setPixel(x+w+1,y+h,((*(ptr))&0xF));
-            ++ptr;
-        }
-    }
-}
-
-void blitclrt(void* image,int x,int y,int width,int height,int color) {
-    byte* ptr = (byte*)image;
-    byte c;
-    for(int h=0; h<height; ++h) {
-        for(int w=0; w<width; w+=2) {
-            c = ((*ptr)&0xF0)>>4;
-            if(c) {
-                setPixel(x+w,y+h,color);
-            }
-            c = ((*(ptr))&0xF);
-            if(c) {
-                setPixel(x+w+1,y+h,color);
-            }
-            ++ptr;
-        }
-    }
-}
-
-void blit(void* image,int x,int y) {
-    unsigned char test[] = {
-        0x33,0x33,0x33,0x83,0x33,0x33,0x33,0x33,0x33,
-        0x33,0x33,0x88,0x98,0x33,0x33,0x88,0x83,0x33,
-        0x38,0x88,0x99,0x99,0x88,0x88,0x89,0x98,0x83,
-        0x88,0x89,0x89,0x99,0x88,0x88,0x98,0x99,0x99,
-        0x88,0x88,0x88,0x98,0x77,0x99,0x99,0x88,0x87,
-        0x89,0x98,0x38,0x98,0x37,0x79,0x99,0x77,0x87,
-        0x99,0x99,0x37,0x97,0x33,0x38,0x98,0x37,0x78,
-        0x79,0x98,0x37,0x97,0x33,0x38,0x98,0x33,0x33,
-        0x79,0x97,0x37,0x87,0x33,0x37,0x97,0x33,0x33,
-        0x77,0x77,0x33,0x83,0x33,0x37,0x97,0x33,0x33,
-        0x37,0x73,0x33,0x73,0x33,0x37,0x87,0x33,0x33,
-        0x33,0x33,0x33,0x73,0x33,0x33,0x83,0x33,0x33,
-        0x33,0x33,0x33,0x33,0x33,0x33,0x73,0x33,0x33,
-        0x33,0x33,0x33,0x33,0x33,0x33,0x73,0x33,0x33
-    };
-    SPRITE s = {0,0,0,0,18,14,(void*)test};
-    byte* ptr = (byte*)s.data;
-    for(int h=0; h<s.height; ++h) {
-        for(int w=0; w<s.width; w+=2) {
-            setPixel(x+w,y+h,((*ptr)&0xF0)>>4);
-//            setPixel(x+w+1,y+h,((*(ptr))&0xF));
-            ++ptr;
-        }
-    }
-}
 
 byte isRGB()
 {

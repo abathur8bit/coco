@@ -61,10 +61,10 @@ _setupTimerIRQ
 	rts    
                 
 timerirq        
-	ldd    timer
+	ldd    timer		; add 1 to timer
 	addd   #1
 	std    timer
-	lda    $ff02
+	lda    $ff02		; reset interrupe
 	rti
 
 *******************************************************************************
@@ -124,7 +124,7 @@ _mmupage1
 	; map GIME $60000-65FFF to 64K address space of $8000-$DFFF
 	ldd	#$3031	; GIME address ranges $$60000-$61FFF and $62000-$63FFF...
 	std	$FFA4	; ...mapped to $8000-$9FFF and $A000-$BFFF
-	lda	#$32	; GIME address range $66000-67FFF...
+	lda	#$32	; GIME address range $64000-67FFF...
 	sta	$FFA6	; mapped to $C000-$DFFF
 	rts
 		
