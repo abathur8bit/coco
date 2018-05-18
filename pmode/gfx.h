@@ -94,6 +94,7 @@ void setColor(int c);
 void setBGColor(int c);
 void* loadImage(char* filename);
 void blit(NODE* image);
+void blitsimon(NODE* image);
 
 void blitclr(void* image,int x,int y,int width,int height,int color); //blit an image, but use the specfied color instead of what's in the bitmap
 void blitrect(NODE* src,NODE* dest,int x,int y,int width,int height,int srcx,int srcy);
