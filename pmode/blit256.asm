@@ -93,9 +93,6 @@ tstR1
 	beq	doMix	* if zero, use background right nibble
 	anda	#$F0	* if not zero, clear background right nibble
 	
-	sta	$0
-	addb	$0
-	
 doMix	pshs	b	* adding A&B regs together...
 	adda	,s+	* ...A=A+B
 
