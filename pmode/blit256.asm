@@ -55,9 +55,9 @@ nextline	.byte	0
 oldu	.word	0
 
 _blit
-*	stu	restoreu+1	* hold U
-	pshs	u	* hold U
-	ldu	NODE,s	* X points to NODE pointer
+	stu	restoreu+1	* hold U
+*	pshs	u	* hold U
+	ldu	NODE2,s	* X points to NODE pointer
 	
 	lda	XPOS+1,u	* find dest addr...
 	ldb	YPOS+1,u
@@ -109,8 +109,8 @@ blit3	ldb	#00	* how many bytes the sprite has on a line
 	bra	loop
 
 doneLines	
-	puls	u	* restore U
-*restoreu	ldu	#0000	* restore U
+*	puls	u	* restore U
+restoreu	ldu	#0000	* restore U
 	rts
 
 xx	.byte	0
