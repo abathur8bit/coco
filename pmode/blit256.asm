@@ -18,7 +18,6 @@
 	include 'hmode256.inc'
 	
 _blit	export
-_blitsimon	export
 _printf	import
 
 	section 	code
@@ -59,7 +58,7 @@ source	.word	0
 dest	.word	0
 
 oldu	.word	0
-_blitsimon
+_blit
 *	stu	restoreu+1	* hold U
 	pshs	u	* hold U
 	ldu	NODE,s	* X points to NODE pointer
@@ -99,7 +98,8 @@ tstR1
 	beq	doMix	* if zero, use background right nibble
 	anda	#$F0	* if not zero, clear background right nibble
 	
-doMix	ora	-1,x	* add background and sprite
+doMix	pshs	b	* adding A&B regs together...
+	adda	,s+	* ...A=A+B
 
 short	sta	,x+	* update destination and its pointer
 ctrl	dec	ww	* last byte of source line?
@@ -118,7 +118,7 @@ doneLines
 *restoreu	ldu	#0000	* restore U
 	rts
 
-_blit
+_blitold
 	pshs	u	* setup to use U as function param stack
 	leau	,s
 	

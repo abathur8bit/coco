@@ -46,15 +46,22 @@ pattern_loop:
     }
 }
 
+void wait() {
+    while(!inkey()) {
+    }    
+}
+
 //27fps
 void testblit()
 {
+    printf("READY?");
+    wait();
     initgfx();
-    //setHighSpeed(1);
+    setHighSpeed(1);
 
 
     setPage(0);
-    //pattern2();
+    pattern2();
     //rect(0,0,256,192);
 
     setPage(1);
@@ -62,16 +69,16 @@ void testblit()
     //pattern2();
     //rect(0,0,256,192);
     
-    coolspot.x = 255/2-coolspot.width/2;
+    coolspot.x = 0;
     coolspot2.x = coolspot.x;
-    coolspot.y = 192/2-coolspot.height/2;
+    coolspot.y = 0;
     coolspot2.y = coolspot.y;
     
     setPage(0);
     
     for(int i=0; i<500; i++) {
-        blitsimon(&coolspot);
-        blitsimon(&coolspot2);
+        blit(&coolspot);
+        blit(&coolspot2);
     }
     clearScreen(DARK_RED);
     

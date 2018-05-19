@@ -20,7 +20,7 @@ lwar -c libgfx256.a hmode256.o setpixel256.o line256.o cline256.o textout256.o b
 echo Building tests
 cmoc --org=3F00 hmode.c   -L. -lgfx256
 cmoc --org=3F00 testfont.c   -L. -lgfx256
-cmoc --org=E00 testblit.c   -L. -lgfx256
+cmoc --org=E00 -i testblit.c   -L. -lgfx256
 
 echo Writing to disk image pmode.dsk
 writecocofile -b pmode.dsk hmode.bin 
