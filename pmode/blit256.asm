@@ -41,8 +41,9 @@ _printf	import
 *******************************************************************************
 * position on the stack
 NODE2	equ	2	* if we haven't stuck anything on the stack
-NODE	equ	4	* pointer to NODE structure
-XPOS	equ	0
+NODE	equ	4	* pointer to NODE structure 
+* position in NODE structure
+XPOS	equ	0	
 YPOS	equ	2
 WIDTH	equ	4
 HEIGHT	equ	6
@@ -50,14 +51,9 @@ DATA	equ	8
 
 ww	.byte	0
 hh	.byte	0
-xx	.byte	0
-yy	.byte	0
-nextline	.byte	104
-
-source	.word	0
-dest	.word	0
-
+nextline	.byte	0
 oldu	.word	0
+
 _blit
 *	stu	restoreu+1	* hold U
 	pshs	u	* hold U
@@ -72,15 +68,14 @@ _blit
 	lda	WIDTH+1,u	* width of sprite
 	lsra		* divid by 2
 	sta	ww	* wcounter contains number of bytes, not pixels of a sprite line
-*	lda	#$FF	* TODO lda nextline
-*	suba	ww
-*	lsra		* divid by 2
-*	sta	nextline
+	lda	#$80	* TODO lda nextline
+	suba	ww
+	sta	nextline
 	lda	HEIGHT+1,u
 	sta	hh
 
 	* loop setup
-	lda	#104	* amount to move to next line
+	lda	nextline	* amount to move to next line
 	sta	blit2+1	* self mod 
 	lda	ww	* how many bytes the sprite has on a line
 	sta	blit3+1	* self mod the # bytes
@@ -97,6 +92,9 @@ tstR1
 	bitb	#$0F	* test sprite right nibble
 	beq	doMix	* if zero, use background right nibble
 	anda	#$F0	* if not zero, clear background right nibble
+	
+	sta	$0
+	addb	$0
 	
 doMix	pshs	b	* adding A&B regs together...
 	adda	,s+	* ...A=A+B
@@ -118,44 +116,8 @@ doneLines
 *restoreu	ldu	#0000	* restore U
 	rts
 
-_blitold
-	pshs	u	* setup to use U as function param stack
-	leau	,s
-	
-	ldx	NODE,u	* X points to NODE pointer
-	ldy	DATA,x	* Y points to source pixel data
-	
-	lda	WIDTH+1,x
-	sta	ww
-*	lda	#$FF	* TODO lda nextline
-*	suba	ww
-*	lsra		* divid by 2
-*	sta	nextline
-	lda	HEIGHT+1,x
-	sta	hh
-	
-	lda	XPOS+1,x
-	ldb	YPOS+1,x
-	lbsr	bltadr	* X will contain the dest addr
-
-	lda	#104	* amount to move to next line
-	sta	blitlda+1	* self mod 
-	
-b@	ldb	ww	* grab the width of a single line
-a@	lda	,y+	* byte from source
-	sta	,x+	* byte to dest
-	decb		* dec 2 pixels
-	decb		* and if 0 we are done
-	bne	a@	* not zero, keep going
-blitlda	ldb	#00
-	abx		* point X to start of next line for dest
-	dec	hh	* we just completed a line
-	bne	b@
-
-	leas	,u	* pop and return
-	puls	u,pc	
-	
-	
+xx	.byte	0
+yy	.byte	0
 blit
 	pshs	u	* setup to use U as function param stack
 	leau	,s
