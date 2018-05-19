@@ -25,9 +25,24 @@ _printf	import
 *******************************************************************************
 * Copy the NODE image to the active display page.
 * void blit(NODE* n);
+*
+* NODE:
+* xpos 2 bytes
+* ypos 2 bytes
+* width 2 bytes
+* height 2 bytes
+* data   bytes of data width*height in length
+*
+* typedef struct NODE_T {
+*     short x,y;                  //position
+*     short width,height;         //size of this node in pixels
+*     void* data;                 //a horz sprite sheet that contains 1 or more frames of animation.
+* } NODE;
+* 
 *******************************************************************************
-NODE2	equ	2
-NODE	equ	4
+* position on the stack
+NODE2	equ	2	* if we haven't stuck anything on the stack
+NODE	equ	4	* pointer to NODE structure
 XPOS	equ	0
 YPOS	equ	2
 WIDTH	equ	4
@@ -43,41 +58,64 @@ nextline	.byte	104
 source	.word	0
 dest	.word	0
 
-
+oldu	.word	0
 _blitsimon
-	pshs	u
-	
+*	stu	restoreu+1	* hold U
+	pshs	u	* hold U
 	ldu	NODE,s	* X points to NODE pointer
+	
+	lda	XPOS+1,u	* find dest addr...
+	ldb	YPOS+1,u
+	lbsr	bltadr	* ...X will contain the dest addr
+	
 	ldy	DATA,u	* Y points to source pixel data
 
-	
-	lda	WIDTH+1,u
-	sta	ww
+	lda	WIDTH+1,u	* width of sprite
+	lsra		* divid by 2
+	sta	ww	* wcounter contains number of bytes, not pixels of a sprite line
 *	lda	#$FF	* TODO lda nextline
 *	suba	ww
 *	lsra		* divid by 2
 *	sta	nextline
 	lda	HEIGHT+1,u
 	sta	hh
-	
-	lda	XPOS+1,u
-	ldb	YPOS+1,u
-	lbsr	bltadr	* X will contain the dest addr
 
+	* loop setup
 	lda	#104	* amount to move to next line
-	sta	c@+1	* self mod 
-b@	ldb	ww	* grab the width of a single line
-a@	lda	,y+	* byte from source
-	sta	,x+	* byte to dest
-	decb		* dec 2 pixels
-	decb		* and if 0 we are done
-	bne	a@	* not zero, keep going
-c@	ldb	#00
-	abx		* make X point to start of next line
-	dec	hh	* we just completed a line
-	bne	b@
+	sta	blit2+1	* self mod 
+	lda	ww	* how many bytes the sprite has on a line
+	sta	blit3+1	* self mod the # bytes
 
-	puls	u
+	* main loop
+loop	lda	,x	* get background byte
+	ldb	,y+	* get sprite byte
+	beq	short	* if transparent use full background
+	
+seeN1	bitb	#$F0	* test sprite left nibble
+	beq	tstR1	* of zero use background left nibble	
+	anda	#$0F	* if not zero, clear background left nibble
+tstR1
+	bitb	#$0F	* test sprite right nibble
+	beq	doMix	* if zero, use background right nibble
+	anda	#$F0	* if not zero, clear background right nibble
+	
+doMix	ora	-1,x	* add background and sprite
+
+short	sta	,x+	* update destination and its pointer
+ctrl	dec	ww	* last byte of source line?
+	bne	loop	* if not last byte, keep going
+
+blit2	ldb	#00	* how much to add to point to next line...
+	abx		* ...X now points to begining of next line
+	dec	hh
+	beq	doneLines	* if we have no more lines
+blit3	ldb	#00	* how many bytes the sprite has on a line
+	stb	ww
+	bra	loop
+
+doneLines	
+	puls	u	* restore U
+*restoreu	ldu	#0000	* restore U
 	rts
 
 _blit
