@@ -40,8 +40,8 @@ _printf	import
 * 
 *******************************************************************************
 * position on the stack
-NODE2	equ	2	* if we haven't stuck anything on the stack
-NODE	equ	4	* pointer to NODE structure 
+NODE2	equ	2	; if we haven't stuck anything on the stack
+NODE	equ	4	; pointer to NODE structure 
 * position in NODE structure
 XPOS	equ	0	
 YPOS	equ	2
@@ -49,116 +49,107 @@ WIDTH	equ	4
 HEIGHT	equ	6
 DATA	equ	8
 
-ww	.byte	0
-hh	.byte	0
+srcwidth	.byte	0
+srcheight	.byte	0
 nextline	.byte	0
 oldu	.word	0
 
 _blit
-	stu	restoreu+1	* hold U
-*	pshs	u	* hold U
-	ldu	NODE2,s	* X points to NODE pointer
+	stu	restoreu+1	; hold U
+*	pshs	u	; hold U
+	ldu	NODE2,s	; X points to NODE pointer
 	
-	lda	XPOS+1,u	* find dest addr...
+	lda	XPOS+1,u	; find dest addr...
 	ldb	YPOS+1,u
-	lbsr	bltadr	* ...X will contain the dest addr
+	lbsr	bltadr	; ...X will contain the dest addr
 	
-	ldy	DATA,u	* Y points to source pixel data
+	ldy	DATA,u	; Y points to source pixel data
 
-	lda	WIDTH+1,u	* width of sprite
-	lsra		* divid by 2
-	sta	ww	* wcounter contains number of bytes, not pixels of a sprite line
-	lda	#$80	* TODO lda nextline
-	suba	ww
+	lda	WIDTH+1,u	; width of sprite
+	lsra		; divid by 2
+	sta	srcwidth	; wcounter contains number of bytes, not pixels of a sprite line
+	lda	#$80	; size in bytes for a full line on 256x192 mode
+	suba	srcwidth
 	sta	nextline
 	lda	HEIGHT+1,u
-	sta	hh
+	sta	srcheight
 
 	* loop setup
-	lda	nextline	* amount to move to next line
-	sta	blit2+1	* self mod 
-	lda	ww	* how many bytes the sprite has on a line
-	sta	blit3+1	* self mod the # bytes
+	lda	nextline	; amount to move to next line
+	sta	blit2+1	; self mod 
+	lda	srcwidth	; how many bytes the sprite has on a line
+	sta	blit3+1	; self mod the # bytes
 
 	* main loop
-loop	lda	,x	* get background byte
-	ldb	,y+	* get sprite byte
-	beq	short	* if transparent use full background
+loop	lda	,x	; get background byte
+	ldb	,y+	; get sprite byte
+	beq	short	; if transparent use full background
 	
-seeN1	bitb	#$F0	* test sprite left nibble
-	beq	tstR1	* of zero use background left nibble	
-	anda	#$0F	* if not zero, clear background left nibble
+seeN1	bitb	#$F0	; test sprite left nibble
+	beq	tstR1	; of zero use background left nibble	
+	anda	#$0F	; if not zero, clear background left nibble
 tstR1
-	bitb	#$0F	* test sprite right nibble
-	beq	doMix	* if zero, use background right nibble
-	anda	#$F0	* if not zero, clear background right nibble
+	bitb	#$0F	; test sprite right nibble
+	beq	doMix	; if zero, use background right nibble
+	anda	#$F0	; if not zero, clear background right nibble
 	
-doMix	pshs	b	* adding A&B regs together...
-	adda	,s+	* ...A=A+B
+doMix	pshs	b	; adding A&B regs together...
+	adda	,s+	; ...A=A+B
 
-short	sta	,x+	* update destination and its pointer
-ctrl	dec	ww	* last byte of source line?
-	bne	loop	* if not last byte, keep going
+short	sta	,x+	; update destination and its pointer
+ctrl	dec	srcwidth	; last byte of source line?
+	bne	loop	; if not last byte, keep going
 
-blit2	ldb	#00	* how much to add to point to next line...
-	abx		* ...X now points to begining of next line
-	dec	hh
-	beq	doneLines	* if we have no more lines
-blit3	ldb	#00	* how many bytes the sprite has on a line
-	stb	ww
+blit2	ldb	#00	; how much to add to point to next line...
+	abx		; ...X now points to begining of next line
+	dec	srcheight
+	beq	doneLines	; if we have no more lines
+blit3	ldb	#00	; how many bytes the sprite has on a line
+	stb	srcwidth
 	bra	loop
 
 doneLines	
-*	puls	u	* restore U
-restoreu	ldu	#0000	* restore U
+*	puls	u	; restore U
+restoreu	ldu	#0000	; restore U
 	rts
 
-xx	.byte	0
-yy	.byte	0
-blit
-	pshs	u	* setup to use U as function param stack
-	leau	,s
-	
-	ldx	NODE,u	* point to the node
-	
-	* push x,y,w,y to stack for printf call	
-	ldd	HEIGHT,x
-	pshs	d
-	ldd	WIDTH,x
-	std	xx
-	pshs	d
-	ldd	YPOS,x
-	pshs	d
-	ldd	XPOS,x
-	pshs	d
-	pshs	x	* load NODE addr
-	
-	leax	msgNode,pcr	* x points to "NODE=..."
-	pshs	x
-	
-	lbsr	_printf
-	leas	10,s
 
-	* show xx	
-	ldd	xx
-	pshs	d
-	leax	msgXX,pcr	
-	pshs	x
-	lbsr	_printf
-	leas	4,s
+*******************************************************************************
+* Copy the rect from NODE image to the active display page.
+* void blitsheet(NODE* n,int x,int y,int w,int h);
+* x,y - starting position in the NODE
+* w,h - size of what gets blitted
+*******************************************************************************
+XPARAM	equ	4
+YPARAM	equ	6
+WPARAM	equ	8
+HPARAM	equ	10
+
+srclinewidth	.byte	0
+destw	.byte	0
+desth	.byte	0
+
+_blitsheet	stu	blitsheetu+1	* hold U
+	ldu	NODE2,s	; X points to NODE pointer
 	
-	leas	,u
-	puls	u,pc	* pop u and return
+	lda	XPOS+1,u	; find dest addr...
+	ldb	YPOS+1,u
+	lbsr	bltadr	; ...X now points to dest address
 	
+	lda	WIDTH+1,u	; width of sprite
+	lsra		; divid by 2
+	sta	srcwidth	; wcounter contains number of bytes, not pixels of a sprite line
+	lda	#$80	; size in bytes for a full line on 256x192 mode	
+	suba	srcwidth
+	sta	nextline	
+	lda	HEIGHT+1,u
+	sta	srcheight
+	
+	
+blitsheetu	ldu	#0000	; restore U
 	
 	endsection
 	
 	section 	rodata
-msgNode	fcc	"NODE=%04X X=%d Y=%d W=%d H=%d"
-	fcb	$0a
-	fcb	0	
-msgXX	fcc	"XX=%d"
-	fcb	$0a
-	fcb	0	
 	endsection	
 	
