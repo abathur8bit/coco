@@ -54,14 +54,14 @@ void wait() {
 //27fps
 void testblit()
 {
-    printf("READY?");
-    wait();
+    //printf("READY?");
+    //wait();
     initgfx();
     setHighSpeed(1);
 
 
     setPage(0);
-    pattern2();
+    //pattern2();
     //rect(0,0,256,192);
 
     setPage(1);
@@ -106,15 +106,30 @@ void test1()
     //blit(&cool);
 }
 
+void test6309() {
+    byte cpu = is6309();
+    if(cpu)
+        printf("6309\n");
+    else
+        printf("6809\n");
+    
+    cpu = native6309();
+    if(cpu)
+        printf("In native 6309 mode\n");
+    else
+        printf("Not able to switch to 6309 mode\n");
+}
+
 int main() {
     initCoCoSupport();
-    if(!isCoCo3) {
-        printf("You need to be running on a Coco 3.\n");
+    if(!isCoCo3 || !is6309()) {
+        printf("NEED A COCO3 AND 6309 CPU.\n");
     }
     
 
     //test1();
     testblit();
+    //test6309();
     
     return 0;	
 }

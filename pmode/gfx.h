@@ -99,4 +99,7 @@ void blitclr(void* image,int x,int y,int width,int height,int color); //blit an 
 void blitrect(NODE* src,NODE* dest,int x,int y,int width,int height,int srcx,int srcy);
 void tblitrect(NODE* image,int x,int y,int width,int height,int srcx,int srcy);
 
+byte is6309();      //test if CPU is a 6309
+byte native6309();  //swtich to native mode on a 6309
+
 #endif
