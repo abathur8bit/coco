@@ -14,6 +14,13 @@ VRES_REG        equ     $FF99
 start           sta         	$ffd9
                 lbsr        	_initGraphics
 
+	
+	; clear screen
+	ldd	#$FFFF
+	pshs	d
+	lbsr	_clearScreen
+	puls	d
+
 	setmmupage2
 	
 	; clear screen

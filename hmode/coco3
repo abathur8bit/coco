@@ -1,0 +1,31 @@
+#!/bin/bash
+SIZE=1024x768
+#SIZE=640x480
+
+if [ $1 == '--help' ]; then
+    echo "Usage  : coco3 [diskimage [loadm]] [-d]"
+    echo "  -d = Start with debugger"
+    echo "Example: coco3"
+    echo "Example: coco3 messwork.dsk"
+    echo "Example: coco3 messwork.dsk hello"
+    echo "You can also use coco3 \`pwd\'/hello.dsk"
+    exit
+fi
+
+if [ $# == 0 ]; then
+   mame64 -window -waitvsync -resolution $SIZE -natural -cfg_directory ~/coco -biospath ~/roms coco3h
+fi
+
+if [ $# == 1 ]; then
+#    echo disk=$1
+    mame64      -window -waitvsync -resolution $SIZE -natural -cfg_directory ~/coco -biospath ~/roms coco3 -flop1 $1
+fi
+
+if [ $# == 2 ]; then
+#    echo disk=$1
+	mame64 -window -waitvsync -resolution $SIZE -natural -cfg_directory ~/coco -biospath ~/roms coco3 -flop1 $1 -autoboot_delay 1 -autoboot_command "LOADM\"$2\":EXEC\n"
+fi
+if [ $# == 3 ]; then
+	mame64 -debug -window -waitvsync -resolution $SIZE -natural -cfg_directory ~/coco -biospath ~/roms coco3 -flop1 $1 -autoboot_delay 1 -autoboot_command "LOADM\"$2\":EXEC\n"
+fi
+

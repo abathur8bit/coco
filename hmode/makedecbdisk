@@ -1,0 +1,14 @@
+#!/bin/bash
+# $@ - all command line params
+# $1 - first param
+# $# - number of command line params
+
+if [ $# == 0 ]; then
+	echo "Usage makedecbdisk filename"
+	echo "Creates an empty DECB disk image named filename.dsk."
+	echo "Example: makedecbdisk bouncy.dsk"
+	exit
+fi
+
+perl -e 'print chr(255) x (35*18*256)' > $1.dsk
+echo Created $1.dsk

@@ -59,8 +59,10 @@ int main() {
 
 
     while (1) {
-        showPage(0);
-        showPage(1);
+//        showPage(0);
+//        showPage(1);
+        showpage1();
+        showpage2();
     }
 
     burnAddr(0x8003);
