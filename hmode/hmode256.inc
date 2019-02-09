@@ -13,6 +13,7 @@ setpixel	macro
 	ldd	\1
 	pshs	d
 	lbsr	_setPixel
+	leas	6,s
 	endm
 
 hline	macro
@@ -25,6 +26,7 @@ hline	macro
 	ldd	\1
 	pshs	d
 	lbsr	_hline
+	leas	8,s
 	endm
 
 *******************************************************************************
