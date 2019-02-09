@@ -7,7 +7,7 @@
 #include "gfx.h"
 
 void textout(int x,int y,char* s);
-void numberout(int x,int y,char* s);
+void numberout(unsigned char* font,int x,int y,char* s);
 unsigned short timerVal();
 void setTimerVal(word);
 
@@ -33,9 +33,10 @@ int main() {
     if(!isCoCo3) {
         printf("You need to be running on a Coco 3.\n");
     }
-    
-
-    
+    char* snum = "123";
+    printf("snum addr=%d\n",snum);
+    numberout((unsigned char*)0xf00d,10,20,snum);
+    /*
     initgfx();
     //pattern();
     //hline(0,8,10*8,WHITE);
@@ -67,15 +68,15 @@ int main() {
     int ox[2] = {x,x};
     int oy[2] = {y,y};
     
-    while(frames<600) {   
+    while(frames<400) {   
+    //while(1) {
         setPage(page);      //set active page
-        //*p = timerVal();
+        // *p = timerVal();
         
         //erase old image
         setColor(DARK_GREEN);
         bar(ox[page],oy[page],w,8);
         //setPixel(ox[page],oy[page],DARK_GREEN);
-        bar(1,1,100,8); //erase fps
 
         //move to new locaton
         x += xv;
@@ -124,13 +125,11 @@ int main() {
     clearScreen(NUCLEAR_GREEN);
     setColor(BLACK);
     rect(0,0,255,191);
-    now = timerVal()/60;
-    sprintf(msg,"%d",frames);
+    now = timerVal();
+    sprintf(msg,"%d %d %d",frames,now,frames/(now/60));
     numberout(10,10,msg);
-    sprintf(msg,"%d",now);
-    numberout(10,18,msg);
     
     infinate();
-    
+    */    
     return 0;	
 }

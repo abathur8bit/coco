@@ -15,6 +15,13 @@
 * position, and W is the width of the screen.
 *
 
+printm		macro		; define the macro
+		pshs	d,x,y,u
+		ldx	\1
+		jsr	print
+		puls	u,y,x,b,a
+		endm
+
 *******************************************************************************
 * Waits for keyboard to be pressed
 *******************************************************************************
@@ -71,23 +78,23 @@ cursoraddr	ldu	#scrn_addr		;screen address
 * Display a null terminated string using the stdout hook.
 * Modifies A,X. Maybe others in teh CHROUT BASIC routine.
 *******************************************************************************
-print		lda	,x+			;grab a character from string
+print	lda	,x+		;grab a character from string
                 beq	doneloop@		;null at end of string?
                 jsr	[cbchrout]		;print char using stdout hook
-                bra	print			;keep printing
-doneloop@	rts				;return to caller
+                bra	print		;keep printing
+doneloop@	rts			;return to caller
 
 cbprintstring	jsr	$b99c
-		rts
+	rts
 		
 *******************************************************************************
 * Display 2's complement number in D.
 * All registers are saved and restored
 *******************************************************************************
 printnum	pshs	u,y,x,d
-		jsr	cbprintnum
-		puls	d,x,y,u
-		rts
+	jsr	cbprintnum
+	puls	d,x,y,u
+	rts
 
 
 *******************************************************************************

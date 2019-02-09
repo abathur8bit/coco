@@ -17,12 +17,6 @@
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU General Public License for more details.
 *
-printm		macro		; define the macro
-		pshs	d,x,y,u
-		ldx	\1
-		jsr	print
-		puls	u,y,x,b,a
-		endm
 
 		
 ;Note that cleard is a cycle slower then `ldd #0` but it clears the carry flag.
@@ -244,7 +238,7 @@ placehuman
 		sta	,u
 		
 placemines	
-		ldy	#10			;loop counter for the specified number of mines
+		ldy	#minesMax		;loop counter for the specified number of mines
 		lda	#mine
 		jsr	placeitems
 				
@@ -735,6 +729,7 @@ robotxy		fcb	11,22,33,44,55,66,77,88	;	rmb robots_max*2
 
 field_width	equ	32
 field_height	equ	14
+minesMax	equ	20
 minefield	rmb	field_width*field_height
 
 endgameflag	fcb	0

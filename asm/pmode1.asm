@@ -91,7 +91,7 @@ pclsp1	sta	,x+
 	
 pclsp2	sta	,x+
 	cmpx	#page2+pgsize	* clear 2 pages
-	bne	pclsp1
+	bne	pclsp2
 	rts
 
 ********************************
@@ -143,6 +143,8 @@ pset99	rts
 ********************************
 * Calculate Pixel Address that xpos and ypos point to. The return is the address you will be storing
 * your pixel to, and the number of bits you need to shift to be in the right spot in the byte.
+*
+* See PixelAddr04 page 92
 *
 *  A  : xpos
 *  B  : ypos
