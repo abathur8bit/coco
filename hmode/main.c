@@ -9,32 +9,26 @@
 void initCoCoSupport();
 extern byte isCoCo3;
 
-
-void waitit(void);
-
 word setupTimerIRQ();
 word timerVal();
+
+
 
 //just change a pixel value so you know the program didn't crash, but you want an infinate loop
 void burnAddr(byte* addr) {
     unsigned short *p = 0x8000;
     while(1) {
         *p = timerVal();
-//        for(byte i=0; i<=255; i++) {
-//            *addr = i;    //same color on both pixels
-//        }
     }
 }
 
 
-void waitit(void) {
-    while(!inkey()) {}
-}
 
 void hold() {
     word timer = timerVal()+60;
     while(timerVal() < timer) {}
 }
+
 
 
 int main() {
@@ -47,26 +41,21 @@ int main() {
     initGraphics();
 
     setPage(0);
-    clearScreen(LIGHT_RED);
-    setPixel(200, 96, BLACK);
+    clearScreen(DARK_BLUE);
+    setPixel(64,48,WHITE);
 
     setPage(1);
     clearScreen(DARK_RED);
-    setPixel(10,10,BLACK);
+    setPixel(192,144,WHITE);
 
     defaultColors();
 
-
-
     while (1) {
-//        showPage(0);
-//        showPage(1);
         showpage1();
+        hold();
         showpage2();
+        hold();
     }
 
-    burnAddr(0x8003);
-
     return 0;
-
 }

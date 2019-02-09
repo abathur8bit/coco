@@ -1,3 +1,6 @@
+*******************************************************************************
+* Main Assembly test program 
+*******************************************************************************
 VOFFSET         equ     $FF9D
 HVEN            equ     $FF9F
 HIGHSPEED       equ     $FFD9
@@ -11,34 +14,45 @@ VRES_REG        equ     $FF99
 
                 section         code
 
-start           sta             $ffd9
-                lbsr            _initGraphics
+start           sta             $ffd9	; high speed poke
+                lbsr            _initGraphics	; init timer and graphics mode
 
-                
                 ; clear screen
-                ldd             #$FFFF
+                ldd             #$FFFF	; color
                 pshs            d
                 lbsr            _clearScreen
-                puls            d
+                leas	2,s	; pop reg
 
-                setmmupage2
+                setpixel        #64,#48,#10	; draw pixel at x,y,color
+
+
+
+                setmmupage2		; set active page 2
                 
                 ; clear screen
-                ldd             #0
+                ldd             #0	; color 
                 pshs            d
                 lbsr            _clearScreen
-                puls            d
+                leas	2,s	; pop reg
 
-                setpixel        #96,#60,#2
-                setpixel        #128,#96,#2
-                
-                setmmupage1
-                setpixel        #10,#10,#10
+                setpixel        #192,#144,#2	; draw a pixel at x,y,color
+
+
                 
 l1              
                 setpage2
+                jsr             shortdelay
                 setpage1
-                jmp             l1
+                jsr             shortdelay
+                bra             l1
+                
+                
+shortdelay      ldd             #0
+                std             timer           ; reset the timer to 0
+checktimer      ldd             timer           ; load what the timer value is 
+                cmpd            #60             ; 
+                ble             checktimer      ; if <= 60 keep looping
+                rts
                 
 endless         jmp             endless
 

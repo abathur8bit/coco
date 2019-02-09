@@ -4,6 +4,8 @@ _setPixel	IMPORT
 _hline	IMPORT
 pixadr	import
 bltadr	import
+_setTimerVal	import
+timer	import
 
 setpixel	macro
 	ldd	\3
