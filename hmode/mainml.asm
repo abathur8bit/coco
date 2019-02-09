@@ -40,9 +40,9 @@ start           sta             $ffd9	; high speed poke
 
                 
 l1              
-                setpage2
-                jsr             shortdelay
                 setpage1
+                jsr             shortdelay
+                setpage2
                 jsr             shortdelay
                 bra             l1
                 
