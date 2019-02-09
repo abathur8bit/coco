@@ -25,5 +25,5 @@ writecocofile -b hmode.dsk mainml.bin
 
 
 echo Running
-# You can pass in the program to auto run, like ""./coco3 hmode.dsk main" to run the main test.
+# You can pass in the program to auto run, like "./coco3 hmode.dsk main" to run the main test.
 ./coco3 hmode.dsk $1 $2
