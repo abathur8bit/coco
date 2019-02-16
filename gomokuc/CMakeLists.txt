@@ -3,4 +3,4 @@ project(gomokuc C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(gomokuc main.c)
+add_executable(gomokuc gomoku.c)
