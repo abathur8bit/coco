@@ -14,7 +14,7 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="33f57f3c-afa9-46e2-9eea-aa43b7139c9a" name="Default Changelist" comment="">
+    <list default="true" id="33f57f3c-afa9-46e2-9eea-aa43b7139c9a" name="Default Changelist" comment="Game plays">
       <change afterPath="$PROJECT_DIR$/../hmode/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/main.c" afterDir="false" />
@@ -46,8 +46,8 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/main.c">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="300">
-                  <caret line="81" column="24" selection-start-line="81" selection-start-column="24" selection-end-line="81" selection-end-column="24" />
+                <state relative-caret-position="2900">
+                  <caret line="257" selection-start-line="257" selection-end-line="257" />
                   <folding>
                     <element signature="e#0#18#0" expanded="true" />
                     <element signature="e#938#956#0" expanded="true" />
@@ -86,8 +86,8 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/main.c">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="45">
-                  <caret line="350" selection-start-line="350" selection-end-line="350" />
+                <state relative-caret-position="30">
+                  <caret line="345" selection-start-line="345" selection-end-line="345" />
                   <folding>
                     <element signature="e#0#18#0" expanded="true" />
                   </folding>
@@ -235,7 +235,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Initial commit" />
-    <option name="LAST_COMMIT_MESSAGE" value="Initial commit" />
+    <MESSAGE value="Game plays" />
+    <option name="LAST_COMMIT_MESSAGE" value="Game plays" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/../../../../nconsole/src/cpp/nconsole.h">
@@ -288,8 +289,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="300">
-          <caret line="81" column="24" selection-start-line="81" selection-start-column="24" selection-end-line="81" selection-end-column="24" />
+        <state relative-caret-position="2900">
+          <caret line="257" selection-start-line="257" selection-end-line="257" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
             <element signature="e#938#956#0" expanded="true" />

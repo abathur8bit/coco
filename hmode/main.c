@@ -62,16 +62,18 @@ int main() {
     clearScreen(DARK_BLUE);
     setPixel(64,48,WHITE);
 
-    setPage(1);
-    clearScreen(DARK_RED);
-    setPixel(192,144,WHITE);
+    int x=0;
+    for(int y=0; y<192; y+=2) {
+        hline(x, y, 100, WHITE);
+        x+=5;
+        if(x>150) {
+            x=0;
+        }
+    }
 
     defaultColors();
 
     while (1) {
-        showpage1();
-        hold();
-        showpage2();
         hold();
     }
 

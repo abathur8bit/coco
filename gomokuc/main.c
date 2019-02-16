@@ -3,21 +3,21 @@
 #include <curses.h>
 #include <string.h>     //memset
 
-#define TIMEOUT_DELAY   250
+//#define TIMEOUT_DELAY   250
 #define TIMEOUT_BLOCK   -1
 //#define KEY_BACKSPACE   127
 //#define KEY_ENTER       10
-#define KEY_CR          13
+//#define KEY_CR          13
 
 typedef unsigned char byte;
 typedef unsigned short word;
-typedef byte BOOL;
+//typedef byte BOOL;
 
 #define TRUE 1
 #define FALSE 0
 
-#define STATUS_X    20
-#define STATUS_Y    0
+//#define STATUS_X    20
+//#define STATUS_Y    0
 #define MOVE_X      0
 #define MOVE_Y      13
 
@@ -48,9 +48,6 @@ int rnd(int min,int max);
 void humanMove();
 void computerMove();
 void showBoard();
-void showWinner(byte winner);
-byte checkColor(byte x);
-
 
 void initSystemSupport() {
 #ifdef _COCO_BASIC_

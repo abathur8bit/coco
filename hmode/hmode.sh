@@ -14,6 +14,7 @@ lwar -c libgfx256.a hmode256.o setpixel256.o line256.o gfx.o
 
 echo Building tests
 cmoc --org=3F00 main.c   -L. -lgfx256
+cmoc --org=3F00 pixpagec.c   -L. -lgfx256
 
 lwasm -3 -b -f obj -o mainml.o mainml.asm
 lwlink -o mainml.bin -b -f decb mainml.o hmode256.o setpixel256.o

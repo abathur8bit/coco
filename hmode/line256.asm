@@ -17,41 +17,60 @@
 * ******************************************************************************
 
 
-	include 	'hmode256.inc'
+	        include 	'hmode256.inc'
 	
-;_hline	export
+_hline	        export
+_vline          export
 
-	section 	code
+	        section 	code
+
 *******************************************************************************
 * void hline(int x,int y,int w,int c);
 * Draws a horizontal line from x,y, w pixels long.
-*
-* To make things faster, if the line starts at an even address, draw a pixel 
-* at the odd addr, then a line.
 *******************************************************************************
-linexpos	equ	3
-lineypos	equ	5
-linewidth	equ	7
-linecolor	equ	9
-_hline	lda	linexpos,s
-	; check if xpos is odd or even
-;	anda	#1	; if A is odd, A will be 0 and cc.z=1
-;	beq	a@	; A is even, we don't need to set the first pixel via setPixel
-	
-	ldb	lineypos,s
-	lbsr	pixadr	; find start address of line
-	ldb	linewidth,s	; put the width into U for counting
-	lda	linecolor,s	; line color in lower 4 bits, load into upper and lower
-	lsla		; move color up 4 bits
-	lsla
-	lsla
-	lsla
-	adda	linecolor,s	; load lower 4 bits with color
-a@	sta	,x+	; store color
-	decb		; 
-	decb		; B -= 2
-	bne	a@	; not done yet
-	
-	rts
-		
-	endsection
+linexpos	equ	        3
+lineypos	equ	        5
+linewidth	equ	        7
+linecolor	equ	        9
+_hline	        lda	        linexpos,s
+	        ldb	        lineypos,s
+	        lbsr	        pixadr	        ; find start address of line
+	        ldb	        linewidth,s	; put the width into U for counting
+	        lda	        linecolor,s	; line color in lower 4 bits, load into upper and lower
+	        lsla	        	        ; move color up 4 bits
+	        lsla
+	        lsla
+	        lsla
+	        adda	        linecolor,s	; load lower 4 bits with color
+a@	        sta	        ,x+	        ; store color
+	        decb	        	        ;
+	        decb	        	        ; B -= 2
+	        bne	        a@	        ; not done yet
+
+	        rts
+
+
+*******************************************************************************
+* void vline(int x,int y,int h,int c);
+* Draws a vertical line from x,y, h pixels high.
+*******************************************************************************
+lineheight	equ	        7
+_vline	        lda	        linexpos,s
+	        ldb	        lineypos,s
+	        lbsr	        pixadr	        ; find start address of line
+	        ldb	        lineheight,s	; put the width into U for counting
+	        lda	        linecolor,s	; line color in lower 4 bits, load into upper and lower
+	        lsla	        	        ; move color up 4 bits
+	        lsla
+	        lsla
+	        lsla
+	        adda	        linecolor,s	; load lower 4 bits with color
+a@	        sta	        ,x+	        ; store color
+	        decb	        	        ;
+	        decb	        	        ; B -= 2
+	        bne	        a@	        ; not done yet
+
+	        rts
+
+
+	        endsection
