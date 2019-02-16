@@ -61,26 +61,25 @@ void initSystemSupport() {
 #endif
 }
 
-word readword() {
-    int maxbuff = 80;
-    int buffindex = 0;
-    char buff[maxbuff];
-    timeout(TIMEOUT_BLOCK); //wait for keypresses
-    int ch;
-    do {
+void deinitSystemSupport() {
+#ifndef _COCO_BASIC_
+    endwin();
+#endif
+}
+
+int readNumber() {
+    int ch = 0;
+    while(ch < '0' || ch > '9') {
         ch = getch();
-        if(ch == KEY_BACKSPACE) {
-            if(buffindex>0) {
-                buffindex--;
-            }
-        } else if(ch != KEY_ENTER && ch != KEY_CR) {
+    }
 
-            buff[buffindex] = ch;
-            buffindex++;
-        }
-    } while(ch != KEY_ENTER && ch != KEY_CR);
-//    timeout(TIMEOUT_DELAY); //back to normal
+    return ch-'0';
+}
 
+word readword() {
+    byte high = readNumber();
+    byte low = readNumber();
+    return high*10+low;
 }
 
 byte inkey() {return (byte)getch();}
@@ -146,10 +145,10 @@ void init()
         }
     }
 
-    printf("YOU WANT THE FIRST MOVE? (Y OR N) ");
+    printw("YOU WANT THE FIRST MOVE? (Y OR N) ");
     unsigned seed=1;
-    byte ch = getch();
-    while(ch != 'Y' && ch != 'N')
+    byte ch = inkey();
+    while(ch != 'Y' && ch != 'N' && ch != 'y' && ch != 'n')
     {
         ++seed;
         ch = inkey();
@@ -157,7 +156,7 @@ void init()
     //srand(seed);
 
     //make the computers first move if user doesn't want first move
-    if('Y' != ch)
+    if('Y' != ch && 'y' != ch)
     {
         aa[openingMove[rnd(0,9)]] = computer;
     }
@@ -170,13 +169,13 @@ void humanMove()
     while(g<12 || g > 89)
     {
         locate(MOVE_X,MOVE_Y);
-        printf("YOUR MOVE? ");
+        printw("YOUR MOVE? ");
         g = (byte)readword();
         g++;
         if(g < 12 || g > 89 || aa[g] != empty)
         {
             locate(MOVE_X,MOVE_Y+1);
-            printf("INVALID MOVE\n");
+            printw("INVALID MOVE\n");
         }
     }
     z = human;
@@ -186,15 +185,15 @@ void humanMove()
 
 void countSequence()
 {
-    //printf("CS start a=%d n=%d z=%d k=%d\n",a,n,z,k);
+    //printw("CS start a=%d n=%d z=%d k=%d\n",a,n,z,k);
     e = a;
     while(1)
     {
         e += n;
         if(aa[e] != z)
         {
-//            locate(20,15); printf("K=%d",k);
-//            locate(20,16); printf("E=%d",e);
+//            locate(20,15); printw("K=%d",k);
+//            locate(20,16); printw("E=%d",e);
             break;
         }
         k++;
@@ -207,7 +206,7 @@ void computerMove()
     a=g;
     l=0;
     locate(MOVE_X,MOVE_Y);
-    printf("MY MOVE...       ");
+    printw("MY MOVE...       ");
     for(byte x=1; x<=4; x++)
     {
         k = 0;
@@ -221,7 +220,7 @@ void computerMove()
 
     if(l>3)
     {
-        printf("YOU WIN\n");
+        printw("YOU WIN\n");
         playing = FALSE;
         return;
     }
@@ -274,7 +273,7 @@ void computerMove()
 
     if(h1 == 0)
     {
-//        printf("random move\n");
+//        printw("random move\n");
         a = 1;
         do
         {
@@ -282,7 +281,7 @@ void computerMove()
             a++;
             if(a > 100)
             {
-                printf("I CONCEDE THE GAME\n");
+                printw("I CONCEDE THE GAME\n");
                 playing = FALSE;
                 return;
             }
@@ -308,33 +307,44 @@ void computerMove()
 void showBoard()
 {
     locate(0,0);
-    printf("GOMOKU C\n\n");
-    printf("  1 2 3 4 5 6 7 8\n");
+    printw("GOMOKU C\n\n");
+    printw("  1 2 3 4 5 6 7 8\n");
     for(byte a=1; a<=8; a++)
     {
-        printf("%d ",a);
+        printw("%d ",a);
         for(byte b=2; b<=9; b++)
         {
             byte n = aa[a*10+b];
-            printf("%c ",n);
+            printw("%c ",n);
         }
-        printf("%d\n",a);
+        printw("%d\n",a);
     }
-    printf("  1 2 3 4 5 6 7 8\n");
+    printw("  1 2 3 4 5 6 7 8\n");
 }
 
 
 int main() {
-    int y=0;
-    initscr();
-    timeout(TIMEOUT_BLOCK);
-    int ch = 0;
-    while((ch = getch()) != 'q') {
-        clear();
-        move(y,10);
-        printw("Hello");
-        y++;
+    initSystemSupport();
+
+    init();
+    while(playing)
+    {
+        showBoard();
+        humanMove();
+        if(!playing)
+            break;
+        showBoard();
+        computerMove();
+        if(l>3)
+        {
+            showBoard();
+            printw("I WIN\n");
+            playing = FALSE;
+            getch();
+            break;
+        }
     }
-    endwin();
+
+    deinitSystemSupport();
     return 0;
 }

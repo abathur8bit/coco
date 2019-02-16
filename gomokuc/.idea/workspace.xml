@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="BookmarkManager">
-    <bookmark url="file://$PROJECT_DIR$/main.c" line="10" />
+    <bookmark url="file://$PROJECT_DIR$/main.c" line="3" />
   </component>
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
     <generated>
@@ -16,6 +16,8 @@
   <component name="ChangeListManager">
     <list default="true" id="33f57f3c-afa9-46e2-9eea-aa43b7139c9a" name="Default Changelist" comment="">
       <change afterPath="$PROJECT_DIR$/../hmode/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/main.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../hmode/hmode.sh" beforeDir="false" afterPath="$PROJECT_DIR$/../hmode/hmode.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../hmode/line256.asm" beforeDir="false" afterPath="$PROJECT_DIR$/../hmode/line256.asm" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../hmode/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/../hmode/main.c" afterDir="false" />
@@ -44,8 +46,8 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/main.c">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="510">
-                  <caret line="339" column="1" lean-forward="true" selection-start-line="339" selection-start-column="1" selection-end-line="339" selection-end-column="1" />
+                <state relative-caret-position="300">
+                  <caret line="81" column="24" selection-start-line="81" selection-start-column="24" selection-end-line="81" selection-end-column="24" />
                   <folding>
                     <element signature="e#0#18#0" expanded="true" />
                     <element signature="e#938#956#0" expanded="true" />
@@ -72,11 +74,11 @@
       </split-first>
       <split-second>
         <leaf>
-          <file pinned="false" current-in-tab="false">
+          <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/../../../../nconsole/src/cpp/nconsole.cpp">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="90">
-                  <caret line="6" selection-start-line="6" selection-end-line="6" />
+                <state relative-caret-position="206">
+                  <caret line="46" column="19" lean-forward="true" selection-start-line="46" selection-start-column="19" selection-end-line="46" selection-end-column="19" />
                 </state>
               </provider>
             </entry>
@@ -84,8 +86,8 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/main.c">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="165">
-                  <caret line="335" column="12" lean-forward="true" selection-start-line="335" selection-start-column="12" selection-end-line="335" selection-end-column="12" />
+                <state relative-caret-position="45">
+                  <caret line="350" selection-start-line="350" selection-end-line="350" />
                   <folding>
                     <element signature="e#0#18#0" expanded="true" />
                   </folding>
@@ -102,11 +104,11 @@
               </provider>
             </entry>
           </file>
-          <file pinned="false" current-in-tab="true">
+          <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/../basic/gomokuc.c">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="-3964">
-                  <caret line="7" selection-start-line="6" selection-end-line="7" />
+                <state relative-caret-position="395">
+                  <caret line="306" selection-start-line="290" selection-end-line="306" />
                 </state>
               </provider>
             </entry>
@@ -120,14 +122,16 @@
       <find>jint</find>
       <find>;</find>
       <find>humanmove</find>
-      <find>readword</find>
       <find>showcur</find>
       <find>cursoraddr</find>
       <find>inkey</find>
       <find>locate</find>
+      <find>printf</find>
+      <find>readword</find>
     </findStrings>
     <replaceStrings>
       <replace>int</replace>
+      <replace>printw</replace>
       <replace>{}</replace>
     </replaceStrings>
   </component>
@@ -203,7 +207,7 @@
     <frame x="0" y="23" width="1920" height="1057" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.13631523" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.2257721" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info active="true" anchor="bottom" id="Messages" visible="true" weight="0.32953367" />
@@ -219,7 +223,7 @@
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
       <window_info anchor="bottom" id="Version Control" order="10" />
       <window_info anchor="bottom" id="CMake" order="11" weight="0.32953367" />
-      <window_info anchor="right" x="0" y="0" width="430" height="857" id="Documentation" side_tool="true" weight="0.32960597" />
+      <window_info anchor="right" x="0" y="0" width="430" height="857" id="Documentation" side_tool="true" visible="true" weight="0.19009584" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -229,6 +233,10 @@
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
   </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Initial commit" />
+    <option name="LAST_COMMIT_MESSAGE" value="Initial commit" />
+  </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/../../../../nconsole/src/cpp/nconsole.h">
       <provider selected="true" editor-type-id="text-editor">
@@ -236,9 +244,6 @@
           <caret line="34" selection-start-line="9" selection-end-line="34" />
         </state>
       </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../../../../nconsole/src/cpp/nconsole.cpp">
-      <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/../../../../nconsole/CMakeLists.txt">
       <provider selected="true" editor-type-id="text-editor">
@@ -273,15 +278,18 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/../basic/gomokuc.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-3964">
-          <caret line="7" selection-start-line="6" selection-end-line="7" />
+        <state relative-caret-position="395">
+          <caret line="306" selection-start-line="290" selection-end-line="306" />
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/../../../../nconsole/src/cpp/nconsole.cpp">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
     <entry file="file://$PROJECT_DIR$/main.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="510">
-          <caret line="339" column="1" lean-forward="true" selection-start-line="339" selection-start-column="1" selection-end-line="339" selection-end-column="1" />
+        <state relative-caret-position="300">
+          <caret line="81" column="24" selection-start-line="81" selection-start-column="24" selection-end-line="81" selection-end-column="24" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
             <element signature="e#938#956#0" expanded="true" />
