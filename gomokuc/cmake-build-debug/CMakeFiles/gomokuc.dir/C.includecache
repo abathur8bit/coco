@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/lee/workspace/coco/github/coco/gomokuc/main.c
+stdio.h
+-
+stdlib.h
+-
+curses.h
+-
+string.h
+-
+
