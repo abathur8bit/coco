@@ -1,23 +1,32 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <curses.h>
-#include <string.h>     //memset
+#ifdef _COCO_BASIC_
 
-//#define TIMEOUT_DELAY   250
-#define TIMEOUT_BLOCK   -1
-//#define KEY_BACKSPACE   127
-//#define KEY_ENTER       10
-//#define KEY_CR          13
+#include "coco.h"
+#include "stdarg.h"
 
-typedef unsigned char byte;
-typedef unsigned short word;
-//typedef byte BOOL;
+#else
 
-#define TRUE 1
-#define FALSE 0
+    #include <stdarg.h>
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <curses.h>
+    #include <string.h>     //memset
 
-//#define STATUS_X    20
-//#define STATUS_Y    0
+    //#define USE_NCURSES
+    //#define TIMEOUT_DELAY   250
+    #define TIMEOUT_BLOCK   -1
+    //#define KEY_BACKSPACE   127
+    //#define KEY_ENTER       10
+    //#define KEY_CR          13
+
+    typedef unsigned char byte;
+    typedef unsigned short word;
+
+    #define TRUE 1
+    #define FALSE 0
+
+#endif
+
+
 #define MOVE_X      0
 #define MOVE_Y      13
 
@@ -52,42 +61,31 @@ void showBoard();
 void initSystemSupport() {
 #ifdef _COCO_BASIC_
     initCoCoSupport();
-#else
-    initscr();
-    timeout(TIMEOUT_BLOCK);
-#endif
-}
-
-void deinitSystemSupport() {
-#ifndef _COCO_BASIC_
-    endwin();
-#endif
-}
-
-int readNumber() {
-    int ch = 0;
-    while(ch < '0' || ch > '9') {
-        ch = getch();
+    if(isCoCo3) {
+        width(80);
     }
-
-    return ch-'0';
+#endif
 }
 
+//any system stuff for returning the system to a normal state
+void deinitSystemSupport() {}
+
+#ifndef _COCO_BASIC_
+//read a number
 word readword() {
-    byte high = readNumber();
-    byte low = readNumber();
-    return high*10+low;
+    int num;
+    scanf("%d",&num);
+    return (word)num;
 }
 
-byte inkey() {return (byte)getch();}
-
-void locate(int x,int y) {
-    move(y,x);
+//read a string
+char readlineBuffer[80];
+char* readline() {
+    memset(readlineBuffer,0,sizeof(readlineBuffer));
+    scanf("%s",readlineBuffer);
+    return readlineBuffer;
 }
-
-void cls(int color) {
-    clear();
-}
+#endif
 
 //Returns a number between min and max inclusive.
 //If min=1 and max=10 numbers returned would be 1 through 10
@@ -97,41 +95,8 @@ int rnd(int min,int max)
     return n;
 }
 
-//in 40 & 80 column mode, makes the cursor visible again.
-void showCursor()
-{
-//    for(byte i=0; i<sizeof cursoraddr; i++)
-//    {
-//        byte* addr = cursoraddr[i];
-//        *addr = 4;
-//    }
-}
-
-void hideCursor()
-{
-//    for(byte i=0; i<sizeof cursoraddr; i++)
-//    {
-//        byte* addr = cursoraddr[i];
-//        *addr = 0;
-//    }
-}
-
-//void cursorBlinkRate(byte rate)
-//{
-//    byte* addr = 0xF78C;
-//    *addr = rate;
-//}
-//
-//void resetCursorBlinkRate()
-//{
-//    byte* addr = 0xF787;
-//    *addr = 10;
-//    *(addr+1) = 148;
-//}
-//
 void init()
 {
-    cls(1);
     memset(aa,0,100);
 
     for(byte c=1; c<=8; c++)
@@ -142,18 +107,14 @@ void init()
         }
     }
 
-    printw("YOU WANT THE FIRST MOVE? (Y OR N) ");
+    printf("Gomoku\n");
+    printf("YOU WANT THE FIRST MOVE? (Y OR N) ");
+    char* s = readline();
     unsigned seed=1;
-    byte ch = inkey();
-    while(ch != 'Y' && ch != 'N' && ch != 'y' && ch != 'n')
-    {
-        ++seed;
-        ch = inkey();
-    }
-    //srand(seed);
+    srand(seed);
 
     //make the computers first move if user doesn't want first move
-    if('Y' != ch && 'y' != ch)
+    if('Y' != *s && 'y' != *s)
     {
         aa[openingMove[rnd(0,9)]] = computer;
     }
@@ -161,36 +122,30 @@ void init()
 
 void humanMove()
 {
-    showCursor();
     g = 0;
     while(g<12 || g > 89)
     {
-        locate(MOVE_X,MOVE_Y);
-        printw("YOUR MOVE? ");
+        printf("YOUR MOVE? ");
         g = (byte)readword();
         g++;
         if(g < 12 || g > 89 || aa[g] != empty)
         {
-            locate(MOVE_X,MOVE_Y+1);
-            printw("INVALID MOVE\n");
+            printf("INVALID MOVE\n");
         }
     }
     z = human;
     aa[g] = human;
-    hideCursor();
 }
 
 void countSequence()
 {
-    //printw("CS start a=%d n=%d z=%d k=%d\n",a,n,z,k);
+    //printf("CS start a=%d n=%d z=%d k=%d\n",a,n,z,k);
     e = a;
     while(1)
     {
         e += n;
         if(aa[e] != z)
         {
-//            locate(20,15); printw("K=%d",k);
-//            locate(20,16); printw("E=%d",e);
             break;
         }
         k++;
@@ -202,8 +157,7 @@ void computerMove()
 {
     a=g;
     l=0;
-    locate(MOVE_X,MOVE_Y);
-    printw("MY MOVE...       ");
+    printf("MY MOVE...       ");
     for(byte x=1; x<=4; x++)
     {
         k = 0;
@@ -217,7 +171,7 @@ void computerMove()
 
     if(l>3)
     {
-        printw("YOU WIN\n");
+        printf("YOU WIN\n");
         playing = FALSE;
         return;
     }
@@ -270,7 +224,7 @@ void computerMove()
 
     if(h1 == 0)
     {
-//        printw("random move\n");
+//        printf("random move\n");
         a = 1;
         do
         {
@@ -278,7 +232,7 @@ void computerMove()
             a++;
             if(a > 100)
             {
-                printw("I CONCEDE THE GAME\n");
+                printf("I CONCEDE THE GAME\n");
                 playing = FALSE;
                 return;
             }
@@ -303,25 +257,25 @@ void computerMove()
 
 void showBoard()
 {
-    locate(0,0);
-    printw("GOMOKU C\n\n");
-    printw("  1 2 3 4 5 6 7 8\n");
+    printf("\n\n");
+//    printf("GOMOKU C\n\n");
+    printf("  1 2 3 4 5 6 7 8\n");
     for(byte a=1; a<=8; a++)
     {
-        printw("%d ",a);
+        printf("%d ",a);
         for(byte b=2; b<=9; b++)
         {
             byte n = aa[a*10+b];
-            printw("%c ",n);
+            printf("%c ",n);
         }
-        printw("%d\n",a);
+        printf("%d\n",a);
     }
-    printw("  1 2 3 4 5 6 7 8\n");
+    printf("  1 2 3 4 5 6 7 8\n");
 }
 
 
 int main() {
-    initSystemSupport();
+    initSystemSupport();    //init the coco or ncurses
 
     init();
     while(playing)
@@ -335,13 +289,12 @@ int main() {
         if(l>3)
         {
             showBoard();
-            printw("I WIN\n");
+            printf("I WIN\n");
             playing = FALSE;
-            getch();
             break;
         }
     }
 
-    deinitSystemSupport();
+    deinitSystemSupport();  //endwin for ncurses
     return 0;
 }

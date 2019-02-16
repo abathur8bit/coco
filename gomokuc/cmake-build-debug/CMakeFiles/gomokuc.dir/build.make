@@ -79,8 +79,6 @@ gomokuc_EXTERNAL_OBJECTS =
 
 gomokuc: CMakeFiles/gomokuc.dir/main.c.o
 gomokuc: CMakeFiles/gomokuc.dir/build.make
-gomokuc: /usr/lib/libcurses.dylib
-gomokuc: /usr/lib/libform.dylib
 gomokuc: CMakeFiles/gomokuc.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/lee/workspace/coco/github/coco/gomokuc/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking C executable gomokuc"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/gomokuc.dir/link.txt --verbose=$(VERBOSE)

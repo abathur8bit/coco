@@ -7,6 +7,12 @@
 #IncludeRegexTransform: 
 
 /Users/lee/workspace/coco/github/coco/gomokuc/main.c
+coco.h
+/Users/lee/workspace/coco/github/coco/gomokuc/coco.h
+stdarg.h
+/Users/lee/workspace/coco/github/coco/gomokuc/stdarg.h
+stdarg.h
+-
 stdio.h
 -
 stdlib.h
