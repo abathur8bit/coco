@@ -1,3 +1,4 @@
+// page 34 of Giant book of computer games
 #ifdef _COCO_BASIC_
 
 #include "coco.h"
@@ -5,51 +6,35 @@
 
 #else
 
-    #include <stdarg.h>
-    #include <stdio.h>
-    #include <stdlib.h>
-    #include <curses.h>
-    #include <string.h>     //memset
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <curses.h>
+#include <string.h>     //memset
 
-    //#define USE_NCURSES
-    //#define TIMEOUT_DELAY   250
-    #define TIMEOUT_BLOCK   -1
-    //#define KEY_BACKSPACE   127
-    //#define KEY_ENTER       10
-    //#define KEY_CR          13
+typedef unsigned char byte;
+typedef unsigned short word;
 
-    typedef unsigned char byte;
-    typedef unsigned short word;
-
-    #define TRUE 1
-    #define FALSE 0
+#define TRUE 1
+#define FALSE 0
 
 #endif
 
 
-#define MOVE_X      0
-#define MOVE_Y      13
+byte board[100];                                        //board
+byte direction[5] = {0,1,9,10,11};                      //move directions
+byte openingMove[] = {34,35,45,46,47,54,55,56,57,66};   //opening move board positions
 
+byte moveIndex=0;                                       //move index points to position in board
+byte sequenceCount=0;
+byte boardIndex=0;
+byte currentDirection=0;
+byte currentPiece=0;                                    //humans last move
+byte longestSequence=0;
 
-byte aa[100];
-byte xx[5] = {0,1,9,10,11};
-byte openingMove[] = {34,35,45,46,47,54,55,56,57,66};
-
-byte g=0;   //last player move?
-byte k=0;
-byte e=0;
-byte a=0;
-byte n=0;
-byte z=0;
-byte l=0;
-byte t=0;
-byte h1=0;
-byte x=0;
-byte m=0;
-
-byte empty = '.';
-byte human = 'H';
-byte computer = 'C';
+byte empty = '.';                                       //board piece
+byte human = 'H';                                       //board piece
+byte computer = 'C';                                    //board piece
 
 byte playing = TRUE;
 
@@ -67,18 +52,18 @@ void initSystemSupport() {
 #endif
 }
 
-//any system stuff for returning the system to a normal state
+//any system stuff for returning the system to boardIndex normal state
 void deinitSystemSupport() {}
 
 #ifndef _COCO_BASIC_
-//read a number
+//read boardIndex number
 word readword() {
     int num;
     scanf("%d",&num);
     return (word)num;
 }
 
-//read a string
+//read boardIndex string
 char readlineBuffer[80];
 char* readline() {
     memset(readlineBuffer,0,sizeof(readlineBuffer));
@@ -87,7 +72,7 @@ char* readline() {
 }
 #endif
 
-//Returns a number between min and max inclusive.
+//Returns boardIndex number between min and max inclusive.
 //If min=1 and max=10 numbers returned would be 1 through 10
 int rnd(int min,int max)
 {
@@ -97,18 +82,18 @@ int rnd(int min,int max)
 
 void init()
 {
-    memset(aa,0,100);
+    memset(board,0,100);
 
     for(byte c=1; c<=8; c++)
     {
         for(byte b=2; b<=9; b++)
         {
-            aa[c*10+b]=empty;
+            board[c*10+b]=empty;
         }
     }
 
     printf("Gomoku\n");
-    printf("YOU WANT THE FIRST MOVE? (Y OR N) ");
+    printf("YOU WANT THE FIRST MOVE? (Y OR N)\n");
     char* s = readline();
     unsigned seed=1;
     srand(seed);
@@ -116,104 +101,108 @@ void init()
     //make the computers first move if user doesn't want first move
     if('Y' != *s && 'y' != *s)
     {
-        aa[openingMove[rnd(0,9)]] = computer;
+        board[openingMove[rnd(0,9)]] = computer;
     }
 }
 
 void humanMove()
 {
-    g = 0;
-    while(g<12 || g > 89)
+    moveIndex = 0;
+    while(moveIndex<12 || moveIndex > 89)
     {
-        printf("YOUR MOVE? ");
-        g = (byte)readword();
-        g++;
-        if(g < 12 || g > 89 || aa[g] != empty)
+        printf("YOUR MOVE? \n");
+        moveIndex = (byte)readword();
+        moveIndex++;
+        if(moveIndex < 12 || moveIndex > 89 || board[moveIndex] != empty)
         {
             printf("INVALID MOVE\n");
         }
     }
-    z = human;
-    aa[g] = human;
+    currentPiece = human;
+    board[moveIndex] = human;
 }
 
 void countSequence()
 {
-    //printf("CS start a=%d n=%d z=%d k=%d\n",a,n,z,k);
-    e = a;
+    byte i = boardIndex;
     while(1)
     {
-        e += n;
-        if(aa[e] != z)
+        i += currentDirection;
+        if(board[i] != currentPiece)
         {
             break;
         }
-        k++;
+        sequenceCount++;
     }
 }
 
-//g is the last move the human made
+//moveIndex is the last move the human made
 void computerMove()
 {
-    a=g;
-    l=0;
-    printf("MY MOVE...       ");
+    boardIndex = moveIndex;        //boardIndex is the index the player just entered, and is used in count sequence,
+    longestSequence=0;        //longest sequence
+    printf("MY MOVE...\n");
+
+    //look for the longest sequence
     for(byte x=1; x<=4; x++)
     {
-        k = 0;
-        n = xx[x];
+        sequenceCount = 0;
+        currentDirection = direction[x];
+        countSequence();    //sequence stored in sequenceCount
+        currentDirection = -currentDirection;
         countSequence();
-        n = -n;
-        countSequence();
-        if(k>l)
-            l=k;
+        if(sequenceCount > longestSequence)
+            longestSequence = sequenceCount;
     }
 
-    if(l>3)
+    if(longestSequence>3)
     {
         printf("YOU WIN\n");
         playing = FALSE;
         return;
     }
 
-    t=1;
+    int t=1;
+    int h1;
+    int m;
+    int x;
     while(t != 4)
     {
         if(t != 2)
-            z = computer;
+            currentPiece = computer;
         if(t == 2)
-            z = human;
+            currentPiece = human;
 
-        g = 0;
+        moveIndex = 0;
         h1 = 0;
-        l = 0;
-        for(a=12; a<=89; a++)
+        longestSequence = 0;
+        for(boardIndex=12; boardIndex<=89; boardIndex++)
         {
             m = 0;
-            if(aa[a] == 46)     //460 IF A(A)<>46 THEN 570
+            if(board[boardIndex] == 46)     //460 IF A(A)<>46 THEN 570
             {
                 for(x=1; x<=4; x++)
                 {
-                    k = 0;
-                    n = xx[x];
+                    sequenceCount = 0;
+                    currentDirection = direction[x];
                     countSequence();
-                    n = -n;
+                    currentDirection = -currentDirection;
                     countSequence();
-                    if(k > l)
+                    if(sequenceCount > longestSequence)
                     {
                         h1 = 0;
-                        l = k;
+                        longestSequence = sequenceCount;
                     }
-                    if(l != k)
+                    if(longestSequence != sequenceCount)
                         continue;   //next loop iteration
-                    if(t==1 && l<4 || (t==2 || t==3) && l<2)
+                    if(t==1 && longestSequence<4 || (t==2 || t==3) && longestSequence<2)
                         continue;   //next loop iteration
                     m++;
                 }
                 if(m > h1)  //550 IF M<=H1 THEN 570
                 {
                     h1 = m;
-                    g = a;
+                    moveIndex = boardIndex;
                 }
             }
         }
@@ -224,48 +213,48 @@ void computerMove()
 
     if(h1 == 0)
     {
-//        printf("random move\n");
-        a = 1;
+//        printf("random move\currentDirection");
+        boardIndex = 1;
         do
         {
-            g = (byte)rnd(13,77); //610 G=INT(RND*77)+13
-            a++;
-            if(a > 100)
+            moveIndex = (byte)rnd(13,77); //610 G=INT(RND*77)+13
+            boardIndex++;
+            if(boardIndex > 100)
             {
                 printf("I CONCEDE THE GAME\n");
                 playing = FALSE;
                 return;
             }
-        } while(aa[g] != 46);
+        } while(board[moveIndex] != 46);
     }
 
-    aa[g] = computer;
-    z = computer;
-    a = g;
-    l = 0;
+    board[moveIndex] = computer;
+    currentPiece = computer;
+    boardIndex = moveIndex;
+    longestSequence = 0;
     for(x=1; x<=4; x++)
     {
-        k = 0;
-        n = xx[x];
+        sequenceCount = 0;
+        currentDirection = direction[x];
         countSequence();
-        n = -n;
+        currentDirection = -currentDirection;
         countSequence();
-        if(k > l)
-            l = k;
+        if(sequenceCount > longestSequence)
+            longestSequence = sequenceCount;
     }
 }
 
 void showBoard()
 {
     printf("\n\n");
-//    printf("GOMOKU C\n\n");
+//    printf("GOMOKU C\currentDirection\currentDirection");
     printf("  1 2 3 4 5 6 7 8\n");
     for(byte a=1; a<=8; a++)
     {
         printf("%d ",a);
         for(byte b=2; b<=9; b++)
         {
-            byte n = aa[a*10+b];
+            byte n = board[a*10+b];
             printf("%c ",n);
         }
         printf("%d\n",a);
@@ -286,7 +275,7 @@ int main() {
             break;
         showBoard();
         computerMove();
-        if(l>3)
+        if(longestSequence>3)
         {
             showBoard();
             printf("I WIN\n");
