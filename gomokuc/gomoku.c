@@ -153,7 +153,7 @@ byte computerMove()
     {
         currentDirection = direction[x];
         sequenceCount = countSequence(currentDirection,currentPiece,boardIndex);    //set the sequence count
-        currentDirection = -currentDirection;
+        currentDirection = (byte) -currentDirection;                                //casting to byte to eliminate compiler warning
         sequenceCount += countSequence(currentDirection,currentPiece,boardIndex);   //add to the sequence
 
         if(sequenceCount > longestSequence)
@@ -166,7 +166,7 @@ byte computerMove()
     }
 
     int t=1;
-    int h1;
+    int h1 = 0;
     int m;
     int x;
     while(t != 4)
@@ -188,7 +188,7 @@ byte computerMove()
                 {
                     currentDirection = direction[x];
                     sequenceCount = countSequence(currentDirection,currentPiece,boardIndex);    //set the sequence count
-                    currentDirection = (byte) -currentDirection;
+                    currentDirection = (byte) -currentDirection;                                //casting to byte to eliminate compiler warning
                     sequenceCount += countSequence(currentDirection,currentPiece,boardIndex);   //add to the sequence
 
                     if(sequenceCount > longestSequence)
@@ -239,7 +239,7 @@ byte computerMove()
     {
         currentDirection = direction[x];
         sequenceCount = countSequence(currentDirection,currentPiece,boardIndex);    //set the sequence count
-        currentDirection = (byte) -currentDirection;
+        currentDirection = (byte) -currentDirection;                                //casting to byte to eliminate compiler warning
         sequenceCount += countSequence(currentDirection,currentPiece,boardIndex);   //add to the sequence
         if(sequenceCount > longestSequence)
             longestSequence = sequenceCount;
