@@ -26,11 +26,11 @@ byte direction[5] = {0,1,9,10,11};                      //move directions
 byte openingMove[] = {34,35,45,46,47,54,55,56,57,66};   //opening move board positions
 
 byte moveIndex=0;                                       //move index points to position in board
-byte sequenceCount=0;
-byte boardIndex=0;
-byte currentDirection=0;
+//byte sequenceCount=0;
+//byte boardIndex=0;
+//byte currentDirection=0;
 byte currentPiece=0;                                    //humans last move
-byte longestSequence=0;
+//byte longestSequence=0;
 
 byte empty = '.';                                       //board piece
 byte human = 'H';                                       //board piece
@@ -40,7 +40,7 @@ byte playing = TRUE;
 
 int rnd(int min,int max);
 void humanMove();
-void computerMove();
+byte computerMove();
 void showBoard();
 
 void initSystemSupport() {
@@ -122,44 +122,47 @@ void humanMove()
     board[moveIndex] = human;
 }
 
-void countSequence()
+byte countSequence(byte direction,byte piece,byte startIndex)
 {
-    byte i = boardIndex;
+    byte sequenceCount = 0;
+    byte i = startIndex;
     while(1)
     {
-        i += currentDirection;
-        if(board[i] != currentPiece)
+        i += direction;
+        if(board[i] != piece)
         {
             break;
         }
         sequenceCount++;
     }
+    return sequenceCount;
 }
 
 //moveIndex is the last move the human made
-void computerMove()
+byte computerMove()
 {
-    boardIndex = moveIndex;        //boardIndex is the index the player just entered, and is used in count sequence,
-    longestSequence=0;        //longest sequence
+    byte boardIndex = moveIndex;        //boardIndex is the index the player just entered, and is used in count sequence,
+    byte longestSequence=0;             //longest sequence
+    byte sequenceCount = 0;
+    byte currentDirection = 0;
+
     printf("MY MOVE...\n");
 
     //look for the longest sequence
     for(byte x=1; x<=4; x++)
     {
-        sequenceCount = 0;
         currentDirection = direction[x];
-        countSequence();    //sequence stored in sequenceCount
+        sequenceCount = countSequence(currentDirection,currentPiece,boardIndex);    //set the sequence count
         currentDirection = -currentDirection;
-        countSequence();
+        sequenceCount += countSequence(currentDirection,currentPiece,boardIndex);   //add to the sequence
+
         if(sequenceCount > longestSequence)
             longestSequence = sequenceCount;
     }
 
     if(longestSequence>3)
     {
-        printf("YOU WIN\n");
-        playing = FALSE;
-        return;
+        return human;
     }
 
     int t=1;
@@ -183,16 +186,17 @@ void computerMove()
             {
                 for(x=1; x<=4; x++)
                 {
-                    sequenceCount = 0;
                     currentDirection = direction[x];
-                    countSequence();
-                    currentDirection = -currentDirection;
-                    countSequence();
+                    sequenceCount = countSequence(currentDirection,currentPiece,boardIndex);    //set the sequence count
+                    currentDirection = (byte) -currentDirection;
+                    sequenceCount += countSequence(currentDirection,currentPiece,boardIndex);   //add to the sequence
+
                     if(sequenceCount > longestSequence)
                     {
                         h1 = 0;
                         longestSequence = sequenceCount;
                     }
+
                     if(longestSequence != sequenceCount)
                         continue;   //next loop iteration
                     if(t==1 && longestSequence<4 || (t==2 || t==3) && longestSequence<2)
@@ -222,8 +226,7 @@ void computerMove()
             if(boardIndex > 100)
             {
                 printf("I CONCEDE THE GAME\n");
-                playing = FALSE;
-                return;
+                return human;
             }
         } while(board[moveIndex] != 46);
     }
@@ -234,14 +237,18 @@ void computerMove()
     longestSequence = 0;
     for(x=1; x<=4; x++)
     {
-        sequenceCount = 0;
         currentDirection = direction[x];
-        countSequence();
-        currentDirection = -currentDirection;
-        countSequence();
+        sequenceCount = countSequence(currentDirection,currentPiece,boardIndex);    //set the sequence count
+        currentDirection = (byte) -currentDirection;
+        sequenceCount += countSequence(currentDirection,currentPiece,boardIndex);   //add to the sequence
         if(sequenceCount > longestSequence)
             longestSequence = sequenceCount;
     }
+
+    if(longestSequence > 3)
+        return computer;
+
+    return 0;
 }
 
 void showBoard()
@@ -274,11 +281,17 @@ int main() {
         if(!playing)
             break;
         showBoard();
-        computerMove();
-        if(longestSequence>3)
+        byte winner = computerMove();
+        if(winner == computer)
         {
             showBoard();
             printf("I WIN\n");
+            playing = FALSE;
+            break;
+        }
+        else if (winner == human)
+        {
+            printf("YOU WIN\n");
             playing = FALSE;
             break;
         }
