@@ -11,17 +11,8 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="33f57f3c-afa9-46e2-9eea-aa43b7139c9a" name="Default Changelist" comment="made so it compiles and runs on any system.">
+    <list default="true" id="33f57f3c-afa9-46e2-9eea-aa43b7139c9a" name="Default Changelist" comment="fixed build warning">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/gomokuc.dir/C.includecache" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/gomokuc.dir/C.includecache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/gomokuc.dir/DependInfo.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/gomokuc.dir/DependInfo.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/gomokuc.dir/build.make" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/gomokuc.dir/build.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/gomokuc.dir/cmake_clean.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/gomokuc.dir/cmake_clean.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/gomokuc.dir/depend.internal" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/gomokuc.dir/depend.internal" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/gomokuc.dir/depend.make" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/gomokuc.dir/depend.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/gomokuc.dir/link.txt" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/gomokuc.dir/link.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/Makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/gomokuc.cbp" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/gomokuc.cbp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gomoku.c" beforeDir="false" afterPath="$PROJECT_DIR$/gomoku.c" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
@@ -39,8 +30,8 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/gomoku.c">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="102">
-                  <caret line="164" column="24" selection-start-line="164" selection-start-column="24" selection-end-line="164" selection-end-column="24" />
+                <state relative-caret-position="436">
+                  <caret line="282" column="20" lean-forward="true" selection-start-line="282" selection-start-column="20" selection-end-line="282" selection-end-column="20" />
                   <folding>
                     <element signature="e#1179#1240#0" expanded="true" />
                   </folding>
@@ -70,8 +61,8 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/gomoku.c">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="102">
-                  <caret line="150" column="22" selection-start-line="150" selection-start-column="22" selection-end-line="150" selection-end-column="22" />
+                <state relative-caret-position="179">
+                  <caret line="61" column="80" selection-start-line="61" selection-start-column="80" selection-end-line="61" selection-end-column="80" />
                   <folding>
                     <element signature="e#1179#1240#0" expanded="true" />
                   </folding>
@@ -103,6 +94,7 @@
       <find>board</find>
       <find>lastUsedPiece</find>
       <find>count</find>
+      <find>computermove</find>
     </findStrings>
     <replaceStrings>
       <replace>int</replace>
@@ -206,7 +198,31 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="2560" height="1417" extended-state="6" />
+    <editor active="true" />
     <layout>
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4974093" weight="0.22790202" />
+      <window_info id="Structure" order="1" sideWeight="0.50259066" side_tool="true" weight="0.22790202" />
+      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info id="Find" order="3" visible="true" weight="0.33762518" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info active="true" anchor="bottom" id="Run" order="1" visible="true" weight="0.34037736" />
+      <window_info anchor="bottom" id="Debug" order="2" weight="0.24145077" />
+      <window_info anchor="bottom" id="Cvs" order="3" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="4" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="5" />
+      <window_info anchor="bottom" id="Database Changes" order="6" />
+      <window_info anchor="bottom" id="Terminal" order="7" weight="0.3290566" />
+      <window_info anchor="bottom" id="Event Log" order="8" side_tool="true" />
+      <window_info anchor="bottom" id="Version Control" order="9" weight="0.32953367" />
+      <window_info anchor="bottom" id="CMake" order="10" weight="0.3290566" />
+      <window_info anchor="bottom" id="Messages" order="11" weight="0.4045283" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="Database" order="3" />
+      <window_info anchor="right" x="0" y="0" width="430" height="857" id="Documentation" order="4" side_tool="true" weight="0.19009584" />
+    </layout>
+    <layout-to-restore>
       <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4974093" weight="0.22790202" />
       <window_info id="Structure" order="1" sideWeight="0.50259066" side_tool="true" weight="0.22790202" />
       <window_info id="Favorites" order="2" side_tool="true" />
@@ -223,29 +239,6 @@
       <window_info anchor="bottom" id="Version Control" order="9" weight="0.32953367" />
       <window_info anchor="bottom" id="CMake" order="10" weight="0.32953367" />
       <window_info anchor="bottom" id="Messages" order="11" weight="0.40509555" />
-      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
-      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
-      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="right" id="Database" order="3" />
-      <window_info anchor="right" x="0" y="0" width="430" height="857" id="Documentation" order="4" side_tool="true" weight="0.19009584" />
-    </layout>
-    <layout-to-restore>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4974093" visible="true" weight="0.22790202" />
-      <window_info id="Structure" order="1" sideWeight="0.50259066" side_tool="true" visible="true" weight="0.22790202" />
-      <window_info id="Favorites" order="2" side_tool="true" />
-      <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.32953367" />
-      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.4" />
-      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Database Changes" order="7" />
-      <window_info anchor="bottom" id="Terminal" order="8" weight="0.32953367" />
-      <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
-      <window_info anchor="bottom" id="Version Control" order="10" weight="0.32953367" />
-      <window_info anchor="bottom" id="CMake" order="11" weight="0.32953367" />
-      <window_info anchor="bottom" id="Messages" order="12" weight="0.32953367" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -303,19 +296,22 @@
     <MESSAGE value="made so it compiles and runs on any system." />
     <MESSAGE value="refactoring project file" />
     <MESSAGE value="Refactoring to make variable names more readable." />
-    <option name="LAST_COMMIT_MESSAGE" value="Refactoring to make variable names more readable." />
+    <MESSAGE value="refactored build output" />
+    <MESSAGE value="refactored to get rid of some global variables, and handle win/loose better." />
+    <MESSAGE value="fixed build warning" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixed build warning" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/gomoku.c</url>
-          <line>156</line>
+          <line>143</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/gomoku.c</url>
-          <line>172</line>
+          <line>163</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
       </breakpoints>
@@ -432,8 +428,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/gomoku.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="102">
-          <caret line="150" column="22" selection-start-line="150" selection-start-column="22" selection-end-line="150" selection-end-column="22" />
+        <state relative-caret-position="179">
+          <caret line="61" column="80" selection-start-line="61" selection-start-column="80" selection-end-line="61" selection-end-column="80" />
           <folding>
             <element signature="e#1179#1240#0" expanded="true" />
           </folding>

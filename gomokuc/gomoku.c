@@ -59,7 +59,7 @@ void deinitSystemSupport() {}
 //read boardIndex number
 word readword() {
     int num;
-    scanf("%d",&num);
+    scanf("%d",&num);   //note that this does't handle if the user types letters
     return (word)num;
 }
 
@@ -199,7 +199,7 @@ byte computerMove()
 
                     if(longestSequence != sequenceCount)
                         continue;   //next loop iteration
-                    if(t==1 && longestSequence<4 || (t==2 || t==3) && longestSequence<2)
+                    if((t==1 && longestSequence<4) || ((t==2 || t==3) && longestSequence<2))
                         continue;   //next loop iteration
                     m++;
                 }
