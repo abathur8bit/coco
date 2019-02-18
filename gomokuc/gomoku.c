@@ -22,7 +22,7 @@ typedef unsigned short word;
 
 
 byte board[100];                                        //board
-byte direction[5] = {0,1,9,10,11};                      //move directions
+byte direction[4] = {1,9,10,11};                      //move directions
 byte openingMove[] = {34,35,45,46,47,54,55,56,57,66};   //opening move board positions
 
 byte moveIndex=0;                                       //move index points to position in board
@@ -149,7 +149,7 @@ byte computerMove()
     printf("MY MOVE...\n");
 
     //look for the longest sequence
-    for(byte x=1; x<=4; x++)
+    for(byte x=0; x<4; x++)
     {
         currentDirection = direction[x];
         sequenceCount = countSequence(currentDirection,currentPiece,boardIndex);    //set the sequence count
@@ -184,7 +184,7 @@ byte computerMove()
             m = 0;
             if(board[boardIndex] == 46)     //460 IF A(A)<>46 THEN 570
             {
-                for(x=1; x<=4; x++)
+                for(x=0; x<4; x++)
                 {
                     currentDirection = direction[x];
                     sequenceCount = countSequence(currentDirection,currentPiece,boardIndex);    //set the sequence count
@@ -235,7 +235,7 @@ byte computerMove()
     currentPiece = computer;
     boardIndex = moveIndex;
     longestSequence = 0;
-    for(x=1; x<=4; x++)
+    for(x=0; x<4; x++)
     {
         currentDirection = direction[x];
         sequenceCount = countSequence(currentDirection,currentPiece,boardIndex);    //set the sequence count
