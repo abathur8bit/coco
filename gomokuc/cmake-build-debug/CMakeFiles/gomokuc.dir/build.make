@@ -57,27 +57,27 @@ include CMakeFiles/gomokuc.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/gomokuc.dir/flags.make
 
-CMakeFiles/gomokuc.dir/main.c.o: CMakeFiles/gomokuc.dir/flags.make
-CMakeFiles/gomokuc.dir/main.c.o: ../main.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/lee/workspace/coco/github/coco/gomokuc/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/gomokuc.dir/main.c.o"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/gomokuc.dir/main.c.o   -c /Users/lee/workspace/coco/github/coco/gomokuc/main.c
+CMakeFiles/gomokuc.dir/gomoku.c.o: CMakeFiles/gomokuc.dir/flags.make
+CMakeFiles/gomokuc.dir/gomoku.c.o: ../gomoku.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/lee/workspace/coco/github/coco/gomokuc/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/gomokuc.dir/gomoku.c.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/gomokuc.dir/gomoku.c.o   -c /Users/lee/workspace/coco/github/coco/gomokuc/gomoku.c
 
-CMakeFiles/gomokuc.dir/main.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/gomokuc.dir/main.c.i"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/lee/workspace/coco/github/coco/gomokuc/main.c > CMakeFiles/gomokuc.dir/main.c.i
+CMakeFiles/gomokuc.dir/gomoku.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/gomokuc.dir/gomoku.c.i"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/lee/workspace/coco/github/coco/gomokuc/gomoku.c > CMakeFiles/gomokuc.dir/gomoku.c.i
 
-CMakeFiles/gomokuc.dir/main.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/gomokuc.dir/main.c.s"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/lee/workspace/coco/github/coco/gomokuc/main.c -o CMakeFiles/gomokuc.dir/main.c.s
+CMakeFiles/gomokuc.dir/gomoku.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/gomokuc.dir/gomoku.c.s"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/lee/workspace/coco/github/coco/gomokuc/gomoku.c -o CMakeFiles/gomokuc.dir/gomoku.c.s
 
 # Object files for target gomokuc
 gomokuc_OBJECTS = \
-"CMakeFiles/gomokuc.dir/main.c.o"
+"CMakeFiles/gomokuc.dir/gomoku.c.o"
 
 # External object files for target gomokuc
 gomokuc_EXTERNAL_OBJECTS =
 
-gomokuc: CMakeFiles/gomokuc.dir/main.c.o
+gomokuc: CMakeFiles/gomokuc.dir/gomoku.c.o
 gomokuc: CMakeFiles/gomokuc.dir/build.make
 gomokuc: CMakeFiles/gomokuc.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/lee/workspace/coco/github/coco/gomokuc/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking C executable gomokuc"

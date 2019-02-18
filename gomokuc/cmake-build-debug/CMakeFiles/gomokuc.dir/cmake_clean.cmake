@@ -1,5 +1,5 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/gomokuc.dir/main.c.o"
+  "CMakeFiles/gomokuc.dir/gomoku.c.o"
   "gomokuc.pdb"
   "gomokuc"
 )

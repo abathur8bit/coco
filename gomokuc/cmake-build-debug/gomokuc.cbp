@@ -78,7 +78,7 @@
 				</MakeCommands>
 			</Target>
 		</Build>
-		<Unit filename="/Users/lee/workspace/coco/github/coco/gomokuc/main.c">
+		<Unit filename="/Users/lee/workspace/coco/github/coco/gomokuc/gomoku.c">
 			<Option target="gomokuc"/>
 		</Unit>
 		<Unit filename="/Users/lee/workspace/coco/github/coco/gomokuc/CMakeLists.txt">

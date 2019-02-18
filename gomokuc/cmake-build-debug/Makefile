@@ -123,32 +123,32 @@ gomokuc/fast:
 	$(MAKE) -f CMakeFiles/gomokuc.dir/build.make CMakeFiles/gomokuc.dir/build
 .PHONY : gomokuc/fast
 
-main.o: main.c.o
+gomoku.o: gomoku.c.o
 
-.PHONY : main.o
+.PHONY : gomoku.o
 
 # target to build an object file
-main.c.o:
-	$(MAKE) -f CMakeFiles/gomokuc.dir/build.make CMakeFiles/gomokuc.dir/main.c.o
-.PHONY : main.c.o
+gomoku.c.o:
+	$(MAKE) -f CMakeFiles/gomokuc.dir/build.make CMakeFiles/gomokuc.dir/gomoku.c.o
+.PHONY : gomoku.c.o
 
-main.i: main.c.i
+gomoku.i: gomoku.c.i
 
-.PHONY : main.i
+.PHONY : gomoku.i
 
 # target to preprocess a source file
-main.c.i:
-	$(MAKE) -f CMakeFiles/gomokuc.dir/build.make CMakeFiles/gomokuc.dir/main.c.i
-.PHONY : main.c.i
+gomoku.c.i:
+	$(MAKE) -f CMakeFiles/gomokuc.dir/build.make CMakeFiles/gomokuc.dir/gomoku.c.i
+.PHONY : gomoku.c.i
 
-main.s: main.c.s
+gomoku.s: gomoku.c.s
 
-.PHONY : main.s
+.PHONY : gomoku.s
 
 # target to generate assembly for a file
-main.c.s:
-	$(MAKE) -f CMakeFiles/gomokuc.dir/build.make CMakeFiles/gomokuc.dir/main.c.s
-.PHONY : main.c.s
+gomoku.c.s:
+	$(MAKE) -f CMakeFiles/gomokuc.dir/build.make CMakeFiles/gomokuc.dir/gomoku.c.s
+.PHONY : gomoku.c.s
 
 # Help Target
 help:
@@ -159,9 +159,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... gomokuc"
-	@echo "... main.o"
-	@echo "... main.i"
-	@echo "... main.s"
+	@echo "... gomoku.o"
+	@echo "... gomoku.i"
+	@echo "... gomoku.s"
 .PHONY : help
 
 

@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-/Users/lee/workspace/coco/github/coco/gomokuc/main.c
+/Users/lee/workspace/coco/github/coco/gomokuc/gomoku.c
 coco.h
 /Users/lee/workspace/coco/github/coco/gomokuc/coco.h
 stdarg.h
