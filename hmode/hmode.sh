@@ -15,6 +15,7 @@ lwar -c libgfx256.a hmode256.o setpixel256.o line256.o gfx.o
 echo Building tests
 cmoc --org=3F00 main.c   -L. -lgfx256
 cmoc --org=3F00 pixpagec.c   -L. -lgfx256
+cmoc --org=3F00 linetest.c   -L. -lgfx256
 
 lwasm -3 -b -f obj -o mainml.o mainml.asm
 lwlink -o mainml.bin -b -f decb mainml.o hmode256.o setpixel256.o
@@ -29,6 +30,7 @@ writecocofile -b hmode.dsk main.bin
 writecocofile -b hmode.dsk mainml.bin
 writecocofile -b hmode.dsk pixpagec.bin
 writecocofile -b hmode.dsk pixpagea.bin
+writecocofile -b hmode.dsk linetest.bin
 
 
 echo Running

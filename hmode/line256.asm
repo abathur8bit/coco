@@ -17,60 +17,63 @@
 * ******************************************************************************
 
 
-	        include 	'hmode256.inc'
-	
-_hline	        export
+                include         'hmode256.inc'
+        
+_hline          export
 _vline          export
 
-	        section 	code
+                section         code
 
 *******************************************************************************
 * void hline(int x,int y,int w,int c);
 * Draws a horizontal line from x,y, w pixels long.
 *******************************************************************************
-linexpos	equ	        3
-lineypos	equ	        5
-linewidth	equ	        7
-linecolor	equ	        9
-_hline	        lda	        linexpos,s
-	        ldb	        lineypos,s
-	        lbsr	        pixadr	        ; find start address of line
-	        ldb	        linewidth,s	; put the width into U for counting
-	        lda	        linecolor,s	; line color in lower 4 bits, load into upper and lower
-	        lsla	        	        ; move color up 4 bits
-	        lsla
-	        lsla
-	        lsla
-	        adda	        linecolor,s	; load lower 4 bits with color
-a@	        sta	        ,x+	        ; store color
-	        decb	        	        ;
-	        decb	        	        ; B -= 2
-	        bne	        a@	        ; not done yet
-
-	        rts
+linexpos        equ            3
+lineypos        equ            5
+linewidth       equ            7
+linecolor       equ            9
+_hline          lda            linexpos,s
+                ldb            lineypos,s
+                lbsr           pixadr           ; find start address of line
+                ldb            linewidth,s      ; put the width into U for counting
+                lda            linecolor,s      ; line color in lower 4 bits, load into upper and lower
+                lsla                            ; move color up 4 bits
+                lsla
+                lsla
+                lsla
+                adda           linecolor,s      ; load lower 4 bits with color
+a@              sta            ,x+              ; store color
+                decb                            ;
+                decb                            ; B -= 2
+                bne            a@               ; not done yet
+                
+                rts
 
 
 *******************************************************************************
 * void vline(int x,int y,int h,int c);
 * Draws a vertical line from x,y, h pixels high.
 *******************************************************************************
-lineheight	equ	        7
-_vline	        lda	        linexpos,s
-	        ldb	        lineypos,s
-	        lbsr	        pixadr	        ; find start address of line
-	        ldb	        lineheight,s	; put the width into U for counting
-	        lda	        linecolor,s	; line color in lower 4 bits, load into upper and lower
-	        lsla	        	        ; move color up 4 bits
-	        lsla
-	        lsla
-	        lsla
-	        adda	        linecolor,s	; load lower 4 bits with color
-a@	        sta	        ,x+	        ; store color
-	        decb	        	        ;
-	        decb	        	        ; B -= 2
-	        bne	        a@	        ; not done yet
+; x&y defined in hline
+lineheight      equ             7
+_vline          lda             linexpos,s
+                anda            #254            ; make sure A is even
+                ldb             lineypos,s
+                lbsr            pixadr          ; find start address of line
+                ldb             lineheight,s    ; put the height into B for counting
+                lda             linecolor,s     ; line color in lower 4 bits, load into upper and lower
+                lsla                            ; move color up 4 bits
+                lsla
+                lsla
+                lsla
+                adda            linecolor,s     ; load lower 4 bits with color
 
-	        rts
+b@              sta             ,x              ; store color
+                leax            128,x           ; move to the next line
+                decb                            ; one less line to draw
+                bne             b@              ; not done yet
+                        
+                rts
 
 
-	        endsection
+                endsection
