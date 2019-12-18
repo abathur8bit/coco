@@ -176,7 +176,7 @@ void countMines() {
 
 void drawField(BOOL masked) {
     move(0, 0);
-    printw("      M I N E   F I E L D\n"
+    printw("        M I N E F I E L D\n"
         "LEVEL %02d  MOVES %03d  SCORE %05d\n\n", level + 1, moves, score);
     move(3, 0);
     for (int y = 0; y < 10; ++y) {
@@ -223,7 +223,7 @@ void drawField(BOOL masked) {
 
 void title() {
     clear();
-    printw("      M I N E   F I E L D\n\n");
+    printw("        M I N E F I E L D\n\n");
     //      12345678901234567890123456789012
     printw("AVOID MINES WHILE MOVING TOWARD\n"
            "THE SAFTY OF THE BUFFERS (#) ON\n"
