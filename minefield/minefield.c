@@ -176,7 +176,7 @@ void countMines() {
 
 void drawField(BOOL masked) {
     move(0, 0);
-    printw("           M I N E S\n"
+    printw("      M I N E   F I E L D\n"
         "LEVEL %02d  MOVES %03d  SCORE %05d\n\n", level + 1, moves, score);
     attroff(COL_MINE);
     move(3, 0);

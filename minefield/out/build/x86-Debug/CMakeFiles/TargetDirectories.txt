@@ -1,0 +1,3 @@
+C:/workspace/github/coco/minefield/out/build/x86-Debug/CMakeFiles/minefield.dir
+C:/workspace/github/coco/minefield/out/build/x86-Debug/CMakeFiles/edit_cache.dir
+C:/workspace/github/coco/minefield/out/build/x86-Debug/CMakeFiles/rebuild_cache.dir
