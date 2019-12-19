@@ -6,3 +6,5 @@
 *.lst
 .vs
 out
+minefield/cfg
+minefield/ui.ini

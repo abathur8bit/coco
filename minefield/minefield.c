@@ -152,7 +152,7 @@ void initGame() {
     //lay mines
     for (int y = 0; y < 10; ++y) {
         for (int x = 0; x < 15; ++x) {
-            if (1 == rnd(1, 25) - level) {
+            if (1 == rnd(1, 25) - level && x > 0) {
                 field[y][x] = MINE;
             }
             else {
