@@ -80,13 +80,21 @@ void colorTest() {
     printf("X");
     locate(79, 23);
     gotoxy(1, 2);
-    const char* ch[8] = { "A","B","C","D","E","F","G","H" };
+    const char* ch[8] = { " A "," B "," C "," D "," E "," F "," G "," H " };
     for (byte i = 0; i < 8; ++i) {
         setColor(i, 1);
         textout(ch[i]);
     }
+
+    gotoxy(1, 3);
+    for (byte i = 0; i < 8; ++i) {
+        setColor(0, i);
+        textout(ch[i]);
+    }
+
     waitforkey();
 }
+
 int main() {
     initSystem();
     locate(79, 23);

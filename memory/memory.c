@@ -67,7 +67,7 @@ WINDOW* win;
  * Waits for the user to type a key and returns it.  
  */
 int waitkey() {
-    return wgetch(win);
+    return wgetch(stdscr);
 }
 
 /** 
@@ -110,12 +110,12 @@ void initCurses() {
         printf("Screen must be at least %dx%d\n", SCREEN_WIDTH, SCREEN_HEIGHT);
         exit(1);
     }
-    win = newwin(SCREEN_HEIGHT, SCREEN_WIDTH, screenHeight / 2 - SCREEN_HEIGHT / 2, screenWidth / 2 - SCREEN_WIDTH / 2);
-    if (win == NULL) {
-        endwin();
-        printf("Unable to make window\n");
-        exit(1);
-    }
+    //win = newwin(SCREEN_HEIGHT, SCREEN_WIDTH, screenHeight / 2 - SCREEN_HEIGHT / 2, screenWidth / 2 - SCREEN_WIDTH / 2);
+    //if (win == NULL) {
+    //    endwin();
+    //    printf("Unable to make window\n");
+    //    exit(1);
+    //}
 }
 #endif
 
@@ -236,13 +236,14 @@ void locate(int x, int y) {
 int main()
 {
     initSystem();
-    cls();
-    locate(0, 0);
-    textout("Hello world\n");
-    textout("Hello world");
-    textout("Hello world");
-    textout("Hello world");
 
+    clear();
+    for (int i = 1; i < 9; i++) {
+        init_pair(i, i - 1, COLOR_BLUE);
+        attron(COLOR_PAIR(i));
+        printw("Hello world\n");
+        attroff(COLOR_PAIR(i));
+    }
     waitkey();
     deinitSystem();
 	return 0;
