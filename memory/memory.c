@@ -37,6 +37,9 @@
 
 #endif //_COCO_BASIC_
 
+#define COLOR_CARD_TOP 1
+#define COLOR_CARD_UNDERSIDE 2
+
 typedef struct {
     char value;
     char suite;
@@ -70,16 +73,40 @@ int rnd(int min, int max) {
     return n;
 }
 
+void setupColorPairs() {
+#ifndef _COCO_BASIC_
+    init_pair(COLOR_CARD_TOP, COLOR_YELLOW, COLOR_RED);
+    init_pair(COLOR_CARD_UNDERSIDE, COLOR_BLACK, COLOR_YELLOW);
+
+#endif // !_COCO_BASIC_
+
+}
+
+void colorPair(byte pair) {
+#ifdef _COCO_BASIC_
+    switch (pair) {
+    case COLOR_CARD_TOP:
+        setColor(COLOR_YELLOW, COLOR_RED);
+        break;
+    case COLOR_CARD_UNDERSIDE:
+        setColor(COLOR_BLACK, COLOR_YELLOW);
+        break;
+    }
+#else 
+    attron(COLOR_PAIR(pair));
+#endif // _COCO_BASIC_
+}
+
 void drawCard(byte x,byte y,CARD* c) {
     char spaces[] = "    ";
     char buff[]   = " <> ";
     if (c->flipped) {
         buff[1] = c->value;
         buff[2] = c->suite;
-        setColor(COLOR_BLACK, COLOR_YELLOW);
+        colorPair(COLOR_CARD_UNDERSIDE);
     }
     else {
-        setColor(COLOR_YELLOW, COLOR_RED);
+        colorPair(COLOR_CARD_TOP);
     }
     //setInverseText();
     gotoxy(x, y);
@@ -123,6 +150,7 @@ void drawField() {
 
 void playGame() {
     initSystem();
+    setupColorPairs();
 
     clear();
     initCards();
