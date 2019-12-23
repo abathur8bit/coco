@@ -27,7 +27,7 @@ byte cursesColors[16] = {
      0, // 0 black
      8, // 1 med blue
     16, // 2 med green
-     3, // 3 med cyan
+    24, // 3 med cyan
     32, // 4 med red
     40, // 5 med magenta
     48, // 6 med yellow
@@ -37,7 +37,7 @@ byte cursesColors[16] = {
      0, // 0 black
      8, // 1 med blue
     16, // 2 med green
-     3, // 3 med cyan
+    24, // 3 med cyan
     32, // 4 med red
     40, // 5 med magenta
     48, // 6 med yellow
