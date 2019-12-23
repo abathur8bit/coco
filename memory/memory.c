@@ -1,4 +1,4 @@
-﻿/* *****************************************************************************
+/* *****************************************************************************
  * Created by Lee Patterson 12/3/19
  *
  * Copyright 2019 Lee Patterson <https://github.com/abathur8bit>
@@ -18,131 +18,24 @@
  * limitations under the License.
  * ******************************************************************************/
 
-#include <curses.h>
-#include "memory.h"
-
-#define SCREEN_WIDTH        32
-#define SCREEN_HEIGHT       16
-
-int screenWidth = SCREEN_WIDTH;
-int screenHeight = SCREEN_HEIGHT;
-
 #ifdef _COCO_BASIC_
 
 #include "coco.h"
 #include "stdarg.h"
+#include "htext.h"
 
-#define ESCAPE              3   //key code for escape key
-#define ENTER               13  //key code for enter key
+//#pragma org 0xE00
 
-#define printw printf
-#define move(y,x) locate(x,y)
-#define clear() cls(1)
-
-#else
+#else //curses
 
 #include <curses.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <ctype.h>
+#include "cursestext.h"
 
-#define ESCAPE              27  //key code for escape key
-#define ENTER               10  //key code for enter key
-#define SCREEN_WIDTH        32
-#define SCREEN_HEIGHT       16
-
-//C doesn't a boolean, make life easier for ourselves
-typedef unsigned char byte;
-typedef char BOOL;
-#define TRUE                1
-#define FALSE               0
-
-#define COL_NORMAL          1
-#define COL_INVERSE         2
-WINDOW* win;
-#endif
-
-/**
- * Waits for the user to type a key and returns it.  
- */
-int waitkey() {
-    return wgetch(stdscr);
-}
-
-/** 
- * Returns a keystroke or 0 of there hasn't been one. 
- */
-int getkey() {
-    nodelay(win, TRUE);
-    int ch = wgetch(win);
-    nodelay(win, FALSE);
-}
-
-#ifdef _COCO_BASIC_
-int getch() {
-    int ch = 0;
-    do {
-        ch = inkey();
-    } while (!ch);
-    return ch;
-}
-#else
-void initColor() {
-    //if(has_colors())
-    {
-        start_color();
-        init_pair(COL_NORMAL, COLOR_BLACK, COLOR_GREEN);
-        init_pair(COL_INVERSE, COLOR_GREEN, COLOR_BLUE);
-    }
-}
-
-void initCurses() {
-    initscr();
-    raw();
-    noecho();
-    initColor();
-    getmaxyx(stdscr, screenHeight, screenWidth);
-
-    //adjust the mine fields size
-    if (screenWidth < SCREEN_WIDTH || screenHeight < SCREEN_HEIGHT) {
-        endwin();
-        printf("Screen must be at least %dx%d\n", SCREEN_WIDTH, SCREEN_HEIGHT);
-        exit(1);
-    }
-    //win = newwin(SCREEN_HEIGHT, SCREEN_WIDTH, screenHeight / 2 - SCREEN_HEIGHT / 2, screenWidth / 2 - SCREEN_WIDTH / 2);
-    //if (win == NULL) {
-    //    endwin();
-    //    printf("Unable to make window\n");
-    //    exit(1);
-    //}
-}
-#endif
-
-void initSystem() {
-#ifdef _COCO_BASIC_
-    initCoCoSupport();
-    if (isCoCo3) {
-        //        width(80);
-        setHighSpeed(TRUE);
-    }
-#else
-    initCurses();
-    srand(time(NULL));
-#endif
-}
-
-void deinitSystem() {
-#ifdef _COCO_BASIC_
-    if (isCoCo3) {
-        setHighSpeed(FALSE);
-    }
-    cls(1);
-#else
-    endwin();
-#endif
-}
-
+#endif //_COCO_BASIC_
 
 /**
  * Returns a number between min and max inclusive.
@@ -154,83 +47,17 @@ int rnd(int min, int max) {
     return n;
 }
 
-void textout(const char* s) {
-#ifdef _COCO_BASIC_
-    printf(s);
-#else
-    wattron(win,COLOR_PAIR(COL_NORMAL));
-    const int len = strlen(s);
-    //for(int i=0; i<len; ++i) {
-    //    if()
-    wprintw(win,s);
-    wattroff(win,COLOR_PAIR(COL_NORMAL));
-    wrefresh(win);
-#endif // _COCO_BASIC_
-
-}
-
-void textoutxy(int x, int y, const char* s) {
-    wmove(win, y, x);
-    wprintf(win, s);
-}
-
-void centertexty(int y, const char* s) {
-#ifndef _COCO_BASIC_
-    int w, h;
-    getmaxyx(win, h, w);
-    wmove(win, y, w / 2 - strlen(s) / 2);
-#else
-    locate(SCREEN_WIDTH / 2 - strlen(s) / 2);
-#endif
-
-    textout(s);
-}
-//void textout(const char* fmt, ...) {
-//    char buffer[80*25];
-//    va_list marker;
-//    va_start(marker, fmt);
-//    vsnprintf(buffer, sizeof buffer, fmt, marker);
-//#ifndef _COCO_BASIC_
-//    wattron(win,COLOR_PAIR(COL_NORMAL));
-//    wprintw(win,buffer);
-//    wattroff(win,COLOR_PAIR(COL_NORMAL));
-//    wrefresh(win);
-//#endif
-//}
-
 void drawField() {
-    byte width = 15;
-    byte height = 13;
-    byte offsety = 0;
+    byte width = 80;
+    byte height = 20;
+    byte offsety = 1;
     byte offsetx = SCREEN_WIDTH / 2 - width/2;
     for (byte y = 0; y < height; y++) {
         for (byte x = 0; x < width; x++) {
-            //wmove(win,offsety + y, offsetx + x);
+            gotoxy(offsetx + x, offsety + y);
             textout(".");
         }
     }
-}
-
-void cls() {
-    wclear(win);
-    wattron(win,COLOR_PAIR(COL_NORMAL));
-    int offsetx = 0;
-    int offsety = 0;
-    for (byte y = 0; y < SCREEN_HEIGHT; y++) {
-        wmove(win,offsety + y, offsetx);
-        for (byte x = 0; x < SCREEN_WIDTH; x++) {
-            waddch(win,' ');
-            wrefresh(win);
-        }
-    }
-}
-
-void update() {
-    wrefresh(win);
-}
-
-void locate(int x, int y) {
-    wmove(win, y, x);
 }
 
 int main()
@@ -238,13 +65,13 @@ int main()
     initSystem();
 
     clear();
-    for (int i = 1; i < 9; i++) {
-        init_pair(i, i - 1, COLOR_BLUE);
-        attron(COLOR_PAIR(i));
-        printw("Hello world\n");
-        attroff(COLOR_PAIR(i));
-    }
-    waitkey();
+    drawField();
+    gotoxy(0, 20);
+    textout("Done");
+    gotoxy(0, 21);
+    setInverseText();
+    textout("Finished");
+    waitforkey();
     deinitSystem();
 	return 0;
 }

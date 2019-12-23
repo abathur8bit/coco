@@ -62,6 +62,34 @@ byte defaultRgbColors[16] = {
     38
 };
 
+void initSystem() {
+    initCoCoSupport();
+    if (isCoCo3) {
+        width(80);
+        setHighSpeed(TRUE);
+        mapColors(cursesColors);
+        setColor(COLOR_WHITE, COLOR_BLACK);
+    }
+}
+
+void deinitSystem() {
+    if (isCoCo3) {
+        setHighSpeed(FALSE);
+        mapColors(defaultRgbColors);
+    }
+    cls(1);
+}
+
+void mapmmu() {
+    previousPageValue = *((byte*)MMU_REGISTER);
+    *((byte*)MMU_REGISTER) = PAGE_HIRES_TEXT;
+}
+
+//60 = 3C
+void unmapmmu() {
+    *((byte*)MMU_REGISTER) = previousPageValue;
+}
+
 void mapColors(byte* colorValues)
 {
     byte count = sizeof cursesColors / sizeof cursesColors[0];
@@ -106,30 +134,15 @@ int waitforkey() {
     return waitkey(TRUE);
 }
 
-void initSystem() {
-    initCoCoSupport();
-    if (isCoCo3) {
-        width(80);
-        setHighSpeed(TRUE);
-        mapColors(cursesColors);
-    }
+void clear() {
+    cls(COLOR_BLACK);
 }
 
-void deinitSystem() {
-    if (isCoCo3) {
-        setHighSpeed(FALSE);
-        mapColors(defaultRgbColors);
-    }
-    cls(1);
+void setNormalText() {
+    setColor(COLOR_WHITE, COLOR_BLACK);
 }
 
-void mapmmu() {
-    previousPageValue = *((byte*)MMU_REGISTER);
-    *((byte*)MMU_REGISTER) = PAGE_HIRES_TEXT;
-}
-
-//60 = 3C
-void unmapmmu() {
-    *((byte*)MMU_REGISTER) = previousPageValue;
+void setInverseText() {
+    setColor(COLOR_BLACK, COLOR_WHITE);
 }
 

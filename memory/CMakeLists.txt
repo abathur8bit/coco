@@ -10,7 +10,7 @@ if(MSVC)
 	link_directories(../pdcurses)
 endif()
 
-add_executable(memory memory.c)
+add_executable(memory memory.c cursestext.c)
 
 if(MSVC)
 	target_link_libraries(memory PRIVATE pdcurses)
