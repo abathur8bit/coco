@@ -24,7 +24,7 @@
 #include "stdarg.h"
 #include "htext.h"
 
-//#pragma org 0xE00
+#pragma org 0xE00
 
 #else //curses
 
@@ -37,6 +37,29 @@
 
 #endif //_COCO_BASIC_
 
+typedef struct {
+    char value;
+    char suite;
+    BOOL flipped;
+} CARD;
+
+CARD cards[56];
+
+void initCards() {
+    char suites[] = "CSDH";
+    char cardValues[] = "123456789TJQKA";
+
+    int cardIndex = 0;
+    for (int s = 0; s < sizeof(suites)-1; ++s) {
+        for (int c = 0; c < sizeof(cardValues)-1; ++c) {
+            cards[cardIndex].value = cardValues[c];
+            cards[cardIndex].suite = suites[s];
+            cards[cardIndex].flipped = FALSE;
+            ++cardIndex;
+        }
+    }
+}
+
 /**
  * Returns a number between min and max inclusive.
  * If min=1 and max=10 numbers returned would be 1 through
@@ -47,6 +70,44 @@ int rnd(int min, int max) {
     return n;
 }
 
+void drawCard(byte x,byte y,CARD* c) {
+    char spaces[] = "    ";
+    char buff[]   = " <> ";
+    if (c->flipped) {
+        buff[1] = c->value;
+        buff[2] = c->suite;
+        setColor(COLOR_BLACK, COLOR_YELLOW);
+    }
+    else {
+        setColor(COLOR_YELLOW, COLOR_RED);
+    }
+    //setInverseText();
+    gotoxy(x, y);
+    textout(spaces);
+    gotoxy(x, y+1);
+    textout(buff);
+    gotoxy(x, y+2);
+    textout(spaces);
+    //setNormalText();
+}
+
+void drawDeck() {
+    int cardIndex = 0;
+    byte offsetx = 5;
+    byte y = 3;
+    while (cardIndex < 52) {
+        for (int x = 0; x < 14; ++x) {
+            //gotoxy((byte)(offsetx + x * 3), y);
+            //char buffer[] = "  ";
+            //buffer[0] = cards[cardIndex].value;
+            //buffer[1] = cards[cardIndex].suite;
+            //textout(buffer);
+            drawCard((byte)(offsetx + x*5), y, &cards[cardIndex]);
+            ++cardIndex;
+        }
+        y += 4;
+    }
+}
 void drawField() {
     byte width = 80;
     byte height = 20;
@@ -60,18 +121,27 @@ void drawField() {
     }
 }
 
-int main()
-{
+void playGame() {
     initSystem();
 
     clear();
-    drawField();
-    gotoxy(0, 20);
-    textout("Done");
-    gotoxy(0, 21);
-    setInverseText();
-    textout("Finished");
+    initCards();
+    cards[0].flipped = TRUE;
+    drawDeck();
+    //drawField();
     waitforkey();
     deinitSystem();
+}
+
+void showCards() {
+    initCards();
+    for (int i = 0; i < 56; i++) {
+        printf("%c%c ", cards[i].value, cards[i].suite);
+    }
+}
+int main()
+{
+    //showCards();
+    playGame();
 	return 0;
 }

@@ -43,6 +43,7 @@ byte cursesColors[16] = {
     48, // 6 med yellow
     56, // 7 med grey
 };
+
 byte defaultRgbColors[16] = {
     18,
     54,

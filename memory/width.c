@@ -1,10 +1,29 @@
+#ifdef _COCO_BASIC_
+
 #include "coco.h"
 #include "stdarg.h"
 #include "htext.h"
 
+#define ESCAPE              3   //key code for escape key
+#define ENTER               13  //key code for enter key
+
 #pragma org 0xE00
 
 extern byte colorAttr;
+
+#else //curses
+
+#include <curses.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <ctype.h>
+
+#define ESCAPE              27  //key code for escape key
+#define ENTER               10  //key code for enter key
+
+#endif //_COCO_BASIC_
+
 
 void showmem() {
     cls(1);
