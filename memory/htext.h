@@ -9,6 +9,12 @@
 
 #define ESCAPE          3   //key code for escape key
 #define ENTER           13  //key code for enter key
+#define LEFT_ARROW          8
+#define RIGHT_ARROW         9
+#define UP_ARROW            94
+#define DOWN_ARROW          10
+#define F1_KEY				103
+#define F2_KEY				4
 
 #define PAGE_HIRES_TEXT 0x36
 #define MMU_REGISTER    0xFFA7

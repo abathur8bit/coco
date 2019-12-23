@@ -37,8 +37,9 @@
 
 #endif //_COCO_BASIC_
 
-#define COLOR_CARD_TOP 1
-#define COLOR_CARD_UNDERSIDE 2
+#define COLOR_CARD_TOP          1
+#define COLOR_CARD_UNDERSIDE    2
+#define COLOR_CARD_SELECTED     3
 
 typedef struct {
     char value;
@@ -47,6 +48,9 @@ typedef struct {
 } CARD;
 
 CARD cards[56];
+CARD* selectedCard = NULL;  //NULL non selected
+char buffer[80*25];
+BOOL playing = TRUE;
 
 void initCards() {
     char suites[] = "CSDH";
@@ -77,7 +81,7 @@ void setupColorPairs() {
 #ifndef _COCO_BASIC_
     init_pair(COLOR_CARD_TOP, COLOR_YELLOW, COLOR_RED);
     init_pair(COLOR_CARD_UNDERSIDE, COLOR_BLACK, COLOR_YELLOW);
-
+    init_pair(COLOR_CARD_SELECTED, COLOR_BLACK, COLOR_CYAN);
 #endif // !_COCO_BASIC_
 
 }
@@ -91,7 +95,10 @@ void colorPair(byte pair) {
     case COLOR_CARD_UNDERSIDE:
         setColor(COLOR_BLACK, COLOR_YELLOW);
         break;
-    }
+    case COLOR_CARD_SELECTED:
+        setColor(COLOR_BLACK, COLOR_CYAN);
+        break;
+}
 #else 
     attron(COLOR_PAIR(pair));
 #endif // _COCO_BASIC_
@@ -100,7 +107,9 @@ void colorPair(byte pair) {
 void drawCard(byte x,byte y,CARD* c) {
     char spaces[] = "    ";
     char buff[]   = " <> ";
-    if (c->flipped) {
+    if (c == selectedCard) {
+        colorPair(COLOR_CARD_SELECTED);
+    } else if (c->flipped) {
         buff[1] = c->value;
         buff[2] = c->suite;
         colorPair(COLOR_CARD_UNDERSIDE);
@@ -151,13 +160,44 @@ void drawField() {
 void playGame() {
     initSystem();
     setupColorPairs();
+    selectedCard = &cards[0];
 
     clear();
     initCards();
-    cards[0].flipped = TRUE;
-    drawDeck();
-    //drawField();
-    waitforkey();
+    int selectx = 0;
+    int selecty = 0;
+    while (playing) {
+        drawDeck();
+        int ch = waitforkey();
+        sprintf(buffer, "key=%d   ", ch);
+        gotoxy(0, 0);
+        textout(buffer);
+        switch (ch) {
+        case ESCAPE:
+            playing = FALSE;
+        case LEFT_ARROW: 
+            if (selectx-1 >= 0) {
+                selectx--;
+            }
+            break;
+        case RIGHT_ARROW:
+            if (selectx + 1 < 14) {
+                selectx++;
+            }
+            break;
+        case UP_ARROW:
+            if (selecty - 1 >= 0) {
+                selecty -= 1;
+            }
+            break;
+        case DOWN_ARROW:
+            if (selecty + 1 < 4) {
+                selecty += 1;
+            }
+            break;
+        }
+        selectedCard = &cards[selecty*14+selectx];
+    }
     deinitSystem();
 }
 

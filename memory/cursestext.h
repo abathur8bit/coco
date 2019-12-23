@@ -6,6 +6,12 @@
 
 #define ESCAPE              27  //key code for escape key
 #define ENTER               10  //key code for enter key
+#define LEFT_ARROW          0x104
+#define RIGHT_ARROW         0x105
+#define UP_ARROW            0x103
+#define DOWN_ARROW          0x102
+#define F1_KEY				0x109
+#define F2_KEY				0x10A
 
 //C doesn't a boolean, make life easier for ourselves
 typedef unsigned char byte;

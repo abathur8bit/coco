@@ -39,9 +39,10 @@ void setInverseText() {
 
 void initCurses() {
     initscr();
-    raw();
+    cbreak();
     noecho();
     initColor();
+    keypad(stdscr, TRUE);
     getmaxyx(stdscr, screenHeight, screenWidth);
 
     //adjust the mine fields size
