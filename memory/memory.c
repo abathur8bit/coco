@@ -174,6 +174,16 @@ void drawField() {
     }
 }
 
+void showMessage(const char* s) {
+
+    colorPair(COLOR_CARD_UNDERSIDE_SELECTED);
+    textoutxy(0, 23, "                                                                                ");
+    centertext(23, s);
+    if (waitforkey() == ESCAPE) playing = FALSE;
+    colorPair(COLOR_NORMAL);
+    textoutxy(0, 23,"                                                                                ");
+}
+
 void playGame() {
     initSystem();
     setupColorPairs();
@@ -232,16 +242,14 @@ void playGame() {
 
             if (firstCard && secondCard) {
                 BOOL match = FALSE;
-                char* msg[2] = { "Cards don't match","Cards match       " };
+                char* msg[2] = { "Cards don't match","Match!" };
                 if (firstCard->value == secondCard->value) {
                     match = TRUE;
                 }
                 else {
                     match = FALSE;
                 }
-                textoutxy(40, 1, msg[match]);
-                colorPair(COLOR_NORMAL);
-                if (waitforkey() == ESCAPE) playing = FALSE;
+                showMessage(msg[match]);
 
                 if (!match) {
                     firstCard->flipped = FALSE;
