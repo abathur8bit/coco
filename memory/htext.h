@@ -44,9 +44,6 @@ void textoutxy(byte x, byte y, const char* s);
 void setColor(byte fg, byte bg);
 void mapColors(byte* colorValues);
 
-void setNormalText();
-void setInverseText();
-
 void centertext(byte y, const char* s);
 
 #endif

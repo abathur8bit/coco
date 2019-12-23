@@ -151,11 +151,4 @@ void clear() {
     cls(COLOR_BLACK);
 }
 
-void setNormalText() {
-    setColor(COLOR_WHITE, COLOR_BLACK);
-}
-
-void setInverseText() {
-    setColor(COLOR_BLACK, COLOR_WHITE);
-}
 

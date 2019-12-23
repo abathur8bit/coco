@@ -37,9 +37,11 @@
 
 #endif //_COCO_BASIC_
 
-#define COLOR_CARD_TOP          1
-#define COLOR_CARD_UNDERSIDE    2
-#define COLOR_CARD_SELECTED     3
+#define COLOR_CARD_TOP                      1
+#define COLOR_CARD_UNDERSIDE                2
+#define COLOR_CARD_SELECTED                 3
+#define COLOR_CARD_UNDERSIDE_SELECTED       4
+#define COLOR_NORMAL                        5
 
 typedef struct {
     char value;
@@ -49,8 +51,11 @@ typedef struct {
 
 CARD cards[56];
 CARD* selectedCard = NULL;  //NULL non selected
+CARD* firstCard = NULL;
+CARD* secondCard = NULL;
 char buffer[80*25];
 BOOL playing = TRUE;
+int score = 0;
 
 void initCards() {
     char suites[] = "CSDH";
@@ -79,9 +84,11 @@ int rnd(int min, int max) {
 
 void setupColorPairs() {
 #ifndef _COCO_BASIC_
+    init_pair(COLOR_NORMAL, COLOR_WHITE, COLOR_BLACK);
     init_pair(COLOR_CARD_TOP, COLOR_YELLOW, COLOR_RED);
     init_pair(COLOR_CARD_UNDERSIDE, COLOR_BLACK, COLOR_YELLOW);
     init_pair(COLOR_CARD_SELECTED, COLOR_BLACK, COLOR_CYAN);
+    init_pair(COLOR_CARD_UNDERSIDE_SELECTED, COLOR_WHITE, COLOR_CYAN);
 #endif // !_COCO_BASIC_
 
 }
@@ -98,6 +105,12 @@ void colorPair(byte pair) {
     case COLOR_CARD_SELECTED:
         setColor(COLOR_BLACK, COLOR_CYAN);
         break;
+    case COLOR_CARD_UNDERSIDE_SELECTED:
+        setColor(COLOR_WHITE, COLOR_CYAN);
+        break;
+    case COLOR_NORMAL:
+        setColor(COLOR_WHITE, COLOR_BLACK);
+        break;
 }
 #else 
     attron(COLOR_PAIR(pair));
@@ -107,7 +120,11 @@ void colorPair(byte pair) {
 void drawCard(byte x,byte y,CARD* c) {
     char spaces[] = "    ";
     char buff[]   = " <> ";
-    if (c == selectedCard) {
+    if (c == selectedCard && c->flipped) {
+        colorPair(COLOR_CARD_UNDERSIDE_SELECTED);
+        buff[1] = c->value;
+        buff[2] = c->suite;
+    } else if (c == selectedCard) {
         colorPair(COLOR_CARD_SELECTED);
     } else if (c->flipped) {
         buff[1] = c->value;
@@ -166,12 +183,14 @@ void playGame() {
     initCards();
     int selectx = 0;
     int selecty = 0;
+    BOOL isCardChosen = FALSE;
     while (playing) {
+        colorPair(COLOR_NORMAL);
         centertext(0, "M E M O R Y");
+        sprintf(buffer, "SCORE: %05d", score);
+        textoutxy(0, 1, buffer);
         drawDeck();
         int ch = waitforkey();
-        sprintf(buffer, "key=%d   ", ch);
-        textoutxy(10,0,buffer);
         switch (ch) {
         case ESCAPE:
             playing = FALSE;
@@ -188,13 +207,49 @@ void playGame() {
         case DOWN_ARROW:
             selecty += 1;
             break;
+        case ENTER:
+            isCardChosen = TRUE;
+            break;
         }
+
         if (selectx < 0) selectx = 13;
         if (selectx > 13) selectx = 0;
         if (selecty < 0) selecty = 3;
         if (selecty > 3) selecty = 0;
 
-        selectedCard = &cards[selecty*14+selectx];
+        selectedCard = &cards[selecty * 14 + selectx];
+        if (isCardChosen) {
+            isCardChosen = FALSE;   //reset
+            if (!firstCard) {
+                firstCard = selectedCard;
+                firstCard->flipped = TRUE;
+            }
+            else {
+                secondCard = selectedCard;
+                secondCard->flipped = TRUE;
+                drawDeck();
+            }
+
+            if (firstCard && secondCard) {
+                BOOL match = FALSE;
+                char* msg[2] = { "Cards don't match","Cards match       " };
+                if (firstCard->value == secondCard->value) {
+                    match = TRUE;
+                }
+                else {
+                    match = FALSE;
+                }
+                textoutxy(40, 1, msg[match]);
+                colorPair(COLOR_NORMAL);
+                if (waitforkey() == ESCAPE) playing = FALSE;
+
+                if (!match) {
+                    firstCard->flipped = FALSE;
+                    secondCard->flipped = FALSE;
+                }
+                firstCard = secondCard = NULL;
+            }
+        }
     }
     deinitSystem();
 }

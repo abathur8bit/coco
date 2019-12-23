@@ -24,17 +24,7 @@ void initColor() {
     //if(has_colors())
     {
         start_color();
-        init_pair(COLOR_NORMAL, COLOR_WHITE, COLOR_BLACK);
-        init_pair(COLOR_INVERSE, COLOR_BLACK, COLOR_WHITE);
     }
-}
-
-void setNormalText() {
-    attron(COLOR_PAIR(COLOR_NORMAL));
-}
-
-void setInverseText() {
-    attron(COLOR_PAIR(COLOR_INVERSE));
 }
 
 void initCurses() {
