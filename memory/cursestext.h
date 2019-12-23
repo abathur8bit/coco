@@ -28,9 +28,10 @@ int waitforkey();
 int getkey();
 void gotoxy(byte x, byte y);
 void textout(const char* s);
+void textoutxy(byte x, byte y, const char* s);
 void setColor(byte fg, byte bg);
 void setNormalText();
 void setInverseText();
-void centertexty(int y, const char* s);
+void centertext(byte y, const char* s);
 
 #endif //__CURSESTEXT__

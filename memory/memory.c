@@ -167,35 +167,33 @@ void playGame() {
     int selectx = 0;
     int selecty = 0;
     while (playing) {
+        centertext(0, "M E M O R Y");
         drawDeck();
         int ch = waitforkey();
         sprintf(buffer, "key=%d   ", ch);
-        gotoxy(0, 0);
-        textout(buffer);
+        textoutxy(10,0,buffer);
         switch (ch) {
         case ESCAPE:
             playing = FALSE;
+            break;
         case LEFT_ARROW: 
-            if (selectx-1 >= 0) {
-                selectx--;
-            }
+            selectx--;
             break;
         case RIGHT_ARROW:
-            if (selectx + 1 < 14) {
-                selectx++;
-            }
+            selectx++;
             break;
         case UP_ARROW:
-            if (selecty - 1 >= 0) {
-                selecty -= 1;
-            }
+            selecty -= 1;
             break;
         case DOWN_ARROW:
-            if (selecty + 1 < 4) {
-                selecty += 1;
-            }
+            selecty += 1;
             break;
         }
+        if (selectx < 0) selectx = 13;
+        if (selectx > 13) selectx = 0;
+        if (selecty < 0) selecty = 3;
+        if (selecty > 3) selecty = 0;
+
         selectedCard = &cards[selecty*14+selectx];
     }
     deinitSystem();
@@ -211,5 +209,7 @@ int main()
 {
     //showCards();
     playGame();
+    printf("Thanks for playing!\n");
+    printf("https://8BitCoder.com\n");
 	return 0;
 }

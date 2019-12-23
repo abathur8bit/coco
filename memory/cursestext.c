@@ -70,11 +70,16 @@ void textout(const char* s) {
     printw("%s", s);
 }
 
+void textoutxy(byte x, byte y, const char* s) {
+    move(y, x);
+    printw("%s", s);
+}
+
 void setColor(byte fg, byte bg) {
 
 }
 
-void centertexty(int y, const char* s) {
+void centertext(byte y, const char* s) {
     int w, h;
     getmaxyx(stdscr, h, w);
     move(y, w / 2 - strlen(s) / 2);

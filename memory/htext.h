@@ -40,10 +40,13 @@ void mapmmu();
 void unmapmmu();
 void gotoxy(byte x, byte y);
 void textout(const char* s);
+void textoutxy(byte x, byte y, const char* s);
 void setColor(byte fg, byte bg);
 void mapColors(byte* colorValues);
 
 void setNormalText();
 void setInverseText();
+
+void centertext(byte y, const char* s);
 
 #endif

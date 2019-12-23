@@ -131,6 +131,18 @@ void textout(const char* s) {
     unmapmmu();
 }
 
+void textoutxy(byte x, byte y, const char* s) {
+    cursorx = x;
+    cursory = y;
+    textout(s);
+}
+
+void centertext(byte y, const char* s) {
+    cursory = y;
+    cursorx = SCREEN_WIDTH / 2 - strlen(s) / 2;
+    textout(s);
+}
+
 int waitforkey() {
     return waitkey(TRUE);
 }
