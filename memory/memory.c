@@ -24,7 +24,7 @@
 #include "stdarg.h"
 #include "htext.h"
 
-#pragma org 0xE00
+//#pragma org 0xE00
 
 #else //curses
 
@@ -37,6 +37,7 @@
 
 #endif //_COCO_BASIC_
 
+#define TITLE                               "M E M O R Y"
 #define COLOR_CARD_TOP                      1
 #define COLOR_CARD_UNDERSIDE                2
 #define COLOR_CARD_TOP_CURSOR               3
@@ -260,9 +261,14 @@ BOOL checkWin() {
     return 52 == flipped;
 }
 
+void drawTable() {
+    colorPair(COLOR_NORMAL);
+    centertext(OFFSET_TOP, TITLE);
+    drawScore();
+    drawDeck();
+}
+
 void playGame() {
-    initSystem();
-    setupColorPairs();
     selectedCard = &cards[0];
 
     clear();
@@ -271,10 +277,7 @@ void playGame() {
     int selecty = 0;
     BOOL isCardChosen = FALSE;
     while (playing) {
-        colorPair(COLOR_NORMAL);
-        centertext(OFFSET_TOP, "M E M O R Y");
-        drawScore();
-        drawDeck();
+        drawTable();
         int ch = waitforkey();
         switch (ch) {
         case ESCAPE:
@@ -303,6 +306,9 @@ void playGame() {
         if (selecty > 3) selecty = 0;
 
         selectedCard = &cards[selecty * ROW_CARDS + selectx];
+        if (selectedCard->flipped)
+            isCardChosen = FALSE;
+
         if (isCardChosen) {
             isCardChosen = FALSE;   //reset
             if (!firstCard) {
@@ -372,9 +378,55 @@ void showCards() {
     printf("\n");
 }
 
+void title() {
+    clear();
+#ifdef _COCO_BASIC_
+    locate(0, 1);   //position the cursor out of sight
+#endif
+    byte y = 0;
+    colorPair(COLOR_MESSAGE);
+    textoutxy(0, y++, "                                   M E M O R Y                                  ");
+    colorPair(COLOR_NORMAL);
+    textoutxy(0, y++, "");
+    textoutxy(0, y++, "Memory, also known by the name Concentration, is a card game played with a ");
+    textoutxy(0, y++, "standard deck of 52 cards. Cards include thirteen ranks numbered 2-10 (T for 10)");
+    textoutxy(0, y++, "jack (J), queen (Q), king (K) and ace (A), in each of the four suites: ");
+    textoutxy(0, y++, "");
+    textoutxy(0, y++, "    clubs (C), diamonds (D), hearts (H), and spades (S).");
+    textoutxy(0, y++, "");
+    textoutxy(0, y++, "You flip cards over two at a time. If the rank matches (the suite does not need");
+    textoutxy(0, y++, "to) you leave the cards face up and chose another two. If they do no match you");
+    textoutxy(0, y++, "turn them over so they are face down again.");
+    textoutxy(0, y++, "");
+    textoutxy(0, y++, "You continue flipping cards two at a time, leaving matches face up, and flipping");
+    textoutxy(0, y++, "ones that do not match back over until all cards have been matched.");
+    textoutxy(0, y++, "");
+    textoutxy(0, y++, "Your score is the number of turns you have made. The lower the score the better.");
+    textoutxy(0, y++, "");
+    textoutxy(0, y++, "Use the arrow keys, ENTER to select a card, ESCAPE to quit the game.");
+    textoutxy(0, y++, "");
+    colorPair(COLOR_CARD_TOP);
+    centertext(y++, "PRESS ANY KEY TO CONTINUE");
+    textoutxy(0, y++, "");
+    textoutxy(0, y++, "");
+    colorPair(COLOR_MESSAGE);
+    textoutxy(0, y++, "                           A game by Lee Patterson                              ");
+    textoutxy(0, y++, "                            https://8BitCoder.com                               ");
+
+    //calculate a new random seed while waiting
+    int n = 0;
+    while (getkey() == -1)
+        n++;
+    srand(n);
+}
+
 int main()
 {
-    //showCards();
+    //showCards(); return 0;
+
+    initSystem();
+    setupColorPairs();
+    title();
     playGame();
     printf("Thanks for playing!\n");
     printf("https://8BitCoder.com\n\n");

@@ -36,6 +36,7 @@ void initSystem();
 void deinitSystem();
 void clear();
 int waitforkey();
+int getkey();
 void mapmmu();
 void unmapmmu();
 void gotoxy(byte x, byte y);

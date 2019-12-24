@@ -143,8 +143,15 @@ void centertext(byte y, const char* s) {
     textout(s);
 }
 
+// Wait for a key to be pressed, and return it.
 int waitforkey() {
     return waitkey(TRUE);
+}
+
+// Return the key that was pressed, or -1 if one wasn't pressed.
+int getkey() {
+    int ch = inkey();
+    return ch == 0 ? -1:ch;     //return -1 to match what curses returns.
 }
 
 void clear() {
