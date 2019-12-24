@@ -18,6 +18,7 @@ int getkey() {
     nodelay(stdscr, TRUE);
     int ch = getch();
     nodelay(stdscr, FALSE);
+    return ch;
 }
 
 void initColor() {
