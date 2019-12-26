@@ -46,5 +46,7 @@ void setColor(byte fg, byte bg);
 void mapColors(byte* colorValues);
 
 void centertext(byte y, const char* s);
+byte getTextWidth(); 
+byte getTextHeight();
 
 #endif

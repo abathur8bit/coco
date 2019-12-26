@@ -28,5 +28,7 @@ void textout(const char* s);
 void textoutxy(byte x, byte y, const char* s);
 void setColor(byte fg, byte bg);
 void centertext(byte y, const char* s);
+byte getTextWidth();
+byte getTextHeight();
 
 #endif //__CURSESTEXT__

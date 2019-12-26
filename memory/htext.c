@@ -65,8 +65,8 @@ byte defaultRgbColors[16] = {
 
 void initSystem() {
     initCoCoSupport();
-    if (isCoCo3) {
-        width(80);
+    if (isCoCo3 && SCREEN_WIDTH > 32) {
+        width(SCREEN_WIDTH);
         setHighSpeed(TRUE);
         mapColors(cursesColors);
         setColor(COLOR_WHITE, COLOR_BLACK);
@@ -158,4 +158,5 @@ void clear() {
     cls(COLOR_BLACK);
 }
 
-
+byte getTextWidth() { return SCREEN_WIDTH; }
+byte getTextHeight() { return SCREEN_HEIGHT; }

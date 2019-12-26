@@ -61,6 +61,7 @@ CARD* firstCard = NULL;  //NULL non selected
 CARD* secondCard = NULL;  //NULL non selected
 char buffer[80*25];
 BOOL playing = TRUE;
+BOOL forceFlipped = FALSE;      //debug flag to always show underside of card
 int score = 0;
 int best = -1;
 
@@ -160,6 +161,11 @@ void drawCard(byte x,byte y,CARD* c) {
     //not flipped and cursor on it      COLOR_CARD_TOP_CURSOR
     //flipped and cursor on it          COLOR_CARD_UNDERSIDE_CURSOR
 
+    if (forceFlipped) {
+        buff[1] = c->value;
+        buff[2] = c->suite;
+    }
+
     if (c == selectedCard) {
         if (c->flipped) {
             buff[1] = c->value;
@@ -196,7 +202,7 @@ void drawCard(byte x,byte y,CARD* c) {
 
 void drawDeck() {
     int cardIndex = 0;
-    byte offsetx = SCREEN_WIDTH/2-(ROW_CARDS*5/2);
+    byte offsetx = getTextWidth()/2-(ROW_CARDS*5/2);
     byte y = OFFSET_TOP+4;
     while (cardIndex < 52) {
         for (int x = 0; x < ROW_CARDS; ++x) {
@@ -261,6 +267,22 @@ BOOL checkWin() {
     return 52 == flipped;
 }
 
+void showWin() {
+    if (score < best || best == -1) {
+        best = score;
+        drawScore();
+        sprintf(buffer, "You won in %d turns. New best!", score);
+    }
+    else {
+        sprintf(buffer, "You won in %d turns.", score);
+    }
+    showMessage(buffer);
+    score = 0;
+    initCards();
+}
+
+
+
 void drawTable() {
     colorPair(COLOR_NORMAL);
     centertext(OFFSET_TOP, TITLE);
@@ -298,6 +320,9 @@ void playGame() {
         case ENTER:
             isCardChosen = TRUE;
             break;
+        //case 'F':
+        //    forceFlipped = TRUE;
+        //    break;
         }
 
         if (selectx < 0) selectx = ROW_CARDS-1;
@@ -337,7 +362,12 @@ void playGame() {
                     firstCard->flipped = FALSE;
                     secondCard->flipped = FALSE;
                 }
-                showMessage(msg[match]);
+                if (checkWin()) {
+                    showWin();
+                }
+                else {
+                    showMessage(msg[match]);
+                }
                 firstCard = secondCard = NULL;
             }
         }
@@ -345,23 +375,53 @@ void playGame() {
         if (ch == 'W') {
             fakeWin();
             drawDeck();
-        }
-
-        if (checkWin()) {
-            if(score < best || best == -1) {
-                best = score;
-                drawScore();
-                sprintf(buffer, "You won in %d turns. New best!", score);
-            }
-            else {
-                sprintf(buffer, "You won in %d turns.", score);
-            }
-            showMessage(buffer);
-            score = 0;
-            initCards();
+            showWin();
         }
     }
     deinitSystem();
+}
+
+void title() {
+    clear();
+#ifdef _COCO_BASIC_
+    locate(0, 1);   //position the cursor out of sight
+#endif
+    byte y = 0;
+    byte offsetx = getTextWidth() / 2 - 40;
+    colorPair(COLOR_MESSAGE);
+    textoutxy(offsetx, y++, "                                   M E M O R Y                                  ");
+    colorPair(COLOR_NORMAL);
+    textoutxy(offsetx, y++, "");
+    textoutxy(offsetx, y++, "Memory, also known by the name Concentration, is a card game played with a ");
+    textoutxy(offsetx, y++, "standard deck of 52 cards. Cards include thirteen ranks numbered 2-10 (T for 10)");
+    textoutxy(offsetx, y++, "jack (J), queen (Q), king (K) and ace (A), in each of the four suites: ");
+    textoutxy(offsetx, y++, "");
+    textoutxy(offsetx, y++, "    clubs (C), diamonds (D), hearts (H), and spades (S).");
+    textoutxy(offsetx, y++, "");
+    textoutxy(offsetx, y++, "You flip cards over two at a time. If the rank matches (the suite does not need");
+    textoutxy(offsetx, y++, "to) you leave the cards face up and chose another two. If they do no match you");
+    textoutxy(offsetx, y++, "turn them over so they are face down again.");
+    textoutxy(offsetx, y++, "");
+    textoutxy(offsetx, y++, "You continue flipping cards two at a time, leaving matches face up, and flipping");
+    textoutxy(offsetx, y++, "ones that do not match back over until all cards have been matched.");
+    textoutxy(offsetx, y++, "");
+    textoutxy(offsetx, y++, "Your score is the number of turns you have made. The lower the score the better.");
+    textoutxy(offsetx, y++, "");
+    textoutxy(offsetx, y++, "Use the arrow keys, ENTER to select a card, ESCAPE to quit the game.");
+    textoutxy(offsetx, y++, "");
+    colorPair(COLOR_CARD_TOP);
+    centertext(y++, "PRESS ANY KEY TO CONTINUE");
+    textoutxy(offsetx, y++, "");
+    textoutxy(offsetx, y++, "");
+    colorPair(COLOR_MESSAGE);
+    textoutxy(offsetx, y++, "                           A game by Lee Patterson                              ");
+    textoutxy(offsetx, y++, "                            https://8BitCoder.com                               ");
+
+    //calculate a new random seed while waiting
+    int n = 0;
+    while (getkey() == -1)
+        n++;
+    srand(n);
 }
 
 void showCards() {
@@ -378,51 +438,18 @@ void showCards() {
     printf("\n");
 }
 
-void title() {
-    clear();
-#ifdef _COCO_BASIC_
-    locate(0, 1);   //position the cursor out of sight
-#endif
-    byte y = 0;
-    colorPair(COLOR_MESSAGE);
-    textoutxy(0, y++, "                                   M E M O R Y                                  ");
-    colorPair(COLOR_NORMAL);
-    textoutxy(0, y++, "");
-    textoutxy(0, y++, "Memory, also known by the name Concentration, is a card game played with a ");
-    textoutxy(0, y++, "standard deck of 52 cards. Cards include thirteen ranks numbered 2-10 (T for 10)");
-    textoutxy(0, y++, "jack (J), queen (Q), king (K) and ace (A), in each of the four suites: ");
-    textoutxy(0, y++, "");
-    textoutxy(0, y++, "    clubs (C), diamonds (D), hearts (H), and spades (S).");
-    textoutxy(0, y++, "");
-    textoutxy(0, y++, "You flip cards over two at a time. If the rank matches (the suite does not need");
-    textoutxy(0, y++, "to) you leave the cards face up and chose another two. If they do no match you");
-    textoutxy(0, y++, "turn them over so they are face down again.");
-    textoutxy(0, y++, "");
-    textoutxy(0, y++, "You continue flipping cards two at a time, leaving matches face up, and flipping");
-    textoutxy(0, y++, "ones that do not match back over until all cards have been matched.");
-    textoutxy(0, y++, "");
-    textoutxy(0, y++, "Your score is the number of turns you have made. The lower the score the better.");
-    textoutxy(0, y++, "");
-    textoutxy(0, y++, "Use the arrow keys, ENTER to select a card, ESCAPE to quit the game.");
-    textoutxy(0, y++, "");
-    colorPair(COLOR_CARD_TOP);
-    centertext(y++, "PRESS ANY KEY TO CONTINUE");
-    textoutxy(0, y++, "");
-    textoutxy(0, y++, "");
-    colorPair(COLOR_MESSAGE);
-    textoutxy(0, y++, "                           A game by Lee Patterson                              ");
-    textoutxy(0, y++, "                            https://8BitCoder.com                               ");
+void showWidthHeight() {
+    initSystem();
+    int w = getTextWidth();
+    int h = getTextHeight();
+    deinitSystem();
 
-    //calculate a new random seed while waiting
-    int n = 0;
-    while (getkey() == -1)
-        n++;
-    srand(n);
+    printf("w=%d h=%d\n", w, h);
 }
 
 int main()
 {
-    //showCards(); return 0;
+    //showWidthHeight(); return 0;
 
     initSystem();
     setupColorPairs();

@@ -76,3 +76,15 @@ void centertext(byte y, const char* s) {
     move(y, w / 2 - strlen(s) / 2);
     textout(s);
 }
+
+byte getTextWidth() {
+    int w, h;
+    getmaxyx(stdscr, h, w);
+    return w;
+}
+
+byte getTextHeight() {
+    int w, h;
+    getmaxyx(stdscr, h, w);
+    return h;
+}
