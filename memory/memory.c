@@ -305,24 +305,29 @@ void playGame() {
         case ESCAPE:
             playing = FALSE;
             break;
+        case 'a':
         case LEFT_ARROW: 
             selectx--;
             break;
+        case 'd':
         case RIGHT_ARROW:
             selectx++;
             break;
+        case 'w':
         case UP_ARROW:
             selecty -= 1;
             break;
+        case 's':
         case DOWN_ARROW:
             selecty += 1;
             break;
+        case ' ':
         case ENTER:
             isCardChosen = TRUE;
             break;
-        //case 'F':
-        //    forceFlipped = TRUE;
-        //    break;
+        case 'F':
+            forceFlipped = !forceFlipped;
+            break;
         }
 
         if (selectx < 0) selectx = ROW_CARDS-1;
