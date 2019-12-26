@@ -27,7 +27,7 @@ byte cursesColors[16] = {
      0, // 0 black
      8, // 1 med blue
     16, // 2 med green
-    24, // 3 med cyan
+     3, // 3 med cyan
     32, // 4 med red
     40, // 5 med magenta
     48, // 6 med yellow
@@ -37,7 +37,7 @@ byte cursesColors[16] = {
      0, // 0 black
      8, // 1 med blue
     16, // 2 med green
-    24, // 3 med cyan
+     3, // 3 med cyan
     32, // 4 med red
     40, // 5 med magenta
     48, // 6 med yellow
@@ -86,7 +86,6 @@ void mapmmu() {
     *((byte*)MMU_REGISTER) = PAGE_HIRES_TEXT;
 }
 
-//60 = 3C
 void unmapmmu() {
     *((byte*)MMU_REGISTER) = previousPageValue;
 }
