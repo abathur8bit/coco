@@ -7,6 +7,12 @@
 *md5*.txt
 *.exe
 *.zip
+memory/*.bat
+memory/*sha*.txt
+memory/*md5*.txt
+memory/*.exe
+memory/*.zip
+
 *.lst
 .vs
 out
