@@ -2,7 +2,11 @@
 *.dsk
 
 *.bin
-
+*.bat
+*sha*.txt
+*md5*.txt
+*.exe
+*.zip
 *.lst
 .vs
 out
