@@ -45,7 +45,7 @@
 
 #define WALL            '-'
 #define OPEN            '.'
-#define ATHING           'x'
+#define ATHING           'X'
 #define ONE '1'
 #define TWO '2'
 #define THREE '3'
@@ -121,18 +121,29 @@ void fillRoomWith(int sx, int sy, int maxw, int maxh, char c) {
     }
 }
 
-void createRoom(int sx, int sy, int maxw, int maxh,char c) {
-    int xpos = rnd(0, maxw-2);
-    int ypos = rnd(0, maxh-2);
-    int w = rnd(2, maxw - xpos);
-    int h = rnd(2, maxh - ypos);
+void createRoom(int sx, int sy, int maxw, int maxh, char c) {
+    int w = rnd(0, maxw - 1);
+    int h = rnd(0, maxh - 1);
 
-    xpos += sx;
-    ypos += sy;
-    for (int y = 0; y < h; ++y) {
-        for (int x = 0; x < w; ++x) {
-            map[ypos + y][xpos + x] = c;
+    if (w == 1) w = 2;
+    if (h == 1) h = 2;
+
+    int xpos = rnd(0, maxw - w - 1);
+    int ypos = rnd(0, maxh - h - 1);
+
+    if (w && h) {
+
+        xpos += sx;
+        ypos += sy;
+        for (int y = 0; y < h; ++y) {
+            for (int x = 0; x < w; ++x) {
+                map[ypos + y][xpos + x] = c;
+            }
         }
+    }
+    sprintf(buffer, "%d,%d %dx%d", xpos-sx, ypos-sy, w, h);
+    for (int i = 0; i < strlen(buffer); ++i) {
+        map[sy][sx + i] = buffer[i];
     }
 }
 
@@ -156,6 +167,7 @@ void createMap2x2() {
     fillRoomWith( 0,12, 40, 12, '2');
     fillRoomWith(40,12, 40, 12, '1');
 }
+
 void createMap() {
     resetMap();
 
@@ -165,7 +177,7 @@ void createMap() {
     int h = getTextHeight() / rows;
     for (int y = 0; y < rows; ++y) {
         for (int x = 0; x < cols; ++x) {
-            createRoom(x * w, y * h, w, h, OPEN);
+            createRoom(x * w, y * h, w-1, h-1, OPEN);
         }
     }
 }
@@ -202,7 +214,8 @@ void drawField() {
                     break;
                 default:
                     colorPair(CLR_NORMAL);
-                    textoutxy(x, y, ".");
+                    sprintf(buffer, "%c", map[y][x]);
+                    textoutxy(x, y, buffer);
                     break;
             }
         }
@@ -287,10 +300,9 @@ void showWidthHeight() {
 
 int main()
 {
-    //showWidthHeight(); return 0;
-
     initSystem();
     setupColorPairs();
+
     //title();
     playGame();
     printf("Thanks for playing!\n");

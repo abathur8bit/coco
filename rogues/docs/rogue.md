@@ -95,3 +95,7 @@ http://www.cardinalquest.com/ looks interesting, release 2011, $10
 
 Giant list of computer game programmers: 
 https://dadgum.com/giantlist
+
+# Resources
+Playing notes:
+http://www.the-spoiler.com/ADVENTURE/Computer.systems/rogue.2.html
