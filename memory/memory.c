@@ -325,9 +325,9 @@ void playGame() {
         case ENTER:
             isCardChosen = TRUE;
             break;
-        case 'F':
-            forceFlipped = !forceFlipped;
-            break;
+        //case 'F':
+        //    forceFlipped = !forceFlipped;
+        //    break;
         }
 
         if (selectx < 0) selectx = ROW_CARDS-1;
@@ -377,11 +377,11 @@ void playGame() {
             }
         }
 
-        if (ch == 'W') {
-            fakeWin();
-            drawDeck();
-            showWin();
-        }
+        //if (ch == 'W') {
+        //    fakeWin();
+        //    drawDeck();
+        //    showWin();
+        //}
     }
     deinitSystem();
 }
