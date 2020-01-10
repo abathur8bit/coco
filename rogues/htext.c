@@ -1,8 +1,29 @@
+/* *****************************************************************************
+ * Created by Lee Patterson 12/20/19
+ *
+ * Copyright 2019 Lee Patterson <https://github.com/abathur8bit>
+ *
+ * You may use and modify at will. Please credit me in the source.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ******************************************************************************/
+
 #include "coco.h"
 #include "stdarg.h"
 #include "htext.h"
 
 byte previousPageValue;
+byte previousBorderValue;
 int cursorx = 0;
 int cursory = 0;
 byte colorAttr = 2;
@@ -70,6 +91,8 @@ void initSystem() {
         setHighSpeed(TRUE);
         mapColors(cursesColors);
         setColor(COLOR_WHITE, COLOR_BLACK);
+        previousBorderValue = *((byte*)BORDER_ADDR);
+        *((byte*)BORDER_ADDR) = 0;
     }
 }
 
@@ -77,6 +100,7 @@ void deinitSystem() {
     if (isCoCo3) {
         setHighSpeed(FALSE);
         mapColors(defaultRgbColors);
+        *((byte*)BORDER_ADDR) = previousBorderValue;
     }
     cls(1);
 }
@@ -136,6 +160,21 @@ void textoutxy(byte x, byte y, const char* s) {
     textout(s);
 }
 
+void charoutxy(byte x, byte y, const char ch) {
+    cursorx = x;
+    cursory = y;
+    charout(ch);
+}
+
+void charout(const char ch) {
+    mapmmu();
+    byte* addr = (byte*)PAGE_ADDR + (cursory * 160 + cursorx * 2);
+    *addr = ch;
+    *(addr + 1) = colorAttr;
+    cursorx++;
+    unmapmmu();
+}
+
 void centertext(byte y, const char* s) {
     cursory = y;
     cursorx = SCREEN_WIDTH / 2 - strlen(s) / 2;
@@ -157,5 +196,10 @@ void clear() {
     cls(COLOR_BLACK);
 }
 
-byte getTextWidth() { return SCREEN_WIDTH; }
-byte getTextHeight() { return SCREEN_HEIGHT; }
+byte getTextWidth() { 
+    return SCREEN_WIDTH; 
+}
+
+byte getTextHeight() { 
+    return SCREEN_HEIGHT; 
+}

@@ -34,6 +34,7 @@
 #include <time.h>
 #include <ctype.h>
 #include "cursestext.h"
+#include <string.h>
 
 #endif //_COCO_BASIC_
 
@@ -52,11 +53,14 @@
 
 #define OFFSET_TOP      2   //where to start drawing text
 
-char map[24][80];
+#define MAX_ROWS 24
+#define MAX_COLS 80
+char map[MAX_ROWS][MAX_COLS];
 char buffer[80*25];
 BOOL playing = TRUE;
 byte rows = 3;
 byte cols = 3;
+int gameKey = 1;
 
 /**
  * Returns a number between min and max inclusive.
@@ -100,8 +104,8 @@ void colorPair(byte pair) {
 }
 
 void resetMap() {
-    int w = getTextWidth();
-    int h = getTextHeight();
+    int w = MAX_COLS;
+    int h = MAX_ROWS;
     for (int y = 0; y < h; ++y) {
         for (int x = 0; x < w; ++x) {
             map[y][x] = WALL;
@@ -110,6 +114,7 @@ void resetMap() {
 }
 
 void initGame() {
+    srand(gameKey);
     resetMap();
 }
 
@@ -118,32 +123,6 @@ void fillRoomWith(int sx, int sy, int maxw, int maxh, char c) {
         for (int x = 0; x < maxw; ++x) {
             map[sy + y][sx + x] = c;
         }
-    }
-}
-
-void createRoom(int sx, int sy, int maxw, int maxh, char c) {
-    int w = rnd(0, maxw - 1);
-    int h = rnd(0, maxh - 1);
-
-    if (w == 1) w = 2;
-    if (h == 1) h = 2;
-
-    int xpos = rnd(0, maxw - w - 1);
-    int ypos = rnd(0, maxh - h - 1);
-
-    if (w && h) {
-
-        xpos += sx;
-        ypos += sy;
-        for (int y = 0; y < h; ++y) {
-            for (int x = 0; x < w; ++x) {
-                map[ypos + y][xpos + x] = c;
-            }
-        }
-    }
-    sprintf(buffer, "%d,%d %dx%d", xpos-sx, ypos-sy, w, h);
-    for (int i = 0; i < strlen(buffer); ++i) {
-        map[sy][sx + i] = buffer[i];
     }
 }
 
@@ -168,11 +147,47 @@ void createMap2x2() {
     fillRoomWith(40,12, 40, 12, '1');
 }
 
+void createRoom(int sx, int sy, int maxw, int maxh, char c) {
+    float widthScale[] = { 50,50,50,50,50,50,40,40,40,30,30,10,10,0,0,0,0 };
+    int scale = rnd(0, sizeof(widthScale) / sizeof(widthScale[0]) - 1);
+    int minw = (int)(((float)maxw) * (widthScale[scale] / 100));
+    int minh = (int)(((float)maxh) * (widthScale[scale] / 100));
+
+    if (minw && minh) {
+        int w = rnd(minw, maxw - 1);
+        int h = rnd(minh, maxh - 1);
+
+        if (w == 1) w = 2;
+        if (h == 1) h = 2;
+
+        int xpos = rnd(0, maxw - w - 1);
+        int ypos = rnd(0, maxh - h - 1);
+
+        if (w && h) {
+
+            xpos += sx;
+            ypos += sy;
+            for (int y = 0; y < h; ++y) {
+                for (int x = 0; x < w; ++x) {
+                    map[ypos + y][xpos + x] = c;
+                }
+            }
+        }
+        sprintf(buffer, "p%d,%d d%dx%d m%dx%d s%d", xpos - sx, ypos - sy, w, h, minw, minh, scale);
+        for (byte i = 0; i < strlen(buffer); ++i) {
+            map[sy][sx + i] = buffer[i];
+        }
+    }
+}
+
 void createMap() {
     resetMap();
-
-    cols = (byte)rnd(2,4);
-    rows = (byte)rnd(2,3);
+    int colSizeScale[] = {3,3,3,3,3,3,3,3,3,2,2,2,2,2,4,4};
+    int rowSizeScale[] = {3,3,3,3,3,2,2,2,2,2};
+    cols = colSizeScale[rnd(0, sizeof(colSizeScale) / sizeof(colSizeScale[0])-1)];
+    rows = rowSizeScale[rnd(0, sizeof(rowSizeScale) / sizeof(rowSizeScale[0])-1)];
+    //cols = (byte)rnd(2,4);
+    //rows = (byte)rnd(2,3);
     int w = getTextWidth() / cols;
     int h = getTextHeight() / rows;
     for (int y = 0; y < rows; ++y) {
@@ -183,39 +198,38 @@ void createMap() {
 }
 
 void drawField() {
-    int w = getTextWidth();
-    int h = SCREEN_HEIGHT;
-    for (int y = 0; y < h; ++y) {
-        for (int x = 0; x < w; ++x) {
+    byte w = MAX_COLS;
+    byte h = MAX_ROWS;
+    for (byte y = 0; y < h; ++y) {
+        for (byte x = 0; x < w; ++x) {
             switch (map[y][x]) {
                 case WALL: 
                     colorPair(CLR_WALL);
-                    textoutxy(x, y, " ");
+                    charoutxy(x, y, ' ');
                     break;
                 case OPEN:
                     colorPair(CLR_OPEN);
-                    textoutxy(x, y, " ");
+                    charoutxy(x, y, ' ');
                     break;
                 case ATHING:
                     colorPair(CLR_MESSAGE);
-                    textoutxy(x, y, " ");
+                    charoutxy(x, y, ' ');
                     break;
                 case '1':
                     colorPair(CLR_NORMAL);
-                    textoutxy(x, y, "1");
+                    charoutxy(x, y, '1');
                     break;
                 case '2':
                     colorPair(CLR_NORMAL);
-                    textoutxy(x, y, "2");
+                    charoutxy(x, y, '2');
                     break;
                 case '3':
                     colorPair(CLR_NORMAL);
-                    textoutxy(x, y, "3");
+                    charoutxy(x, y, '3');
                     break;
                 default:
                     colorPair(CLR_NORMAL);
-                    sprintf(buffer, "%c", map[y][x]);
-                    textoutxy(x, y, buffer);
+                    charoutxy(x, y, map[y][x]);
                     break;
             }
         }
@@ -232,6 +246,7 @@ void showMessage(const char* s) {
 }
 
 void playGame() {
+    int level[5][2] = { {2,2},{2,2},{3,2},{3,3},{4,3} };
     clear();
     initGame();
     int selectx = 0;
@@ -243,7 +258,7 @@ void playGame() {
 
         colorPair(CLR_NORMAL);
         sprintf(buffer, "cols=%d rows=%d", cols, rows);
-        textoutxy(0, 24, buffer);
+        textoutxy(0, 23, buffer);
 
         int ch = waitforkey();
         switch (ch) {
@@ -276,17 +291,22 @@ void title() {
 #ifdef _COCO_BASIC_
     locate(0, 1);   //position the cursor out of sight
 #endif
-    byte y = 0;
+    byte y = getTextHeight()/2;
     byte offsetx = getTextWidth() / 2 - 40;
     colorPair(CLR_NORMAL);
     centertext(y++, TITLE);
-    centertext(23, "A game by Lee Patterson - https://8BitCoder.com");
+
+    sprintf(buffer, "wxh=%dx%d", getTextWidth(), getTextHeight());
+    centertext(0, buffer);
+    y = 22;
+    centertext(y++, "A game by Lee Patterson");
+    centertext(y++, "https://8BitCoder.com");
 
     //calculate a new random seed while waiting
     int n = 0;
     while (getkey() == -1)
         n++;
-    srand(n);
+    gameKey = n;
 }
 
 void showWidthHeight() {
@@ -298,14 +318,26 @@ void showWidthHeight() {
     printf("w=%d h=%d\n", w, h);
 }
 
-int main()
-{
+#ifndef _COCO_BASIC_
+int main(int argc,char* argv[]) {
+#else
+int main() {
+#endif
     initSystem();
     setupColorPairs();
 
-    //title();
+    title();
+#ifndef _COCO_BASIC_
+    if (argc > 1) {
+        gameKey = atoi(argv[1]);
+        srand(gameKey);
+    }
+#endif
+
     playGame();
     printf("Thanks for playing!\n");
     printf("https://8BitCoder.com\n\n");
-	return 0;
+    printf("Screen size was %dx%d\n", getTextWidth(), getTextHeight());
+    printf("Game key: %d\n", gameKey);
+    return 0;
 }

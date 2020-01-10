@@ -6,6 +6,7 @@
 
 #define ESCAPE              27  //key code for escape key
 #define ENTER               10  //key code for enter key
+#define BACKSPACE           8
 #define LEFT_ARROW          0x104
 #define RIGHT_ARROW         0x105
 #define UP_ARROW            0x103
@@ -26,6 +27,8 @@ int getkey();
 void gotoxy(byte x, byte y);
 void textout(const char* s);
 void textoutxy(byte x, byte y, const char* s);
+void charout(const char ch);
+void charoutxy(byte x, byte y, const char ch);
 void setColor(byte fg, byte bg);
 void centertext(byte y, const char* s);
 byte getTextWidth();
