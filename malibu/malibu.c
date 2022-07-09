@@ -1,4 +1,5 @@
 /* *****************************************************************************
+/* *****************************************************************************
  * Created by Lee Patterson Friday July 8, 2022
  *
  * Copyright 2022, Lee Patterson <https://github.com/abathur8bit>
@@ -34,6 +35,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <ctype.h>
+#include <string.h>
 #include "cursestext.h"
 
 #endif //_COCO_BASIC_
@@ -47,12 +49,30 @@
 #define COLOR_MESSAGE                       6
 #define COLOR_CARD_UNDERSIDE_NOCURSOR       7
 
-#define OFFSET_TOP                          0   //where to start drawing text
+#define OFFSET_TOP                          2   //where to start drawing text
 
 #define ROW_CARDS 13
-int score[2];
+#define MAX_DICE 3
+#define COMPUTER 0
+#define PLAYER   1
+
+int totals[2];
+int scores[2];
 char buffer[80*25];
 BOOL playing = TRUE;
+int playerRolls[MAX_DICE];
+int compterRolls[MAX_DICE];
+char scoreNameFlag[8];
+char* scoreName[8] = {
+        "Sough",
+        "Easy Rider",
+        "Stright Road",
+        "Triple Crown",
+        "Two of a Kind",
+        "Lucky Joe",
+        "Low and Mean",
+        "High Roller"
+};
 
 /**
  * Returns a number between min and max inclusive.
@@ -120,7 +140,7 @@ void drawScore() {
     colorPair(COLOR_NORMAL);
     //                                       1         2         3         4         5         6         7         8
     //                              12345678901234567890123456789012345678901234567890123456789012345678901234567890
-    snprintf(buffer,sizeof(buffer),"SCORE: PLAYER 1: %02d                                                 COMPUTER: %02d",score[0],score[1]);
+    snprintf(buffer,sizeof(buffer),"SCORE: PLAYER 1: %02d                                                 COMPUTER: %02d",scores[0],scores[1]);
     textoutxy(0,1,buffer);
 //    textoutxy(0,1,"         1         2         3         4         5         6         7         8");
 //    textoutxy(0,2,"12345678901234567890123456789012345678901234567890123456789012345678901234567890");
@@ -131,32 +151,106 @@ void drawScore() {
 
 void drawHeader() {
     colorPair(COLOR_NORMAL);
-    centertext(OFFSET_TOP, TITLE);
+    centertext(0, TITLE);
     drawScore();
 }
 
-void rollComputer() {
 
+void rollComputer() {
+    totals[COMPUTER]=0;
+    for(int i=0; i<MAX_DICE; i++) {
+        compterRolls[i]=rnd(1,6);
+        totals[COMPUTER]+=compterRolls[i];
+    }
+    sprintf(buffer,"Rolling for computer : %d %d %d",compterRolls[0],compterRolls[1],compterRolls[2]);
+    textoutxy(0,OFFSET_TOP,buffer);
+    int ch = waitforkey();
+    if(ESCAPE==ch) playing=FALSE;
 }
 
 void rollPlayer() {
-    
+    totals[PLAYER]=0;
+    for(int i=0; i<MAX_DICE; i++) {
+        playerRolls[i]=rnd(1,6);
+    }
+    sprintf(buffer,"\"Rolling for player 1 : %d %d %d",playerRolls[0],playerRolls[1],playerRolls[2]);
+    textoutxy(0,OFFSET_TOP+1,buffer);
+    int ch = waitforkey();
+    if(ESCAPE==ch) playing=FALSE;
 }
+
+void total(const char* who,int* scorePrimary,int* scoreSecondary,int* total,int rolls[]) {
+    printf("%s roll=%d %d %d  total=%d score primary=%d secondary=%d\n",who,rolls[0],rolls[1],rolls[2],*total,*scorePrimary,*scoreSecondary);
+
+    if((rolls[0]==rolls[1] || rolls[1]==rolls[2] || rolls[0]==rolls[2]) && *total == 13 ) {
+        *scorePrimary+=10;
+        *scoreSecondary-=10;
+        printf("  %s: %s\n",who,scoreName[0]);    //Sough
+    }
+    if(*total==6 || *total==15) {
+        *scorePrimary+=4;
+        *scoreSecondary-=4;
+        printf("  %s: %s\n",who,scoreName[1]);    //easy rider
+    }
+    if(*total==9 || *total==12) {
+        *scorePrimary+=3;
+        *scoreSecondary-=3;
+        printf("  %s: %s\n",who,scoreName[2]);    //straight road
+    }
+    if(rolls[0]==rolls[1] && rolls[0]==rolls[2]) {
+        *scorePrimary+=5;
+        *scoreSecondary-=5;
+        printf("  %s: %s\n",who,scoreName[3]);    //triple crown
+    }
+    if((rolls[0]==rolls[1] || rolls[1]==rolls[2] || rolls[0]==rolls[2]) && !(rolls[0]==rolls[1] && rolls[0]==rolls[2])) {
+        *scorePrimary+=5;
+        *scoreSecondary-=5;
+        printf("  %s: %s\n",who,scoreName[4]);    //two of a kind
+    }
+    if(*total==13) {
+        *scorePrimary+=6;
+        *scoreSecondary-=6;
+        printf("  %s: %s\n",who,scoreName[5]);    //lucky joe
+    }
+    if(*total==3) {
+        *scorePrimary+=7;
+        *scoreSecondary-=7;
+        printf("  %s: %s\n",who,scoreName[6]);    //low and mean
+    }
+    if(*total==18) {
+        *scorePrimary+=12;
+        *scoreSecondary-=12;
+        printf("  %s: %s\n",who,scoreName[7]);    //high roller
+    }
+    printf("  score primary=%d secondary=%d\n",*scorePrimary,*scoreSecondary);
+}
+
+void totalComputer() {
+    total("Computer",&scores[COMPUTER],&scores[PLAYER],&totals[COMPUTER],compterRolls);
+}
+
+void totalPlayer() {
+    total("Player 1",&scores[PLAYER],&scores[COMPUTER],&totals[PLAYER],playerRolls);
+}
+
 void playGame() {
     clear();
     while (playing) {
         drawHeader();
         rollComputer();
+        if(!playing) continue;
         rollPlayer();
         totalComputer();
+        if(!playing) continue;
         totalPlayer();
-        int ch = waitforkey();
-        switch (ch) {
-        case ESCAPE:
-            playing = FALSE;
-            break;
-
-        }
+        if(!playing) continue;
+//        int ch = waitforkey();
+//        switch (ch) {
+//        case ESCAPE:
+//            playing = FALSE;
+//            break;
+//
+//        }
     }
     deinitSystem();
 }
@@ -196,15 +290,36 @@ void showWidthHeight() {
     printf("w=%d h=%d\n", w, h);
 }
 
+int calc(int* rolls) {
+    int total=0;
+    for(int i=0; i<3; i++) {
+        total+=rolls[i];
+    }
+    return total;
+}
+
+void testRoll(int a,int b,int c) {
+    compterRolls[0]=a;
+    compterRolls[1]=b;
+    compterRolls[2]=c;
+    totals[COMPUTER]=calc(compterRolls);
+    scores[COMPUTER]=0;
+    scores[PLAYER]=0;
+    total("Computer",&scores[COMPUTER],&scores[PLAYER],&totals[COMPUTER],compterRolls);
+}
 int main()
 {
     //showWidthHeight(); return 0;
+//    testRoll(5,5,3);
+//    testRoll(1,2,12);
+    testRoll(6,6,6);
+    testRoll(2,2,2);
 
-    initSystem();
-    setupColorPairs();
-    title();
-    playGame();
-    printf("Thanks for playing!\n");
-    printf("https://8BitCoder.com\n\n");
+//    initSystem();
+//    setupColorPairs();
+//    title();
+//    playGame();
+//    printf("Thanks for playing!\n");
+//    printf("https://8BitCoder.com\n\n");
 	return 0;
 }
