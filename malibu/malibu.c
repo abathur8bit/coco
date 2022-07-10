@@ -41,9 +41,9 @@
 #endif //_COCO_BASIC_
 
 #define TITLE                               "CMALIBU"
-#define COLOR_CARD_TOP                      1
-#define COLOR_CARD_UNDERSIDE                2
-#define COLOR_CARD_TOP_CURSOR               3
+#define COLOR_TITLE                      1
+#define COLOR_DIE                2
+#define COLOR_SCORE               3
 #define COLOR_CARD_UNDERSIDE_CURSOR         4
 #define COLOR_NORMAL                        5
 #define COLOR_MESSAGE                       6
@@ -90,9 +90,9 @@ int rnd(int min, int max) {
 
 void setupColorPairs() {
 #ifndef _COCO_BASIC_
-    init_pair(COLOR_CARD_TOP, COLOR_YELLOW, COLOR_RED);
-    init_pair(COLOR_CARD_UNDERSIDE, COLOR_BLACK, COLOR_YELLOW);
-    init_pair(COLOR_CARD_TOP_CURSOR, COLOR_WHITE, COLOR_CYAN);
+    init_pair(COLOR_TITLE, COLOR_YELLOW, COLOR_RED);
+    init_pair(COLOR_DIE, COLOR_BLACK, COLOR_YELLOW);
+    init_pair(COLOR_SCORE, COLOR_WHITE, COLOR_CYAN);
     init_pair(COLOR_CARD_UNDERSIDE_CURSOR, COLOR_WHITE, COLOR_CYAN);
     init_pair(COLOR_CARD_UNDERSIDE_NOCURSOR, COLOR_BLACK, COLOR_CYAN);
     init_pair(COLOR_NORMAL, COLOR_WHITE, COLOR_BLACK);
@@ -104,13 +104,13 @@ void setupColorPairs() {
 void colorPair(byte pair) {
 #ifdef _COCO_BASIC_
     switch (pair) {
-    case COLOR_CARD_TOP:
+    case COLOR_TITLE:
         setColor(COLOR_YELLOW, COLOR_RED);
         break;
-    case COLOR_CARD_UNDERSIDE:
+    case COLOR_DIE:
         setColor(COLOR_BLACK, COLOR_YELLOW);
         break;
-    case COLOR_CARD_TOP_CURSOR:
+    case COLOR_SCORE:
         setColor(COLOR_WHITE, COLOR_CYAN);
         break;
     case COLOR_CARD_UNDERSIDE_CURSOR:
@@ -141,22 +141,20 @@ void showMessage(const char* s) {
 }
 
 void drawScore() {
-    colorPair(COLOR_NORMAL);
-    //                                       1         2         3         4         5         6         7         8
-    //                              12345678901234567890123456789012345678901234567890123456789012345678901234567890
     snprintf(buffer,sizeof(buffer),"ROUND: %d   SCORE: PLAYER 1: %02d  COMPUTER: %02d",roundNumber+1,scores[PLAYER],scores[COMPUTER]);
+    textoutxy(0,1, "                                                                                ");
     textoutxy(0,1,buffer);
-//    textoutxy(0,1,"         1         2         3         4         5         6         7         8");
-//    textoutxy(0,2,"12345678901234567890123456789012345678901234567890123456789012345678901234567890");
-//    textoutxy(0,3,buffer);
 }
 
 
 
 void drawHeader() {
-    colorPair(COLOR_NORMAL);
+    colorPair(COLOR_TITLE);
+    textoutxy(0, 0, "                                                                                ");
     centertext(0, TITLE);
+    colorPair(COLOR_SCORE);
     drawScore();
+    colorPair(COLOR_NORMAL);
 }
 
 char pipchar(int pip) {
@@ -201,7 +199,7 @@ void drawDie(byte x,byte y,int pip) {
     };
     byte xx=0;
     byte yy=0;
-    colorPair(COLOR_CARD_UNDERSIDE);
+    colorPair(COLOR_DIE);
     gotoxy(x+xx,y+(yy++));
     printw("+-------+");
     gotoxy(x+xx,y+(yy++));
@@ -227,9 +225,6 @@ void rollComputer() {
         compterRolls[i]=rnd(1,6);
         totals[COMPUTER]+=compterRolls[i];
     }
-    sprintf(buffer,"Rolling for computer : %d %d %d = %d",compterRolls[0],compterRolls[1],compterRolls[2],totals[COMPUTER]);
-    textoutxy(0,OFFSET_TOP,buffer);
-    drawDice(1,OFFSET_TOP+2,compterRolls);
 }
 
 void rollPlayer() {
@@ -238,9 +233,6 @@ void rollPlayer() {
         playerRolls[i]=rnd(1,6);
         totals[PLAYER]+=playerRolls[i];
     }
-    sprintf(buffer,"Rolling for player 1 : %d %d %d = %d",playerRolls[0],playerRolls[1],playerRolls[2],totals[PLAYER]);
-    textoutxy(40,OFFSET_TOP,buffer);
-    drawDice(41,OFFSET_TOP+2,playerRolls);
 }
 
 /** Calculate the given players score and set it's score name flags. */
@@ -334,12 +326,18 @@ void playGame() {
                 y=10;
                 if(PLAYER==player) {
                     x=0;
+                    textoutxy(x,OFFSET_TOP,"Player");
+                    drawDice(x,OFFSET_TOP+2,playerRolls);
+                    sprintf(buffer,"Total: %d",totals[PLAYER]);
+                    textoutxy(x,OFFSET_TOP+8,buffer);
                     gotoxy(x,y++);
-                    printw("SCORE player=%d",scores[PLAYER]);
                 } else {
                     x=40;
+                    textoutxy(x,OFFSET_TOP,"Computer");
+                    drawDice(x,OFFSET_TOP+2,compterRolls);
+                    sprintf(buffer,"Total: %d",totals[COMPUTER]);
+                    textoutxy(x,OFFSET_TOP+8,buffer);
                     gotoxy(x,y++);
-                    printw("SCORE computer=%d",scores[COMPUTER]);
                 }
                 for(int n=0; n<MAX_SCORE_NAMES; n++) {
                     if(scoreNameFlag[player][n]) {
@@ -372,7 +370,7 @@ void title() {
     textoutxy(offsetx, y++, "                                     CMALIBU                                    ");
     colorPair(COLOR_NORMAL);
     textoutxy(offsetx, y++, "");
-    colorPair(COLOR_CARD_TOP);
+    colorPair(COLOR_TITLE);
     centertext(y++, "PRESS ANY KEY TO CONTINUE");
     textoutxy(offsetx, y++, "");
     textoutxy(offsetx, y++, "");
