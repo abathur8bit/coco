@@ -141,9 +141,13 @@ void showMessage(const char* s) {
 }
 
 void drawScore() {
-    snprintf(buffer,sizeof(buffer),"ROUND: %d   SCORE: PLAYER 1: %02d  COMPUTER: %02d",roundNumber+1,scores[PLAYER],scores[COMPUTER]);
-    textoutxy(0,1, "                                                                                ");
-    textoutxy(0,1,buffer);
+    byte y=1;
+    textoutxy(0,y, "                                                                                ");
+    snprintf(buffer,sizeof(buffer),"ROUND: %d",roundNumber+1);
+    centertext(y++,buffer);
+    snprintf(buffer,sizeof(buffer),"Player 1: %-2d                            COMPUTER: %-2d",scores[PLAYER],scores[COMPUTER]);
+    textoutxy(0,y, "                                                                                ");
+    textoutxy(0,y++,buffer);
 }
 
 
