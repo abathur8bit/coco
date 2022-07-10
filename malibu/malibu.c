@@ -68,14 +68,14 @@ int playerRolls[MAX_DICE];
 int compterRolls[MAX_DICE];
 char scoreNameFlag[MAX_PLAYERS][MAX_SCORE_NAMES];
 char* scoreName[MAX_SCORE_NAMES] = {
-        "Sough",
-        "Easy Rider",
-        "Stright Road",
-        "Triple Crown",
-        "Two of a Kind",
-        "Lucky Joe",
-        "Low and Mean",
-        "High Roller"
+        "Sough (10)",
+        "Easy Rider (4)",
+        "Stright Road (3)",
+        "Triple Crown (5)",
+        "Two of a Kind (3)",
+        "Lucky Joe (6)",
+        "Low and Mean (7)",
+        "High Roller (12)"
 };
 
 /**
@@ -132,30 +132,34 @@ void colorPair(byte pair) {
 }
 
 void showMessage(const char* s) {
+    byte offsetx = getTextWidth() / 2 - 40;
     colorPair(COLOR_MESSAGE);
-    textoutxy(0, 23, "                                                                                ");
+    textoutxy(offsetx, 23, "                                                                                ");
     centertext(23, s);
     if (waitforkey() == ESCAPE) playing = FALSE;
     colorPair(COLOR_NORMAL);
-    textoutxy(0, 23,"                                                                                ");
+    textoutxy(offsetx, 23,"                                                                                ");
 }
 
 void drawScore() {
+    byte offsetx = getTextWidth() / 2 - 40;
     byte y=1;
-    textoutxy(0,y, "                                                                                ");
+    textoutxy(offsetx,y, "                                                                                ");
     snprintf(buffer,sizeof(buffer),"ROUND: %d",roundNumber+1);
     centertext(y++,buffer);
     snprintf(buffer,sizeof(buffer),"Player 1: %-2d                            COMPUTER: %-2d",scores[PLAYER],scores[COMPUTER]);
-    textoutxy(0,y, "                                                                                ");
-    textoutxy(0,y++,buffer);
+    textoutxy(offsetx,y, "                                                                                ");
+    textoutxy(offsetx,y++,buffer);
 }
 
 
-
 void drawHeader() {
+    byte offsetx = getTextWidth() / 2 - 40;
+    byte x=40-strlen(TITLE)/2;
     colorPair(COLOR_TITLE);
-    textoutxy(0, 0, "                                                                                ");
-    centertext(0, TITLE);
+    textoutxy(offsetx, 0, "                                                                                ");
+    textoutxy(offsetx+x,0,TITLE);
+//    centertext(0, TITLE);
     colorPair(COLOR_SCORE);
     drawScore();
     colorPair(COLOR_NORMAL);
@@ -241,7 +245,7 @@ void rollPlayer() {
 
 /** Calculate the given players score and set it's score name flags. */
 void total(const char* who,char scoreFlags[],int* scorePrimary,int* scoreSecondary,int* total,int rolls[]) {
-    printf("%s roll=%d %d %d  total=%d score primary=%d secondary=%d\n",who,rolls[0],rolls[1],rolls[2],*total,*scorePrimary,*scoreSecondary);
+//    printf("%s roll=%d %d %d  total=%d score primary=%d secondary=%d\n",who,rolls[0],rolls[1],rolls[2],*total,*scorePrimary,*scoreSecondary);
 
     //clear flags
     for(int i=0; i<MAX_SCORE_NAMES; i++) {
@@ -252,51 +256,51 @@ void total(const char* who,char scoreFlags[],int* scorePrimary,int* scoreSeconda
         *scorePrimary+=10;
         *scoreSecondary-=10;
         scoreFlags[0]=1;
-        printf("  %s: %s\n",who,scoreName[0]);    //Sough
+//        printf("  %s: %s\n",who,scoreName[0]);    //Sough
     }
     if(*total==6 || *total==15) {
         *scorePrimary+=4;
         *scoreSecondary-=4;
         scoreFlags[1]=1;
-        printf("  %s: %s\n",who,scoreName[1]);    //easy rider
+//        printf("  %s: %s\n",who,scoreName[1]);    //easy rider
     }
     if(*total==9 || *total==12) {
         *scorePrimary+=3;
         *scoreSecondary-=3;
         scoreFlags[2]=1;
-        printf("  %s: %s\n",who,scoreName[2]);    //straight road
+//        printf("  %s: %s\n",who,scoreName[2]);    //straight road
     }
     if(rolls[0]==rolls[1] && rolls[0]==rolls[2]) {
         *scorePrimary+=5;
         *scoreSecondary-=5;
         scoreFlags[3]=1;
-        printf("  %s: %s\n",who,scoreName[3]);    //triple crown
+//        printf("  %s: %s\n",who,scoreName[3]);    //triple crown
     }
     if((rolls[0]==rolls[1] || rolls[1]==rolls[2] || rolls[0]==rolls[2]) && !(rolls[0]==rolls[1] && rolls[0]==rolls[2])) {
         *scorePrimary+=5;
         *scoreSecondary-=5;
         scoreFlags[4]=1;
-        printf("  %s: %s\n",who,scoreName[4]);    //two of a kind
+//        printf("  %s: %s\n",who,scoreName[4]);    //two of a kind
     }
     if(*total==13) {
         *scorePrimary+=6;
         *scoreSecondary-=6;
         scoreFlags[5]=1;
-        printf("  %s: %s\n",who,scoreName[5]);    //lucky joe
+//        printf("  %s: %s\n",who,scoreName[5]);    //lucky joe
     }
     if(*total==3) {
         *scorePrimary+=7;
         *scoreSecondary-=7;
         scoreFlags[6]=1;
-        printf("  %s: %s\n",who,scoreName[6]);    //low and mean
+//        printf("  %s: %s\n",who,scoreName[6]);    //low and mean
     }
     if(*total==18) {
         *scorePrimary+=12;
         *scoreSecondary-=12;
         scoreFlags[7]=1;
-        printf("  %s: %s\n",who,scoreName[7]);    //high roller
+//        printf("  %s: %s\n",who,scoreName[7]);    //high roller
     }
-    printf("  score primary=%d secondary=%d\n",*scorePrimary,*scoreSecondary);
+//    printf("  score primary=%d secondary=%d\n",*scorePrimary,*scoreSecondary);
 }
 
 void totalComputer() {
@@ -313,10 +317,40 @@ void initGame() {
     }
 }
 
+void drawPlayers() {
+    byte offsetx = getTextWidth() / 2 - 40;
+    byte x;
+    byte y;
+    for(int player=0; player<MAX_PLAYERS; player++) {
+        y=10;
+        if(PLAYER==player) {
+            x=offsetx;
+            textoutxy(x,OFFSET_TOP,"Player");
+            drawDice(x,OFFSET_TOP+2,playerRolls);
+            sprintf(buffer,"Total: %d",totals[PLAYER]);
+            textoutxy(x,OFFSET_TOP+8,buffer);
+            gotoxy(x,y++);
+        } else {
+            x=offsetx+40;
+            textoutxy(x,OFFSET_TOP,"Computer");
+            drawDice(x,OFFSET_TOP+2,compterRolls);
+            sprintf(buffer,"Total: %d",totals[COMPUTER]);
+            textoutxy(x,OFFSET_TOP+8,buffer);
+            gotoxy(x,y++);
+        }
+        for(int n=0; n<MAX_SCORE_NAMES; n++) {
+            if(scoreNameFlag[player][n]) {
+                gotoxy(x,y++);
+                printw("%s", scoreName[n]);
+            }
+        }
+    }
+}
+
 void playGame() {
     clear();
-    initGame();
     while (playing) {
+        initGame();
         for(int round=0; round<MAX_ROUNDS && playing; round++) {
             roundNumber=round;
             clear();
@@ -324,38 +358,17 @@ void playGame() {
             rollComputer();
             totalComputer();
             totalPlayer();
-            byte x;
-            byte y;
-            for(int player=0; player<MAX_PLAYERS; player++) {
-                y=10;
-                if(PLAYER==player) {
-                    x=0;
-                    textoutxy(x,OFFSET_TOP,"Player");
-                    drawDice(x,OFFSET_TOP+2,playerRolls);
-                    sprintf(buffer,"Total: %d",totals[PLAYER]);
-                    textoutxy(x,OFFSET_TOP+8,buffer);
-                    gotoxy(x,y++);
-                } else {
-                    x=40;
-                    textoutxy(x,OFFSET_TOP,"Computer");
-                    drawDice(x,OFFSET_TOP+2,compterRolls);
-                    sprintf(buffer,"Total: %d",totals[COMPUTER]);
-                    textoutxy(x,OFFSET_TOP+8,buffer);
-                    gotoxy(x,y++);
-                }
-                for(int n=0; n<MAX_SCORE_NAMES; n++) {
-                    if(scoreNameFlag[player][n]) {
-                        gotoxy(x,y++);
-                        printw("%s", scoreName[n]);
-                    }
-                }
-            }
+            drawPlayers();
             drawHeader();
             showMessage("Press ENTER for next round");
         }
         if(playing) {
+            byte offsetx = getTextWidth() / 2 - 40;
             clear();
+            drawHeader();
+            gotoxy(offsetx,5);
             printw("End of the game\n");
+            gotoxy(offsetx,6);
             printw("Final scores: player=%d computer=%d\n",scores[PLAYER],scores[COMPUTER]);
             showMessage("Press ENTER");
         }
@@ -373,14 +386,41 @@ void title() {
     colorPair(COLOR_MESSAGE);
     textoutxy(offsetx, y++, "                                     CMALIBU                                    ");
     colorPair(COLOR_NORMAL);
-    textoutxy(offsetx, y++, "");
+    //    Use PrettyCSV to format for textoutxy
+    //    TOTAL,NAME,POINTS
+    //    13 plus a pair,Sough,10
+    //    6 or 15,Easy Rider,4
+    //    9 or 12,Straight Road,3
+    //    All the same,Triple Crown,5
+    //    Two of the same,Two of a Kind,3
+    //    13,Lucky Joe,6
+    //    3,Low and Mean,7
+    //    18,High Roller,12
+    //
+    //                                 1         2         3         4         5         6         7         8
+    //                        12345678901234567890123456789012345678901234567890123456789012345678901234567890
+    textoutxy(offsetx, y++,  "Roll the dice now for a few rounds of Malibu. You and the computer take it in ");
+    textoutxy(offsetx, y++,  "turns to roll three dice each. Various dice combinations, and the total of the ");
+    textoutxy(offsetx, y++,  "three dice, are worth points. For example, if the total of the pips showing is ");
+    textoutxy(offsetx, y++,  "13 ('Lucky Joe') on the computer's dice, the computer gets six points, and the ");
+    textoutxy(offsetx, y++,  "human loses six points.");
+    textoutxy(offsetx, y++,  "");
+    textoutxy(offsetx, y++,  "     TOTAL                         NAME                            POINTS");
+    textoutxy(offsetx, y++,  "     13 plus a pair                Sough                           10    ");
+    textoutxy(offsetx, y++,  "     6 or 15                       Easy Rider                      4     ");
+    textoutxy(offsetx, y++,  "     9 or 12                       Straight Road                   3     ");
+    textoutxy(offsetx, y++,  "     All the same                  Triple Crown                    5     ");
+    textoutxy(offsetx, y++,  "     Two of the same               Two of a Kind                   3     ");
+    textoutxy(offsetx, y++,  "     13                            Lucky Joe                       6     ");
+    textoutxy(offsetx, y++,  "     3                             Low and Mean                    7     ");
     colorPair(COLOR_TITLE);
+    y+=2;
     centertext(y++, "PRESS ANY KEY TO CONTINUE");
     textoutxy(offsetx, y++, "");
     textoutxy(offsetx, y++, "");
     colorPair(COLOR_MESSAGE);
-    textoutxy(offsetx, y++, "                           A game by Lee Patterson                              ");
-    textoutxy(offsetx, y++, "                            https://8BitCoder.com                               ");
+    textoutxy(offsetx, 22, "                           A game by Lee Patterson                              ");
+    textoutxy(offsetx, 23, "                            https://8BitCoder.com                               ");
 
     //calculate a new random seed while waiting
     int n = 0;
@@ -429,9 +469,15 @@ int main()
 
     initSystem();
     setupColorPairs();
-//    title();
+    title();
     playGame();
-    printf("Thanks for playing!\n");
-    printf("https://8BitCoder.com\n\n");
+    printf("\n\n\n\n");
+    printf("---------------------------------------------------------\n");
+    printf("- Thanks for playing!                                   -\n");
+    printf("- Originally from Malibu in Tim Hartnell's              -\n");
+    printf("- Giant Book of Computer Games                          -\n");
+    printf("- Converted to C for the heck of it by Lee Patterson at -\n");
+    printf("- https://8BitCoder.com                                 -\n");
+    printf("---------------------------------------------------------\n");
 	return 0;
 }
