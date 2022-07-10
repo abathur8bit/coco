@@ -57,9 +57,11 @@
 #define MAX_DICE            3
 #define MAX_SCORE_NAMES     8
 #define SCORE_START         50
+#define MAX_ROUNDS          5
 
 int totals[MAX_PLAYERS];
 int scores[MAX_PLAYERS];
+int roundNumber=0;
 char buffer[80*25];
 BOOL playing = TRUE;
 int playerRolls[MAX_DICE];
@@ -142,7 +144,7 @@ void drawScore() {
     colorPair(COLOR_NORMAL);
     //                                       1         2         3         4         5         6         7         8
     //                              12345678901234567890123456789012345678901234567890123456789012345678901234567890
-    snprintf(buffer,sizeof(buffer),"SCORE: PLAYER 1: %02d                                                 COMPUTER: %02d",scores[0],scores[1]);
+    snprintf(buffer,sizeof(buffer),"ROUND: %d   SCORE: PLAYER 1: %02d  COMPUTER: %02d",roundNumber+1,scores[PLAYER],scores[COMPUTER]);
     textoutxy(0,1,buffer);
 //    textoutxy(0,1,"         1         2         3         4         5         6         7         8");
 //    textoutxy(0,2,"12345678901234567890123456789012345678901234567890123456789012345678901234567890");
@@ -166,8 +168,6 @@ void rollComputer() {
     }
     sprintf(buffer,"Rolling for computer : %d %d %d = %d",compterRolls[0],compterRolls[1],compterRolls[2],totals[COMPUTER]);
     textoutxy(0,OFFSET_TOP,buffer);
-    int ch = waitforkey();
-    if(ESCAPE==ch) playing=FALSE;
 }
 
 void rollPlayer() {
@@ -178,8 +178,6 @@ void rollPlayer() {
     }
     sprintf(buffer,"Rolling for player 1 : %d %d %d = %d",playerRolls[0],playerRolls[1],playerRolls[2],totals[PLAYER]);
     textoutxy(0,OFFSET_TOP+1,buffer);
-    int ch = waitforkey();
-    if(ESCAPE==ch) playing=FALSE;
 }
 
 /** Calculate the given players score and set it's score name flags. */
@@ -255,41 +253,44 @@ void initGame() {
         scores[i]=SCORE_START;
     }
 }
+
 void playGame() {
     clear();
     initGame();
     while (playing) {
-        clear();
-        drawHeader();
-        rollComputer();
-        if(!playing) continue;
-        rollPlayer();
-        if(!playing) continue;
-        totalComputer();
-        if(!playing) continue;
-        totalPlayer();
-        if(!playing) continue;
+        for(int round=0; round<MAX_ROUNDS && playing; round++) {
+            roundNumber=round;
+            clear();
+            drawHeader();
+            rollComputer();
+            if(!playing) continue;
+            rollPlayer();
+            if(!playing) continue;
+            totalComputer();
+            if(!playing) continue;
+            totalPlayer();
+            if(!playing) continue;
 
-        printw("\n");
-        for(int player=0; player<MAX_PLAYERS; player++) {
-            if(COMPUTER==player) {
-                printw("SCORE computer=%d\n",scores[COMPUTER]);
-            } else {
-                printw("SCORE player=%d\n",scores[PLAYER]);
+            printw("\n");
+            for(int player=0; player<MAX_PLAYERS; player++) {
+                if(COMPUTER==player) {
+                    printw("SCORE computer=%d\n",scores[COMPUTER]);
+                } else {
+                    printw("SCORE player=%d\n",scores[PLAYER]);
+                }
+                for(int n=0; n<MAX_SCORE_NAMES; n++) {
+                    if(scoreNameFlag[player][n])
+                        printw("    %s\n",scoreName[n]);
+                }
             }
-            for(int n=0; n<MAX_SCORE_NAMES; n++) {
-                if(scoreNameFlag[player][n])
-                    printw("    %s\n",scoreName[n]);
-            }
+
+            showMessage("Press ENTER for next round");
         }
-
-        centertext(20,"Press ENTER for next round");
-        int ch = waitforkey();
-        switch (ch) {
-        case ESCAPE:
-            playing = FALSE;
-            break;
-
+        if(playing) {
+            clear();
+            printw("End of the game\n");
+            printw("Final scores: player=%d computer=%d\n",scores[PLAYER],scores[COMPUTER]);
+            showMessage("Press ENTER");
         }
     }
     deinitSystem();
