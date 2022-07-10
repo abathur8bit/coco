@@ -159,6 +159,67 @@ void drawHeader() {
     drawScore();
 }
 
+char pipchar(int pip) {
+    if(pip)
+        return '0'+pip;
+    return ' ';
+}
+
+void drawDie(byte x,byte y,int pip) {
+    pip--;
+    const int face[6][9] = {
+            {
+                    0,0,0,
+                    0,1,0,
+                    0,0,0
+            },
+            {
+                    0,0,0,
+                    2,0,2,
+                    0,0,0
+            },
+            {
+                    3,0,0,
+                    0,3,0,
+                    0,0,3
+            },
+            {
+                    4,0,4,
+                    0,0,0,
+                    4,0,4
+            },
+            {
+                    5,0,5,
+                    0,5,0,
+                    5,0,5
+            },
+            {
+                    6,0,6,
+                    6,0,6,
+                    6,0,6
+            }
+    };
+    byte xx=0;
+    byte yy=0;
+    colorPair(COLOR_CARD_UNDERSIDE);
+    gotoxy(x+xx,y+(yy++));
+    printw("+-------+");
+    gotoxy(x+xx,y+(yy++));
+    printw("| %c %c %c |",pipchar(face[pip][0]),pipchar(face[pip][1]),pipchar(face[pip][2]));
+    gotoxy(x+xx,y+(yy++));
+    printw("| %c %c %c |",pipchar(face[pip][3]),pipchar(face[pip][4]),pipchar(face[pip][5]));
+    gotoxy(x+xx,y+(yy++));
+    printw("| %c %c %c |",pipchar(face[pip][6]),pipchar(face[pip][7]),pipchar(face[pip][8]));
+    gotoxy(x+xx,y+(yy++));
+    printw("+-------+");
+    colorPair(COLOR_NORMAL);
+}
+
+void drawDice(byte x,byte y,int rolls[]) {
+    for(int i=0; i<MAX_DICE; i++) {
+        drawDie(x+i*10,y,rolls[i]);
+    }
+}
 
 void rollComputer() {
     totals[COMPUTER]=0;
@@ -168,6 +229,7 @@ void rollComputer() {
     }
     sprintf(buffer,"Rolling for computer : %d %d %d = %d",compterRolls[0],compterRolls[1],compterRolls[2],totals[COMPUTER]);
     textoutxy(0,OFFSET_TOP,buffer);
+    drawDice(1,OFFSET_TOP+2,compterRolls);
 }
 
 void rollPlayer() {
@@ -177,7 +239,8 @@ void rollPlayer() {
         totals[PLAYER]+=playerRolls[i];
     }
     sprintf(buffer,"Rolling for player 1 : %d %d %d = %d",playerRolls[0],playerRolls[1],playerRolls[2],totals[PLAYER]);
-    textoutxy(0,OFFSET_TOP+1,buffer);
+    textoutxy(40,OFFSET_TOP,buffer);
+    drawDice(41,OFFSET_TOP+2,playerRolls);
 }
 
 /** Calculate the given players score and set it's score name flags. */
@@ -261,29 +324,31 @@ void playGame() {
         for(int round=0; round<MAX_ROUNDS && playing; round++) {
             roundNumber=round;
             clear();
-            drawHeader();
-            rollComputer();
-            if(!playing) continue;
             rollPlayer();
-            if(!playing) continue;
+            rollComputer();
             totalComputer();
-            if(!playing) continue;
             totalPlayer();
-            if(!playing) continue;
-
-            printw("\n");
+            byte x;
+            byte y;
             for(int player=0; player<MAX_PLAYERS; player++) {
-                if(COMPUTER==player) {
-                    printw("SCORE computer=%d\n",scores[COMPUTER]);
+                y=10;
+                if(PLAYER==player) {
+                    x=0;
+                    gotoxy(x,y++);
+                    printw("SCORE player=%d",scores[PLAYER]);
                 } else {
-                    printw("SCORE player=%d\n",scores[PLAYER]);
+                    x=40;
+                    gotoxy(x,y++);
+                    printw("SCORE computer=%d",scores[COMPUTER]);
                 }
                 for(int n=0; n<MAX_SCORE_NAMES; n++) {
-                    if(scoreNameFlag[player][n])
-                        printw("    %s\n",scoreName[n]);
+                    if(scoreNameFlag[player][n]) {
+                        gotoxy(x,y++);
+                        printw("%s", scoreName[n]);
+                    }
                 }
             }
-
+            drawHeader();
             showMessage("Press ENTER for next round");
         }
         if(playing) {
@@ -354,7 +419,7 @@ void testRoll(int a,int b,int c) {
 }
 int main()
 {
-    //showWidthHeight(); return 0;
+//    showWidthHeight(); return 0;
 //    testRoll(5,5,3);
 //    testRoll(1,2,12);
 //    testRoll(6,6,6);
