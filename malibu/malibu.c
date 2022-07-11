@@ -66,7 +66,7 @@ BOOL playing = TRUE;
 int playerRolls[MAX_DICE];
 int compterRolls[MAX_DICE];
 char scoreNameFlag[MAX_PLAYERS][MAX_SCORE_NAMES];
-char* scoreName[MAX_SCORE_NAMES] = {
+const char* scoreName[MAX_SCORE_NAMES] = {
         "Sough (10)",
         "Easy Rider (4)",
         "Stright Road (3)",
@@ -144,9 +144,9 @@ void drawScore() {
     byte offsetx = getTextWidth() / 2 - 40;
     byte y=1;
     textoutxy(offsetx,y, "                                                                                ");
-    snprintf(buffer,sizeof(buffer),"ROUND: %d",roundNumber+1);
+    sprintf(buffer,"ROUND: %d",roundNumber+1);
     centertext(y++,buffer);
-    snprintf(buffer,sizeof(buffer),"Player 1: %-2d                            COMPUTER: %-2d",scores[PLAYER],scores[COMPUTER]);
+    sprintf(buffer,"Player 1: %-2d                            COMPUTER: %-2d",scores[PLAYER],scores[COMPUTER]);
     textoutxy(offsetx,y, "                                                                                ");
     textoutxy(offsetx,y++,buffer);
 }
@@ -154,7 +154,7 @@ void drawScore() {
 
 void drawHeader() {
     byte offsetx = getTextWidth() / 2 - 40;
-    byte x=40-strlen(TITLE)/2;
+    byte x=40-(byte)(strlen(TITLE)/2);
     colorPair(COLOR_TITLE);
     textoutxy(offsetx, 0, "                                                                                ");
     textoutxy(offsetx+x,0,TITLE);
@@ -166,7 +166,7 @@ void drawHeader() {
 
 char pipchar(int pip) {
     if(pip)
-        return '0'+pip;
+        return (char)('0'+pip);
     return ' ';
 }
 
@@ -208,20 +208,23 @@ void drawDie(byte x,byte y,int pip) {
     byte yy=0;
     colorPair(COLOR_DIE);
     gotoxy(x+xx,y+(yy++));
-    printw("+-------+");
+    textout("+-------+");
     gotoxy(x+xx,y+(yy++));
-    printw("| %c %c %c |",pipchar(face[pip][0]),pipchar(face[pip][1]),pipchar(face[pip][2]));
+    sprintf(buffer,"| %c %c %c |",pipchar(face[pip][0]),pipchar(face[pip][1]),pipchar(face[pip][2]));
+    textout(buffer);
     gotoxy(x+xx,y+(yy++));
-    printw("| %c %c %c |",pipchar(face[pip][3]),pipchar(face[pip][4]),pipchar(face[pip][5]));
+    sprintf(buffer,"| %c %c %c |",pipchar(face[pip][3]),pipchar(face[pip][4]),pipchar(face[pip][5]));
+    textout(buffer);
     gotoxy(x+xx,y+(yy++));
-    printw("| %c %c %c |",pipchar(face[pip][6]),pipchar(face[pip][7]),pipchar(face[pip][8]));
+    sprintf(buffer,"| %c %c %c |",pipchar(face[pip][6]),pipchar(face[pip][7]),pipchar(face[pip][8]));
+    textout(buffer);
     gotoxy(x+xx,y+(yy++));
-    printw("+-------+");
+    textout("+-------+");
     colorPair(COLOR_NORMAL);
 }
 
 void drawDice(byte x,byte y,int rolls[]) {
-    for(int i=0; i<MAX_DICE; i++) {
+    for(byte i=0; i<MAX_DICE; i++) {
         drawDie(x+i*10,y,rolls[i]);
     }
 }
@@ -340,7 +343,8 @@ void drawPlayers() {
         for(int n=0; n<MAX_SCORE_NAMES; n++) {
             if(scoreNameFlag[player][n]) {
                 gotoxy(x,y++);
-                printw("%s", scoreName[n]);
+                sprintf(buffer,"%s", scoreName[n]);
+                textout(buffer);
             }
         }
     }
@@ -366,9 +370,10 @@ void playGame() {
             clear();
             drawHeader();
             gotoxy(offsetx,5);
-            printw("End of the game\n");
+            textout("End of the game\n");
             gotoxy(offsetx,6);
-            printw("Final scores: player=%d computer=%d\n",scores[PLAYER],scores[COMPUTER]);
+            sprintf(buffer,"Final scores: player=%d computer=%d\n",scores[PLAYER],scores[COMPUTER]);
+            textout(buffer);
             showMessage("Press ENTER");
         }
     }
@@ -478,5 +483,6 @@ int main()
     printf("- Converted to C for the heck of it by Lee Patterson at -\n");
     printf("- https://8BitCoder.com                                 -\n");
     printf("---------------------------------------------------------\n");
+
 	return 0;
 }
