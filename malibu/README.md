@@ -1,24 +1,7 @@
-# Memory
+# CMalibu
 
-A text based game that compiles for the Color Computer 3, Linux, macOS and Windows. 
-Memory, also known by the name Concentration, is a card game played with a 
-standard deck of 52 cards. Cards include thirteen ranks numbered 2-10 (T for 10)
-in each of the four suites: 
-
-- clubs (C)
-- diamonds (D)
-- hearts (H)
-- spades (S)
-	
-You flip them over two at a time. If the rank matches (the suite does not need 
-to) you leave the cards face up and chose another two. If they do no match you 
-turn them over so they are face down again. 
-
-You continue flipping cards two at a time until all cards have been matched.
-
-Your score is the number of turns you have made. The lower the score the better.
-								   
-
+C version of Malibu dice game, inspired by Tim Hartnell's Giant Book of Computer Games. 
+This is a text based game that compiles for the Color Computer 3, Linux, macOS and Windows. 
 
 
 # Compiling
@@ -28,11 +11,11 @@ This compiles on Windows using [pdcurses], Linux and macOS using [curses], and f
 
 **Building** using Visual Studio, **File menu > Open > CMake**, then select the **CMakeLists.txt** file. **Build > Build All** should build it. You should be able to run and debug it like you would a console app. 
 
-**Running** from Visual Studio,  **Debug menu > Start**. On the command prompt, navigate to the project folder, then run **memory.exe**:
+**Running** from Visual Studio,  **Debug menu > Start**. On the command prompt, navigate to the project folder, then run **manibu.exe**:
 
 ```
-cd c:\workspace\memory
-out\build\x86-Debug\memory.exe
+cd c:\workspace\malibu
+out\build\x86-Debug\malibu.exe
 ```
 
 
@@ -47,7 +30,7 @@ make
 Once built, run with:
 
 ```
-./memory
+./malibu
 ```
 
 
@@ -59,24 +42,24 @@ Use [cmoc] to compile to a BIN file that the Color Computer can understand. Once
 Create the disk image using perl. Note that you only have to create the disk image once. You can just copy the BIN file to it without creating it again. 
 
 ```
-perl -e 'print chr(255) x (35*18*256)' > memory.dsk
+perl -e 'print chr(255) x (35*18*256)' > malibu.dsk
 ```
 
 ### Compile and copy to disk image
 I rename the bin file before putting it on the disk image, as the coco only understands 8.3 character filenames. 
 
 ```
-cmoc memory.c
-mv memory.bin memory.bin
-writecocofile memory.dsk memory.bin
+cmoc malibu.c
+mv malibu.bin malibu.bin
+writecocofile malibu.dsk malibu.bin
 ```
 
 ### Running
 Last but not least, running it. This will start Mame with the disk image mounted, then automatically load and run the program. The first form is used on Linux, the second on Windows. 
 
 ```
-.\mame64.exe -window coco3 -flop1 memory.dsk -autoboot_delay 1 -autoboot_command "LOADM\"memory\":EXEC\n"
-.\mame64.exe -window coco3 -flop1 memory.dsk -autoboot_delay 1 -autoboot_command 'LOADM\"memory\":EXEC\n'
+.\mame64.exe -window coco3 -flop1 malibu.dsk -autoboot_delay 1 -autoboot_command "LOADM\"MALIBU\":EXEC\n"
+.\mame64.exe -window coco3 -flop1 malibu.dsk -autoboot_delay 1 -autoboot_command 'LOADM\"MALIBU\":EXEC\n'
 ```
 
 

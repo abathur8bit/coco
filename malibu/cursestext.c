@@ -1,4 +1,8 @@
 #include <curses.h>
+#include <stdlib.h>
+#include <time.h>
+#include <string.h>
+
 #include "cursestext.h"
 
 int screenWidth = SCREEN_WIDTH;
