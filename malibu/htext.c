@@ -184,3 +184,5 @@ byte getTextWidth() {
 byte getTextHeight() { 
     return SCREEN_HEIGHT; 
 }
+
+void refresh() {}   //not used on a coco3

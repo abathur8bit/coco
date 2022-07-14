@@ -1,6 +1,9 @@
 #ifndef __CURSESTEXT__
 #define __CURSESTEXT__
 
+
+#include <sys/time.h>
+
 #define SCREEN_WIDTH        80
 #define SCREEN_HEIGHT       24
 
@@ -30,5 +33,6 @@ void setColor(byte fg, byte bg);
 void centertext(byte y, const char* s);
 byte getTextWidth();
 byte getTextHeight();
+unsigned short getTimer();
 
 #endif //__CURSESTEXT__

@@ -18,7 +18,6 @@
  * limitations under the License.
  * ******************************************************************************/
 
-
 #ifdef _COCO_BASIC_
 
 #include "coco.h"
@@ -43,7 +42,7 @@
 #define COLOR_TITLE                      1
 #define COLOR_DIE                2
 #define COLOR_SCORE               3
-#define COLOR_CARD_UNDERSIDE_CURSOR         4
+#define COLOR_YELLOW_BLACK         4
 #define COLOR_NORMAL                        5
 #define COLOR_MESSAGE                       6
 #define COLOR_CARD_UNDERSIDE_NOCURSOR       7
@@ -65,7 +64,7 @@ char buffer[80*25];
 BOOL playing = TRUE;
 int playerRolls[MAX_DICE];
 int compterRolls[MAX_DICE];
-char scoreNameFlag[MAX_PLAYERS][MAX_SCORE_NAMES];
+char scoreNameFlags[MAX_PLAYERS][MAX_SCORE_NAMES];
 const char* scoreName[MAX_SCORE_NAMES] = {
         "Sough (10)",
         "Easy Rider (4)",
@@ -87,12 +86,20 @@ int rnd(int min, int max) {
     return n;
 }
 
+/** Sleep the given number of ticks, with 60 equal 1 second. */
+unsigned short snooze(int ticks) {
+    int start=getTimer();
+    int n;
+    while((n=getTimer())-start < ticks) {}
+    return n;
+}
+
 void setupColorPairs() {
 #ifndef _COCO_BASIC_
     init_pair(COLOR_TITLE, COLOR_YELLOW, COLOR_RED);
     init_pair(COLOR_DIE, COLOR_BLACK, COLOR_YELLOW);
     init_pair(COLOR_SCORE, COLOR_WHITE, COLOR_CYAN);
-    init_pair(COLOR_CARD_UNDERSIDE_CURSOR, COLOR_WHITE, COLOR_CYAN);
+    init_pair(COLOR_YELLOW_BLACK, COLOR_YELLOW, COLOR_BLACK);
     init_pair(COLOR_CARD_UNDERSIDE_NOCURSOR, COLOR_BLACK, COLOR_CYAN);
     init_pair(COLOR_NORMAL, COLOR_WHITE, COLOR_BLACK);
     init_pair(COLOR_MESSAGE, COLOR_BLACK, COLOR_CYAN);
@@ -112,8 +119,8 @@ void colorPair(byte pair) {
     case COLOR_SCORE:
         setColor(COLOR_WHITE, COLOR_CYAN);
         break;
-    case COLOR_CARD_UNDERSIDE_CURSOR:
-        setColor(COLOR_WHITE, COLOR_CYAN);
+    case COLOR_YELLOW_BLACK:
+        setColor(COLOR_YELLOW, COLOR_BLACK);
         break;
     case COLOR_CARD_UNDERSIDE_NOCURSOR:
         setColor(COLOR_BLACK, COLOR_CYAN);
@@ -130,12 +137,14 @@ void colorPair(byte pair) {
 #endif // _COCO_BASIC_
 }
 
-void showMessage(const char* s) {
+void showMessage(BOOL wait,const char* s) {
     byte offsetx = getTextWidth() / 2 - 40;
     colorPair(COLOR_MESSAGE);
     textoutxy(offsetx, 23, "                                                                                ");
     centertext(23, s);
-    if (waitforkey() == ESCAPE) playing = FALSE;
+    if(wait) {
+        if(waitforkey()==ESCAPE) playing=FALSE;
+    }
     colorPair(COLOR_NORMAL);
     textoutxy(offsetx, 23,"                                                                                ");
 }
@@ -306,11 +315,11 @@ void total(const char* who,char scoreFlags[],int* scorePrimary,int* scoreSeconda
 }
 
 void totalComputer() {
-    total("Computer",&scoreNameFlag[COMPUTER],&scores[COMPUTER],&scores[PLAYER],&totals[COMPUTER],compterRolls);
+    total("Computer", scoreNameFlags[COMPUTER], &scores[COMPUTER], &scores[PLAYER], &totals[COMPUTER], compterRolls);
 }
 
 void totalPlayer() {
-    total("Player 1",&scoreNameFlag[PLAYER],&scores[PLAYER],&scores[COMPUTER],&totals[PLAYER],playerRolls);
+    total("Player 1", scoreNameFlags[PLAYER], &scores[PLAYER], &scores[COMPUTER], &totals[PLAYER], playerRolls);
 }
 
 void initGame() {
@@ -341,7 +350,7 @@ void drawPlayers() {
             gotoxy(x,y++);
         }
         for(int n=0; n<MAX_SCORE_NAMES; n++) {
-            if(scoreNameFlag[player][n]) {
+            if(scoreNameFlags[player][n]) {
                 gotoxy(x,y++);
                 sprintf(buffer,"%s", scoreName[n]);
                 textout(buffer);
@@ -350,20 +359,42 @@ void drawPlayers() {
     }
 }
 
+/** shows what round we are about to play. */
+void showRound() {
+    colorPair(COLOR_YELLOW_BLACK);
+    clear();
+    sprintf(buffer,"GET READY FOR NEXT ROUND %d",roundNumber+1);
+    centertext(10,buffer);
+    refresh();
+    snooze(120);
+}
+
 void playGame() {
     clear();
     while (playing) {
         initGame();
         for(int round=0; round<MAX_ROUNDS && playing; round++) {
             roundNumber=round;
+            showRound();
             clear();
+            showMessage(FALSE,"Rolling for player 1");
             rollPlayer();
+            drawPlayers(PLAYER);
+            drawHeader();
+            refresh();
+            snooze(120);
+            showMessage(FALSE,"Rolling for computer");
             rollComputer();
+            drawPlayers(PLAYER|COMPUTER);
+            drawHeader();
+            refresh();
+            snooze(120);
+
             totalComputer();
             totalPlayer();
             drawPlayers();
             drawHeader();
-            showMessage("Press ENTER for next round");
+            showMessage(TRUE,"Press ENTER for next round");
         }
         if(playing) {
             byte offsetx = getTextWidth() / 2 - 40;
@@ -374,7 +405,7 @@ void playGame() {
             gotoxy(offsetx,6);
             sprintf(buffer,"Final scores: player=%d computer=%d\n",scores[PLAYER],scores[COMPUTER]);
             textout(buffer);
-            showMessage("Press ENTER");
+            showMessage(TRUE,"Press ENTER");
         }
     }
     deinitSystem();
@@ -457,14 +488,14 @@ void testRoll(int a,int b,int c) {
     totals[COMPUTER]=calc(compterRolls);
     scores[COMPUTER]=0;
     scores[PLAYER]=0;
-    total("Computer",&scoreNameFlag[COMPUTER],&scores[COMPUTER],&scores[PLAYER],&totals[COMPUTER],compterRolls);
+    total("Computer", scoreNameFlags[COMPUTER], &scores[COMPUTER], &scores[PLAYER], &totals[COMPUTER], compterRolls);
     for(int i=0; i<MAX_SCORE_NAMES; i++) {
-        if(scoreNameFlag[COMPUTER][i])
+        if(scoreNameFlags[COMPUTER][i])
             printf("  %s\n",scoreName[i]);
     }
 }
-int main()
-{
+
+int main() {
 //    showWidthHeight(); return 0;
 //    testRoll(5,5,3);
 //    testRoll(1,2,12);

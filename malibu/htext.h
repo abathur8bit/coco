@@ -68,5 +68,5 @@ void mapColors(byte* colorValues);
 void centertext(byte y, const char* s);
 byte getTextWidth(); 
 byte getTextHeight();
-
+void refresh(); //not used on coco3, updates screen after printw etc
 #endif

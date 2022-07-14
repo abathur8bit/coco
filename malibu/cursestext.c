@@ -92,3 +92,17 @@ byte getTextHeight() {
     getmaxyx(stdscr, h, w);
     return h;
 }
+
+long systemStartTime=0;
+unsigned short getTimer() {
+    struct timeval t;
+    gettimeofday(&t,NULL);
+    //tv_usec is int32
+    long n=(t.tv_sec*1000+t.tv_usec/1000);
+    if(!systemStartTime) {
+        systemStartTime=n;
+    }
+//    printf("n=%ld start=%ld start-n=%ld ticks=%ld\n",n,systemStartTime,n-systemStartTime,(n-systemStartTime)/16);
+    double ms=(n-systemStartTime)/16.667;
+    return (int)(ms)&0xFFFF;   //convert to 60Hz (16.6 but close enough without using floating point)
+}
