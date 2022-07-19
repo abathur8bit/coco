@@ -57,6 +57,13 @@
 #define SCORE_START         50
 #define MAX_ROUNDS          5
 
+#define DRAW_PLAYER                 1
+#define DRAW_PLAYER_TOTAL           2
+#define DRAW_PLAYER_SCORENAMES      4
+#define DRAW_COMPUTER               8
+#define DRAW_COMPUTER_TOTAL         16
+#define DRAW_COMPUTER_SCORENAMES    32
+
 int totals[MAX_PLAYERS];
 int scores[MAX_PLAYERS];
 int roundNumber=0;
@@ -137,6 +144,12 @@ void colorPair(byte pair) {
 #endif // _COCO_BASIC_
 }
 
+void clearMessage() {
+    byte offsetx = getTextWidth() / 2 - 40;
+    colorPair(COLOR_NORMAL);
+    textoutxy(offsetx, 23,"                                                                                ");
+}
+
 void showMessage(BOOL wait,const char* s) {
     byte offsetx = getTextWidth() / 2 - 40;
     colorPair(COLOR_MESSAGE);
@@ -144,9 +157,8 @@ void showMessage(BOOL wait,const char* s) {
     centertext(23, s);
     if(wait) {
         if(waitforkey()==ESCAPE) playing=FALSE;
+        clearMessage();
     }
-    colorPair(COLOR_NORMAL);
-    textoutxy(offsetx, 23,"                                                                                ");
 }
 
 void drawScore() {
@@ -328,32 +340,41 @@ void initGame() {
     }
 }
 
-void drawPlayers() {
+void drawPlayers(int drawFlags) {
     byte offsetx = getTextWidth() / 2 - 40;
     byte x;
     byte y;
     for(int player=0; player<MAX_PLAYERS; player++) {
         y=10;
-        if(PLAYER==player) {
+
+        //draw the dice and total
+        if(PLAYER==player && drawFlags&DRAW_PLAYER) {    //player
             x=offsetx;
-            textoutxy(x,OFFSET_TOP,"Player");
-            drawDice(x,OFFSET_TOP+2,playerRolls);
-            sprintf(buffer,"Total: %d",totals[PLAYER]);
-            textoutxy(x,OFFSET_TOP+8,buffer);
-            gotoxy(x,y++);
-        } else {
+            textoutxy(x, OFFSET_TOP, "Player");
+            drawDice(x, OFFSET_TOP + 2, playerRolls);
+            if(drawFlags & DRAW_PLAYER_TOTAL) {
+                sprintf(buffer, "Total: %d", totals[PLAYER]);
+                textoutxy(x, OFFSET_TOP + 8, buffer);
+            }
+        } else {                //computer
             x=offsetx+40;
             textoutxy(x,OFFSET_TOP,"Computer");
             drawDice(x,OFFSET_TOP+2,compterRolls);
-            sprintf(buffer,"Total: %d",totals[COMPUTER]);
-            textoutxy(x,OFFSET_TOP+8,buffer);
-            gotoxy(x,y++);
+            if(drawFlags & DRAW_COMPUTER_TOTAL) {
+                sprintf(buffer, "Total: %d", totals[COMPUTER]);
+                textoutxy(x, OFFSET_TOP + 8, buffer);
+            }
         }
-        for(int n=0; n<MAX_SCORE_NAMES; n++) {
-            if(scoreNameFlags[player][n]) {
-                gotoxy(x,y++);
-                sprintf(buffer,"%s", scoreName[n]);
-                textout(buffer);
+        gotoxy(x,y++);
+
+        //draw the score names
+        if((COMPUTER==player && drawFlags&DRAW_COMPUTER) || (PLAYER==player && drawFlags&DRAW_PLAYER)) {
+            for(int n=0; n<MAX_SCORE_NAMES; n++) {
+                if(scoreNameFlags[player][n]) {
+                    gotoxy(x, y++);
+                    sprintf(buffer, "%s", scoreName[n]);
+                    textout(buffer);
+                }
             }
         }
     }
@@ -377,16 +398,16 @@ void playGame() {
             roundNumber=round;
             showRound();
             clear();
-            showMessage(FALSE,"Rolling for player 1");
             rollPlayer();
-            drawPlayers(PLAYER);
+            drawPlayers();
             drawHeader();
+            showMessage(FALSE,"Rolling for player 1");
             refresh();
             snooze(120);
-            showMessage(FALSE,"Rolling for computer");
             rollComputer();
-            drawPlayers(PLAYER|COMPUTER);
+            drawPlayers();
             drawHeader();
+            showMessage(FALSE,"Rolling for computer");
             refresh();
             snooze(120);
 
