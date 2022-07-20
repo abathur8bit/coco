@@ -15,12 +15,7 @@
 * position, and W is the width of the screen.
 *
 
-printm		macro		; define the macro
-		pshs	d,x,y,u
-		ldx	\1
-		jsr	print
-		puls	u,y,x,b,a
-		endm
+
 
 *******************************************************************************
 * Waits for keyboard to be pressed

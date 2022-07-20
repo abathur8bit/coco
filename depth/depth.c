@@ -1,5 +1,5 @@
 /* *****************************************************************************
- * Created by Lee Patterson Friday July 8, 2022
+ * Created by Lee Patterson Monday July 18, 2022
  *
  * Copyright 2022, Lee Patterson <https://github.com/abathur8bit>
  *
@@ -17,6 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * ******************************************************************************/
+
 
 #ifdef _COCO_BASIC_
 
@@ -38,10 +39,10 @@
 
 #endif //_COCO_BASIC_
 
-#define COLOR_TITLE                      1
-#define COLOR_DIE                2
-#define COLOR_SCORE               3
-#define COLOR_YELLOW_BLACK         4
+#define COLOR_TITLE                         1
+#define COLOR_DIE                           2
+#define COLOR_SCORE                         3
+#define COLOR_YELLOW_BLACK                  4
 #define COLOR_NORMAL                        5
 #define COLOR_MESSAGE                       6
 #define COLOR_CARD_UNDERSIDE_NOCURSOR       7
@@ -127,15 +128,15 @@ void colorPair(byte pair) {
 }
 
 void clearMessage() {
-    byte offsetx = getTextWidth() / 2 - 40;
+    byte x = getTextWidth() / 2 - 40;
     colorPair(COLOR_NORMAL);
-    textoutxy(offsetx, 23,"                                                                                ");
+    textoutxy(x, 23,"                                                                                ");
 }
 
 void showMessage(BOOL wait,const char* s) {
-    byte offsetx = getTextWidth() / 2 - 40;
+    byte x = getTextWidth() / 2 - 40;
     colorPair(COLOR_MESSAGE);
-    textoutxy(offsetx, 23, "                                                                                ");
+    textoutxy(x, 23, "                                                                                ");
     centertext(23, s);
     if(wait) {
         if(waitforkey()==ESCAPE) playing=FALSE;
@@ -150,10 +151,14 @@ void initGame() {
 
 void playGame() {
     clear();
+    textoutxy(0,0,"Hello");
+    initGame();
     while (playing) {
-        initGame();
-        textout("DEPTH\n");
-        textout("DEPTH");
+        int x=0;
+        int y=0;
+        textoutxy(x,y++,"DEPTH");
+        textoutxy(x,y++,"DEPTH");
+        refresh();
         //        1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
         //                 1         2         3         4         5         6         7         8         9         0
         waitforkey();
@@ -168,23 +173,23 @@ void title() {
     locate(0, 1);   //position the cursor out of sight
 #endif
     byte y = 0;
-    byte offsetx = getTextWidth() / 2 - 40;
+    byte x = getTextWidth() / 2 - 40;
     colorPair(COLOR_MESSAGE);
-    textoutxy(offsetx, y++, "                                     DEPTH                                    ");
+    textoutxy(x, y++, "                                     DEPTH                                    ");
     colorPair(COLOR_NORMAL);
     //                                 1         2         3         4         5         6         7         8
     //                        12345678901234567890123456789012345678901234567890123456789012345678901234567890
-    textout( "You are the captain of a destroyer and you must use depth charges to stop a");
-    textout( "submarien that is trying to sink you! You will enter an ");
-    textoutxy(offsetx, y++,  "");
+    textoutxy(x,y++ "You are the captain of a destroyer and you must use depth charges to stop a");
+    textoutxy(x,y++ "submarine that is trying to sink you! You will enter an ");
+    textoutxy(x, y++,  "");
     colorPair(COLOR_TITLE);
     y+=2;
     centertext(y++, "PRESS ANY KEY TO CONTINUE");
-    textoutxy(offsetx, y++, "");
-    textoutxy(offsetx, y++, "");
+    textoutxy(x, y++, "");
+    textoutxy(x, y++, "");
     colorPair(COLOR_MESSAGE);
-    textoutxy(offsetx, 22, "                           A game by Lee Patterson                              ");
-    textoutxy(offsetx, 23, "                            https://8BitCoder.com                               ");
+    textoutxy(x, 22, "                           A game by Lee Patterson                              ");
+    textoutxy(x, 23, "                            https://8BitCoder.com                               ");
 
     //calculate a new random seed while waiting
     int n = 0;

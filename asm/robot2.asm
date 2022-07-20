@@ -25,6 +25,13 @@ cleard		macro
 		clrb
 		endm
 
+printm		macro		; define the macro
+		pshs	d,x,y,u
+		ldx	\1
+		jsr	print
+		puls	u,y,x,b,a
+		endm
+
 pushall		macro
 		pshs	a,b,x,y,u
 		endm
@@ -747,4 +754,4 @@ oldy		fcb	0
 		
 		
 		end	start
-art
+
