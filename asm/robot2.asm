@@ -633,6 +633,8 @@ showtitle
 		jsr	print
 		ldx	#originalauthor
 		jsr	print
+		ldx #controls
+		jsr print
 		rts
 
 
@@ -680,6 +682,11 @@ thanks		fcc	"THANKS FOR PLAYING"
 		fcb	13
 		fcc	"WWW.8BITCODER.COM"
 	    	fcb	13,0
+controls    fcb 13
+            fcc "N S W E - CONTROLS ROBOT"
+            fcb 13
+            fcc "PRESS ANY KEY TO PLAY"
+            fcb 13,0
 helloworld	fcc	"HELLO WORLD"
 	    	fcb	13,0
 done		fcc	"DONE"
