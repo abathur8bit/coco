@@ -1,7 +1,7 @@
 # Dodge Block
 
 Part of my 26 letter theme game set, where I 
-make a game and use a theme based on a letter
+make a game and make the theme based on a letter
 of the alphabet. Inpired by John Romero.
 
 Project was first created as a godot project, then 
