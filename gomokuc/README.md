@@ -1,0 +1,1 @@
+This is a refactored version of the original [C version](https://github.com/abathur8bit/coco/tree/master/gomokuc) which was a straight conversion from BASIC to C. In this version I clean it up to better understand how the logic is able to play.
