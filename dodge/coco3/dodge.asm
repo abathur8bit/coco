@@ -13,7 +13,7 @@ XBOX_START	equ	126 ;128-16
 YBOX_TOP        equ     8
 YBOX_MID        equ     72
 YBOX_BTM        equ     136
-BOX_SPEED_START	equ	2
+BOX_SPEED_START	equ	4
 
                 org     $e00            ; code executes at &H0E00
 start
@@ -110,18 +110,21 @@ onpage0		showpage0
                 sta	page_num
                 jmp	loop_end
 
-loop_end	jsr	waitkey
+loop_end	jsr	inkey			* check for a key
+		lbeq	box_loop		* if no key keep looping
+
+		* check what key was pressed
 		cmpa	#9
 		bne	not9
-		lda	#BOX_SPEED_START		* go left
+		lda	#BOX_SPEED_START	* go left
 		sta	box_speed
 		jmp	box_loop
 not9		cmpa	#8
 		bne	not8
-		lda	#$00-BOX_SPEED_START		* go right
+		lda	#$00-BOX_SPEED_START	* go right
 		sta	box_speed
 		jmp	box_loop
-not8		clra			* no movement
+not8		clra				* no movement
 		sta	box_speed
 		jmp	box_loop
 
