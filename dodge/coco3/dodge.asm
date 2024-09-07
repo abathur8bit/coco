@@ -1,3 +1,10 @@
+*************************************************
+* Sample from page 170 listing 7-1
+* of assembly language programming book.
+* lwasm -o d.bin dodge.asm && writecocofile -a dodge.dsk d.bin
+* lwasm -o d.bin dodge.asm && vcc d.bin
+*************************************************
+
                 opt     6809
 
                 include "gfx256.inc"
@@ -95,14 +102,28 @@ onpage1		showpage1
                 setpage0
                 lda	#0
                 sta	page_num
-                jmp	box_loop
+                jmp	loop_end
 
 onpage0		showpage0
                 setpage1
                 lda	#1
                 sta	page_num
-                jmp	box_loop
+                jmp	loop_end
 
+loop_end	jsr	waitkey
+		cmpa	#9
+		bne	not9
+		lda	#BOX_SPEED_START		* go left
+		sta	box_speed
+		jmp	box_loop
+not9		cmpa	#8
+		bne	not8
+		lda	#$00-BOX_SPEED_START		* go right
+		sta	box_speed
+		jmp	box_loop
+not8		clra			* no movement
+		sta	box_speed
+		jmp	box_loop
 
 ;***
 ; Infinite Loop
@@ -136,6 +157,7 @@ ball_sprite	fdb	bbidle.00,bbidle.01,bbidle.02,bbidle.03
 rgb             fcb     0,7,56,63,4,32,36,2,16,18,6,48,54,5,40,45
 
                 include "gfx256.asm"
+                include "keys.asm"
                 include "boxsprite.inc"
 
                 end     start
