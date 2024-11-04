@@ -1,0 +1,1 @@
+[Refactored C version](https://github.com/abathur8bit/coco/tree/master/gomokuc) is a rework of the straight conversion from BASIC to C. Trying to clean it up to better understand how the logic is able to play.
