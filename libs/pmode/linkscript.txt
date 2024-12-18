@@ -1,0 +1,8 @@
+define basesympat s_%s
+define lensympat l_%s
+section init load 3f00
+section main
+section code
+section *,!bss
+section *,bss
+entry 3f00
