@@ -12,15 +12,18 @@ cmp3232         import
 ;                       bge     ...
 ; \1 is like the register number,
 ; \2 is like the operand number.
+;
 cmp32           macro
+                pshs    x
                 ldd     \1
-                ldu     \1+2
-                pshs    u,d
+                ldx     \1+2
+                pshs    x,d
                 ldd     \2
-                ldu     \2+2
-                pshs    u,d
+                ldx     \2+2
+                pshs    x,d
                 jsr     cmp3232
                 leas    8,s
+                puls    x       ; TODO we can probably pull the value from the stack, and pop via the leas
                 endm
 
 ;************************************************

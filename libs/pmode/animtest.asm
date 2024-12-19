@@ -22,22 +22,6 @@ start		export
 
 ;************************************************
 start
-;        ldd     #0
-;        cmpd    #1
-;        bhi     hi1
-;        nop
-;
-;hi1     ldd     #1
-;        cmpd    #1
-;        bhi     hi2
-;        nop
-;
-;hi2     ldd     #10
-;        cmpd    #1
-;        bhi     hi3
-;        nop
-;hi3     rts
-;
 	sta	$ffd9		; coco3 speed-up
 	jsr	setup_timer_irq
 	jsr	pmode1
@@ -58,48 +42,10 @@ pixels	jsr	draw_corners
 	jsr	add_anim
 
 draw
-;        jsr	pcls
-;
-;        ; anim timer msg
-;        ldd	#$0042			; x,y pos
-;        ldx	#msg_animtime  		; buffer less length byte
-;        pshs    x,d
-;        jsr	blitstr			; display to screen
-;        leas    4,s                     ; pop stack
-;
-;        ; anim timer value
-;        ldx     #buffer
-;        ;ldu     idle_anim
-;        ;ldd     ANIM_TIMER,u
-;        ldd     #$1050
-;        jsr     bn2dec
-;        ldd     #$0442                  ; x,y pos
-;        ldx     #buffer+1               ; buffer+1 to pass the char count
-;        pshs    x,d
-;        jsr     blitstr
-;        leas    4,s                     ; pop stack
-;
-;        ; system timer msg
-;        ldd     #$0051                  ; x,y pos
-;        ldx     #msg_systime
-;        pshs    x,d
-;        jsr     blitstr
-;        leas    4,s                     ; pop stack
-;
-;        ; system timer value
-;        jsr     timer_val               ; get the system timer value
-;        ldd     #$1234
-;        jsr     bn2dec
-;        ldx     #buffer+1
-;        ldd     #$0451                  ; x,y pos
-;        pshs    x,d
-;        jsr     blitstr
-;        leas    4,s                     ; pop stack
-;
         jsr     draw_anim_list
         jsr     draw_corners
         ;jsr     pageflip
-	;jsr	move_walk
+	jsr	move_walk
 	;jsr     wait
 	bra	draw
 	rts
@@ -141,13 +87,14 @@ msg_animtime	fcn	/AT/
 msg_systime	fcn	/ST/
 
 ;*************************************************
-;			SIZEWH,POSXY,DIRXY,TIMER,TIMER,DELAY,FRAME,FRCNT,DATA
-idle_anim	fdb	walker,$0100,$0100,$0000,$0000,$0008,$0000,$000e,walker.1,walker.2,walker.3,walker.4,walker.5,walker.6,walker.17,walker.18,walker.19,walker.20,walker.21,walker.22,walker.23,walker.24
-;idle_anim	fdb	walker,$0100,$0100,$0000,$0000,$0004,$0000,$0006,walker.1,walker.2,walker.3,walker.4,walker.5,walker.6
-walk_anim	fdb	walker,$0011,$0100,$0000,$0000,$0002,$0002,$000a,walker.7,walker.8,walker.9,walker.10,walker.11,walker.12,walker.13,walker.14,walker.15,walker.16
+;                       SPRITE             ANIM 32-bit MOVE 32-bit AA MM FN FC
+;			SIZEWH,POSXY,DIRXY,TIMER,TIMER,TIMER,TIMER,DELAY,FRAME,DATA
+idle_anim	fdb	walker,$0100,$0100,$1234,$5678,$8765,$4321,$0800,$000e,walker.1,walker.2,walker.3,walker.4,walker.5,walker.6,walker.17,walker.18,walker.19,walker.20,walker.21,walker.22,walker.23,walker.24
+;idle_anim	fdb	walker,$0100,$0100,$1234,$5678,$8765,$4321,$0400,$0006,walker.1,walker.2,walker.3,walker.4,walker.5,walker.6
+walk_anim	fdb	walker,$0011,$0100,$1234,$5678,$8765,$4321,$0207,$000a,walker.7,walker.8,walker.9,walker.10,walker.11,walker.12,walker.13,walker.14,walker.15,walker.16
 ; POSXY fa= -6 clipped left side
 ;       0f full on screen
-block_anim	fdb	 block,$141f,$0100,$0000,$0000,$000a,$0000,$0008,block.5,block.6,block.7,block.8,block.9,block.10,block.11,block.12
+block_anim	fdb	 block,$141f,$0100,$1234,$5678,$8765,$4321,$0a00,$8808,block.5,block.6,block.7,block.8,block.9,block.10,block.11,block.12
 
 buffer		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 index		fcb	0
