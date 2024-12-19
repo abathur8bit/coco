@@ -10,7 +10,7 @@
 ; sprite- Pointer to sprite data, with the width and height
 ; posxy - position on the screen in pixels (use a 4 digit hex value)
 ; dirxy - x,y direction (signed value)	(use 4 digit hex value)
-; timer - used during update process to remember when frame was last updated
+; timer - 32-bit timer used during update process to know when frame needs to advance
 ; delay - how long to wait to move to the next frame
 ; frame - current frame number
 ; frcnt - number of frames in the animation
@@ -24,21 +24,23 @@
 ;ldd     [,y] 		* size in pixels width in A,height in B, you can NOT use lda [ANIM_SIZE+1,y]
 ;ldd     ANIM_POSXY,y 	* x,y position in bytes 
 ;ldd     ANIM_DIRXY,y 	* x,y direction and speed of sprite
-;ldd     ANIM_TIMER,y 	* last timer value
+;ldd     ANIM_TIMER,y 	* last timer value (32-bit)
 ;ldd     ANIM_DELAY,y 	* how much of a delay between frame updates
 ;ldd     ANIM_FRAME,y 	* current frame number
 ;ldd     ANIM_FRCNT,y 	* how many frames in the animation
 ;
-;			0,y	 4,y   6,y   8,y   0a,y	 0c,y  0e,y  10,y
-;			SIZE  ,POSXY,DIRXY,TIMER,DELAY,FRAME,FRCNT,DATA
-;idle_anim	fdb	walker,$0010,$0100,$0000,$0004,$0000,$0006,walker.1,walker.2,walker.3,walker.4,walker.5,walker.6
-;walk_anim	fdb	walker,$2A10,$FF00,$0000,$0004,$0002,$000a,walker.7,walker.8,walker.9,walker.10,walker.11,walker.12,walker.13,walker.14,walker.15,walker.16
+;			0,y    2,y   4,y   6,y      8,y      0a,y  0c,y  0e,y  10,y
+;			SIZE  ,POSXY,DIRXY,TIMERMSW,TIMERLSW,DELAY,FRAME,FRCNT,DATA
+;idle_anim	fdb	walker,$0010,$0100,$0000,$0000,$0004,$0000,$0006,walker.1,walker.2,walker.3,walker.4,walker.5,walker.6
+;walk_anim	fdb	walker,$2A10,$FF00,$0000,$0000,$0004,$0002,$000a,walker.7,walker.8,walker.9,walker.10,walker.11,walker.12,walker.13,walker.14,walker.15,walker.16
 ;
 
 		include "pmode1.inc"
 		include "blit1.inc"
 		include "timer.inc"
 		include "anim.inc"
+		include "lee.inc"
+		include "math.inc"
 
 draw_anim_list	export 
 add_anim	export
@@ -119,12 +121,12 @@ loop@	ldd     ,x
         ldb     count
         bne     loop@
         ; if we get here, we have no open slots
-        coma                    ; set carry to indicate error
+        sec                     ; set carry to indicate error
         rts
 notused@
  	sty     ,x              ; store the animation
  	jsr	setup_anim	; get anim ready
-        clra                    ; clear carry to indicate no error
+        clc                     ; clear carry to indicate no error
         rts
 		
 ;************************************************
@@ -135,9 +137,14 @@ notused@
 ; MOD:	D
 ;
 setup_anim
+        ldx     #time_now
 	jsr	timer_val		; grab the current timer value
-	addd	ANIM_DELAY,y		; add how long we need to wait
-	std	ANIM_TIMER,y		; store timer to animation
+	lda     ANIM_DELAY,y            ; grab the lower byte
+	jsr     add832
+	ldd     time_now
+	std     ANIM_TIMER_MSW,y        ; store high word timer to animation
+	ldd     time_now+2
+	std	ANIM_TIMER_LSW,y	; store low word timer to animation
 	ldd	#0			; reset to first frame
 	std	ANIM_FRAME,y
 	rts
@@ -156,12 +163,21 @@ draw_anim
 	; 0,s          | anim addr upper
 
         pshs    y       	* anim addr onto stack
+        ldx     #time_now
 	jsr	timer_val
-	cmpd	ANIM_TIMER,y	* last timer+delay
+	ldd     ANIM_TIMER_MSW,y
+	std     time_anim
+	ldd     ANIM_TIMER_LSW,y
+	std     time_anim+2
+	cmp32   time_now,time_anim
 	blo	animdone@
-	jsr	timer_val	* current timer
-	addd	ANIM_DELAY,y	* plus delay
-	std	ANIM_TIMER,y	* store new timer
+	ldx     #time_now       ; current time
+	lda     ANIM_DELAY,y    ; how much to add
+	jsr     add832          ; add anim delay to time_now
+	ldd     time_now        ; store new time now to anim timer
+	std	ANIM_TIMER_MSW,y
+	ldd     time_now+2
+	std     ANIM_TIMER_LSW,y
         jsr     animfr  	* load Y with correct frames address
         ldx     ,s      	* point to anim
         tfr	x,u		* copy to reg U
@@ -203,6 +219,8 @@ animfr
         abx             	* X now points to correct frame ptr
         ldy     ,x      	* Y now points to correct frame ptr
         rts
-	
+
+time_now        fcb     0,0,0,0 ; 32-bit timer
+time_anim       fcb     0,0,0,0
 	endsection
 		

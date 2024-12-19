@@ -99,7 +99,7 @@ draw
         jsr     draw_anim_list
         jsr     draw_corners
         ;jsr     pageflip
-	jsr	move_walk
+	;jsr	move_walk
 	;jsr     wait
 	bra	draw
 	rts
@@ -132,17 +132,6 @@ right@	cmpa	#$1b			; check if at right edge
 done@	rts
 
 
-;************************************************
-wait		jsr	timer_val
-		cmpd	#ANIM_SPEED
-		ble	wait
-		ldd	#0
-		jsr	set_timer_val
-		rts
-
-
-
-
 ;*************************************************
 	include "walker.inc"
 	include "blocks.inc"
@@ -152,14 +141,13 @@ msg_animtime	fcn	/AT/
 msg_systime	fcn	/ST/
 
 ;*************************************************
-;			0,y	 4,y   6,y   8,y   0a,y	 0c,y  0e,y  10,y
-;			SIZE  ,POSXY,DIRXY,TIMER,DELAY,FRAME,FRCNT,DATA
-idle_anim	fdb	walker,$0100,$0100,$0012,$0008,$0000,$000e,walker.1,walker.2,walker.3,walker.4,walker.5,walker.6,walker.17,walker.18,walker.19,walker.20,walker.21,walker.22,walker.23,walker.24
-;idle_anim	fdb	walker,$0100,$0100,$0000,$0004,$0000,$0006,walker.1,walker.2,walker.3,walker.4,walker.5,walker.6
-walk_anim	fdb	walker,$0011,$0100,$FFFF,$0004,$0002,$000a,walker.7,walker.8,walker.9,walker.10,walker.11,walker.12,walker.13,walker.14,walker.15,walker.16
+;			SIZEWH,POSXY,DIRXY,TIMER,TIMER,DELAY,FRAME,FRCNT,DATA
+idle_anim	fdb	walker,$0100,$0100,$0000,$0000,$0008,$0000,$000e,walker.1,walker.2,walker.3,walker.4,walker.5,walker.6,walker.17,walker.18,walker.19,walker.20,walker.21,walker.22,walker.23,walker.24
+;idle_anim	fdb	walker,$0100,$0100,$0000,$0000,$0004,$0000,$0006,walker.1,walker.2,walker.3,walker.4,walker.5,walker.6
+walk_anim	fdb	walker,$0011,$0100,$0000,$0000,$0002,$0002,$000a,walker.7,walker.8,walker.9,walker.10,walker.11,walker.12,walker.13,walker.14,walker.15,walker.16
 ; POSXY fa= -6 clipped left side
 ;       0f full on screen
-block_anim	fdb	block,$141f,$0100,$0000,$000a,$0001,$0008,block.5,block.6,block.7,block.8,block.9,block.10,block.11,block.12
+block_anim	fdb	 block,$141f,$0100,$0000,$0000,$000a,$0000,$0008,block.5,block.6,block.7,block.8,block.9,block.10,block.11,block.12
 
 buffer		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 index		fcb	0
