@@ -10,23 +10,18 @@ start
                 lds     #$3f00
 
                 ; test memset
-                setmem  #block2,#$aa,#4
-                lda     #$BB    ; new value to set
-                ldu     #10     ; new count to set
-                pshs    u,x,a   ; push keeping X what it was
+                ldx     #block2 ; memory to set
+                ldy     #4      ; number of bytes to set
+                lda     #$aa    ; value to set
                 jsr     memset
-                leas    5,s     ; pop
 
-                ;ldx     #block2
-                ;lda     #$aa
-                ;ldu     #4
-                ;pshs    u,x,a
-                ;jsr     memset
-                ;leas    5,s
+                ldy     #10     ; new count to set
+                lda     #$BB    ; new value to set
+                jsr     memset
 
                 ; test memclr
-                ldx     #block1
-                ldd     #$4
+                ldx     #block1 ; memory to clear
+                ldd     #$4     ; number of bytes to clear
                 jsr     memclr
 
                 rts
