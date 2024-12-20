@@ -6,6 +6,7 @@
 
 	include "pmode1.inc"
 	include "timer.inc"
+	include "font.inc"
 	include "anim.inc"
 
 blitstr		import
@@ -22,8 +23,9 @@ start		export
 
 ;************************************************
 start
-	sta	$ffd9		; coco3 speed-up
 	jsr	setup_timer_irq
+        lds     #$3f00          ; move the stack. Note that it grows downwards.
+	;sta	$ffd9		; coco3 speed-up
 	jsr	pmode1
 	jsr	pcls
 	;set1
@@ -38,17 +40,26 @@ pixels	jsr	draw_corners
 	jsr	add_anim
 	ldy	#walk_anim
 	jsr	add_anim
-	ldy	#block_anim
-	jsr	add_anim
 
 draw
         jsr     draw_anim_list
         jsr     draw_corners
+        jsr     show_timer
         ;jsr     pageflip
 	jsr	move_walk
 	;jsr     wait
 	bra	draw
 	rts
+
+;************************************************
+show_timer      blitstring #msg_timer,#$0030
+                ldx     #time_now
+                jsr     timer_val       ; get current timer into fps_timer_now
+                ldd     time_now+2      ; just grab the last 2 bytes and use that value
+                ldx     #buffer
+                jsr     bn2dec          ; convert to ascii
+                blitstring #buffer+1,#$003f
+                rts
 
 ;************************************************
 ; Copies page1 to page0
@@ -80,11 +91,12 @@ done@	rts
 
 ;*************************************************
 	include "walker.inc"
-	include "blocks.inc"
 
 ;*************************************************
 msg_animtime	fcn	/AT/
 msg_systime	fcn	/ST/
+msg_timer       fcn     /TIMER/
+
 
 ;*************************************************
 ;                       SPRITE             ANIM 32-bit MOVE 32-bit AA MM FN FC
@@ -92,12 +104,10 @@ msg_systime	fcn	/ST/
 idle_anim	fdb	walker,$0100,$0100,$1234,$5678,$8765,$4321,$0800,$000e,walker.1,walker.2,walker.3,walker.4,walker.5,walker.6,walker.17,walker.18,walker.19,walker.20,walker.21,walker.22,walker.23,walker.24
 ;idle_anim	fdb	walker,$0100,$0100,$1234,$5678,$8765,$4321,$0400,$0006,walker.1,walker.2,walker.3,walker.4,walker.5,walker.6
 walk_anim	fdb	walker,$0011,$0100,$1234,$5678,$8765,$4321,$0207,$000a,walker.7,walker.8,walker.9,walker.10,walker.11,walker.12,walker.13,walker.14,walker.15,walker.16
-; POSXY fa= -6 clipped left side
-;       0f full on screen
-block_anim	fdb	 block,$141f,$0100,$1234,$5678,$8765,$4321,$0a00,$8808,block.5,block.6,block.7,block.8,block.9,block.10,block.11,block.12
 
 buffer		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 index		fcb	0
+time_now        fcb     1,2,3,4
 
 ;************************************************
 ; block - Test routine, just draws a block on the screen.
@@ -118,9 +128,6 @@ loop@		ldd	#%01010101010101010101010101010101
 		cmpa	max
 		bne	loop@
 		rts
-
-msg             fcc     /HELLO/
-                fcb     0
 
 		endsection
 

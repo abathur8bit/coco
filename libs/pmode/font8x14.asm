@@ -193,13 +193,64 @@ buffer		rmb	8
 padding		rmb	8
 bufptr		fdb	$0000
 
-
 ;************************************************
 score_pos	fdb	$0000
-characters	fdb	font8x14.1,font8x14.2,font8x14.0,font8x14.0,font8x14.0,font8x14.0,font8x14.0,font8x14.0,font8x14.0,font8x14.0,font8x14.0,font8x14.0,font8x14.0,font8x14.15,font8x14.16,font8x14.17
-numbers		fdb	font8x14.18,font8x14.19,font8x14.20,font8x14.21,font8x14.22,font8x14.23,font8x14.24,font8x14.25,font8x14.26,font8x14.27
-chars1		fdb	font8x14.0,font8x14.0,font8x14.0,font8x14.0,font8x14.0,font8x14.0,font8x14.0
-letters		fdb	font8x14.34,font8x14.35,font8x14.36,font8x14.37,font8x14.38,font8x14.39,font8x14.40,font8x14.41,font8x14.42,font8x14.43,font8x14.44,font8x14.45,font8x14.46,font8x14.47,font8x14.48,font8x14.49,font8x14.50,font8x14.51,font8x14.52,font8x14.53,font8x14.54,font8x14.55,font8x14.56,font8x14.57,font8x14.58,font8x14.59
+
+; XX = block to show undefined
+characters	fdb	font8x14.1      ; XX
+                fdb     font8x14.2      ; !
+                fdb     font8x14.0      ; XX
+                fdb     font8x14.0      ; XX
+                fdb     font8x14.0      ; XX
+                fdb     font8x14.0      ; XX
+                fdb     font8x14.0      ; XX
+                fdb     font8x14.0      ; XX
+                fdb     font8x14.0      ; XX
+                fdb     font8x14.0      ; XX
+                fdb     font8x14.0      ; XX
+                fdb     font8x14.0      ; XX
+                fdb     font8x14.0      ; XX
+                fdb     font8x14.15     ; -
+                fdb     font8x14.16     ; .
+                fdb     font8x14.17     ; /
+numbers		fdb	font8x14.18     ; 0
+                fdb     font8x14.19     ; 1
+                fdb     font8x14.20     ; 2
+                fdb     font8x14.21     ; 3
+                fdb     font8x14.22     ; 4
+                fdb     font8x14.23     ; 5
+                fdb     font8x14.24     ; 6
+                fdb     font8x14.25     ; 7
+                fdb     font8x14.26     ; 8
+                fdb     font8x14.27     ; 9
+chars1		fdb	font8x14.0,font8x14.0,font8x14.0,font8x14.0,font8x14.0,font8x14.0,font8x14.0     ; XX
+letters	        fdb 	font8x14.34     ; A
+                fdb 	font8x14.35     ; B
+                fdb 	font8x14.36     ; C
+                fdb 	font8x14.37     ; D
+                fdb 	font8x14.38     ; E
+                fdb 	font8x14.39     ; F
+                fdb 	font8x14.40     ; G
+                fdb 	font8x14.41     ; H
+                fdb 	font8x14.42     ; I
+                fdb 	font8x14.43     ; J
+                fdb 	font8x14.44     ; K
+                fdb 	font8x14.45     ; L
+                fdb 	font8x14.46     ; M
+                fdb 	font8x14.47     ; N
+                fdb 	font8x14.48     ; O
+                fdb 	font8x14.49     ; P
+                fdb 	font8x14.50     ; Q
+                fdb 	font8x14.51     ; R
+                fdb 	font8x14.52     ; S
+                fdb 	font8x14.53     ; T
+                fdb 	font8x14.54     ; U
+                fdb 	font8x14.55     ; V
+                fdb 	font8x14.56     ; W
+                fdb 	font8x14.57     ; X
+                fdb 	font8x14.58     ; Y
+                fdb 	font8x14.59     ; Z
+
 ;************************************************
 
 		include "font8x14.inc"
