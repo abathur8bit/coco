@@ -39,7 +39,7 @@ cmp32           macro
 ; MOD:  D
 ;
 copy32          macro
-                ldd     \2   ; copy fps_timer_now to delta
+                ldd     \2
                 std     \1
                 ldd     \2+2
                 std     \1+2

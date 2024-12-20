@@ -35,7 +35,7 @@ pcls0	clra
         ldx    #PAGE0
 ploop@	std    ,x++
         cmpx   #PAGE0+PGSIZE
-        bne    ploop@
+        blo    ploop@
 	puls	d,x
         rts
 	
@@ -89,7 +89,7 @@ showpage0
 
 showpage1
         sta     $FFC6   * F0 0
-        sta     $FFC8+1 * F1 1
+        sta     $FFC8   * F1 0
         sta     $FFCA   * F2 0
         sta     $FFCC+1 * F3 1
         sta     $FFCE   * F4 0

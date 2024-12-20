@@ -10,7 +10,7 @@ WIDTH		equ	32		* width in bytes
 HEIGHT		equ	96		* number of lines
 PGSIZE		equ	WIDTH*HEIGHT
 PAGE0		equ	$400		* start address of page 0
-PAGE1		equ	$1400		* start address of page 1
+PAGE1		equ	$1000		* start address of page 1
 
 set0		macro
 		lda	#0
