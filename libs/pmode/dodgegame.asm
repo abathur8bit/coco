@@ -15,7 +15,7 @@ bn2dec          import
 rnd             import
 inkey           import
 
-ANIM_SPEED      equ     1
+WAIT_DELAY      equ     2
 BOX_DELAY       equ     15              ; TODO want to tune so we can get about 4 boxes on the screen at once
 
 BOX_IMG         equ     0
@@ -38,7 +38,8 @@ PLAYER_SPEED_DN equ     8
                 section main
 
 start
-                ;sta     $ffd9           ; coco3 speed-up
+                lds     #$3f00
+                sta     $ffd9           ; coco3 speed-up
                 jsr     setup_timer_irq
                 jsr     pmode1
                 jsr     pcls
@@ -58,7 +59,7 @@ draw
                 jsr     pageflip
                 jsr     box_moveall
                 jsr     box_add_logic   ; should we add more boxes
-                ;jsr     wait
+                jsr     wait
 
                 inc     fps_counter+1
                 bne     >
@@ -66,6 +67,15 @@ draw
 !
                 jmp     draw
 
+;************************************************
+; Copies page1 to page0
+pageflip        ldx     #PAGE1          ; source
+                ldu     #PAGE0          ; dest
+l@              ldd     ,x++
+                std     ,u++
+                cmpx    #PAGE1+PGSIZE
+                bne     l@
+                rts
 
 ;************************************************
 ; Show the player, read the keyboard and
@@ -257,7 +267,7 @@ done@           rts
 
 ;************************************************
 ; Show the current FPS
-show_fps        blitstring #msg_fps,#$1a00
+show_fps        blitstring #msg_fps,#$1a01
                 ldd     fps_curr        ; last calced fps
                 ldx     #buffer         ; buffer for ascii
                 jsr     bn2dec          ; convert D to ascii, result in buffer
@@ -284,7 +294,7 @@ timer_elapsed   ldd     fps_counter
 show_fps_done   rts
 
 ;************************************************
-show_timer      blitstring #msg_timer,#$0000
+show_timer      blitstring #msg_timer,#$0001
                 ldx     #fps_timer_now
                 jsr     timer_val       ; get current timer into fps_timer_now
                 ldd     fps_timer_now+2 ; just grab the last 2 bytes and use that value
@@ -294,38 +304,16 @@ show_timer      blitstring #msg_timer,#$0000
                 rts
 
 ;************************************************
-; Copies page1 to page0
-pageflip
-                ldd	page
-                cmpd	#PAGE0
-                bne	page1@
-                ; we are on page0 and showing 1, show page0, set page1
-                show0
-                set1
-                bra     done@
-page1@          ; we are on page1 and showing 0, show page1, set page0
-                show1
-                set0
+; If time_now >= time_wait, the timer has elapsed.
+; Once elapsed, we reset the wait time to now+delay.
+wait            ldx     #time_now			; point to our temp
+                jsr     timer_val			; put current time into time_now
+                cmp32   time_now,time_wait		; 32-bit compare
+                blo     wait				; branch if now<wait
+                lda     #WAIT_DELAY			; wait time
+                jsr     add832				; add to time_now
+                copy32  time_wait,time_now		; time_wait=time_now+delay
 done@           rts
-
-
-
-pageflip1        ldx     #PAGE1
-                ldu     #PAGE0
-l@              ldd     ,x++
-                std     ,u++
-                cmpx    #PAGE1+PGSIZE
-                bne     l@
-                rts
-
-;************************************************
-
-;wait		jsr     timer_val       ; timer to D
-;		cmpd	#ANIM_SPEED
-;		ble	wait
-;		ldd	#0
-;		jsr	set_timer_val
-;		rts
 
 ;************************************************
 
@@ -342,8 +330,11 @@ jump_pressed    fcb     0
 player_score    fcb     0
 fps_counter     fdb     0               ; 16-bit how many times through our main loop
 fps_curr        fdb     0               ; 16-bit current frames per second we are running at
-fps_timer_delta fcb     0,0,0,0         ; 32-bit What we are waiting for time to be
-fps_timer_now   fcb     0,0,0,0         ; 32-bit What the timer currently is
+fps_timer_delta      fcb     0,0,0,0    ; 32-bit What we are waiting for time to be
+fps_timer_now        fcb     0,0,0,0    ; 32-bit What the timer currently is
+; 32-bit timer data
+time_now        fcb     0,0,0,0		; Temp to hold current time
+time_wait       fcb     0,0,0,0		; holds time_now+WAIT_DELAY
 
 box             fdb     dodgeblock,$2510  ; image (w,y,data),posxy
 ; List of box posxy. If the Y is zero (0) then the box is not active
