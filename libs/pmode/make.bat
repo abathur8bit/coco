@@ -27,15 +27,15 @@ echo Building cliptest
 lwasm -9 -f obj -lcliptest.lst -s -p c -I.. -I. -o cliptest.o cliptest.asm || exit /b
 lwlink -m cliptest.map --script=linkscript.txt --entry=start -L.. -L. -llee -lpmode1 -o cliptest.bin -b cliptest.o || exit /b
 
-echo Building dodgetest
+echo Building dodgetest (dodge)
 lwasm -9 -f obj -ldodgetest.lst -s -p c -I.. -I. -o dodgetest.o dodgetest.asm || exit /b
 lwlink -m dodgetest.map --script=linkscript.txt --entry=start -L.. -L. -llee -lpmode1 -o dodge.bin -b dodgetest.o || exit /b
 
-echo Building Dodge Game
+echo Building Dodge Game (dodge)
 lwasm -9 -f obj -ldodgegame.lst -s -p c -I.. -I. -o dodgegame.o dodgegame.asm || exit /b
 lwlink -m dodgegame.map --script=linkscript.txt --entry=start -L.. -L. -llee -lpmode1 -o dodge.bin -b dodgegame.o || exit /b
 
-echo Building pmode1test
+echo Building pmode1test (pmt)
 lwasm -3 -f obj -lpmode1test.lst -s -p c -I.. -I. -o pmode1test.o pmode1test.asm || exit /b
 lwlink -m pmode1test.map --script=linkscript.txt  --entry=start -L.. -L. -llee -lpmode1 -o pmt.bin -b pmode1test.o || exit /b
 
@@ -43,4 +43,5 @@ lwlink -m pmode1test.map --script=linkscript.txt  --entry=start -L.. -L. -llee -
 call php map2lst.php -m pmode1test.map > pmode1testall.lst
 call php map2lst.php -m dodgegame.map > dodgeall.lst
 call php map2lst.php -m animtest.map  > animtestall.lst
+call php map2lst.php -m cliptest.map  > cliptestall.lst
 rem C:\Users\patte\Downloads\lst2cmt.exe /SYSTEM coco3 /NOLINENUMBERS /OVERWRITE dodgeall.lst coco3.cmt

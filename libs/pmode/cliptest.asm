@@ -49,8 +49,8 @@ draw
 
 ;************************************************
 ; Copies page1 to page0
-pageflip        ldx     #PAGE1
-                ldu     #PAGE0
+pageflip        ldx     #PAGE1          ; source
+                ldu     #PAGE0          ; dest
 l@              ldd     ,x++
                 std     ,u++
                 cmpx    #PAGE1+PGSIZE
