@@ -26,13 +26,6 @@ start
         lds     #$3f00          ; relocate the stack
 	sta	$ffd9		; coco3 speed-up
 
-        ; Initialize out wait timer
-        ldx     #time_now               ; point to where to store timer value
-        jsr     timer_val               ; grab the current timer value
-        lda     #WAIT_DELAY             ; amount to delay
-        jsr     add832                  ; add to time_now
-        copy32  time_wait,time_now      ; copy to wait
-
 	jsr	setup_timer_irq
 	jsr	pmode1
 	jsr	pcls
@@ -67,19 +60,23 @@ done@	rts
 
 
 ;************************************************
-wait            ldx     #time_now
-                jsr     timer_val
-                cmp32   time_now,time_wait
-                blo     wait
-                lda     #WAIT_DELAY
-                jsr     add832
-                copy32  time_wait,time_now
+; If time_now >= time_wait, the timer has elapsed.
+; Once elapsed, we reset the wait time to now+delay.
+wait            ldx     #time_now				; point to our temp
+                jsr     timer_val				; put current time into time_now
+                cmp32   time_now,time_wait		; 32-bit compare
+                blo     wait					; branch if now<wait
+                lda     #WAIT_DELAY				; wait time
+                jsr     add832					; add to time_now
+                copy32  time_wait,time_now		; time_wait=time_now+delay
 done@           rts
 
 ;*************************************************
 
-time_now        fcb     0,0,0,0
-time_wait       fcb     0,0,0,0
+; 32-bit timer data
+time_now        fcb     0,0,0,0					; Temp to hold current time
+time_wait       fcb     0,0,0,0					; holds time_now+WAIT_DELAY
+
 player_score	fdb	9800
 buffer		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 index		fcb	0
