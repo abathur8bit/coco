@@ -10,14 +10,19 @@ IRQ		equ	%00010000
 WAIT_DELAY	equ	6
 IRQ_VECTOR	equ	$fef7
 ADDR_START	equ	$400
-ADDR_END	equ	$400+32*16-1
+ADDR_END	equ	$400+32*15-1
+ADDR_PLAYER     equ     ADDR_END+1
 
 start
 		jsr	setup_timer_irq
 		jsr	cls
 		jsr	show_msg	; seed the message
 
-loop		ldx	#ADDR_START
+mainloop        jsr     draw
+                jsr     wait
+                bra     mainloop
+
+draw		ldx	#ADDR_START
 		ldy	#ADDR_START+1
 		ldb	,x		; remember top letter
 move_loop	lda	,y+
@@ -25,8 +30,11 @@ move_loop	lda	,y+
 		cmpx	#ADDR_END
 		bne	move_loop
 		stb	,x		; put top letter at bottom
-		jsr	wait
-		bra	loop
+		ldx     #ADDR_PLAYER
+		lda     position
+		ldb     ship
+		stb     a,x
+		rts
 
 ; Show the message, replace
 show_msg	ldx	#ADDR_START
@@ -38,9 +46,9 @@ msg_loop	lda	,y+
 msg_done	rts
 
 cls		lda	#$60
-		ldx	#$400
+		ldx	#ADDR_START
 cls1		sta	,x+
-		cmpx	#$400+32*16
+		cmpx	#ADDR_END
 		bne	cls1
 		rts
 
@@ -70,6 +78,7 @@ timerirq	ldd	timer
 
 timer		fdb	0		; irq timer
 msg		fcb	$48,$41,$50,$50,$59,$60,$48,$4F,$4C,$49,$44,$41,$59,$53,$00
-
+ship            fcb     '^'
+position        fcb     16
 
              	endsection
