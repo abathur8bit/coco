@@ -1,124 +1,75 @@
-;************************************************
-; Test program to fiddle around
-;
-
-	        include "lee.inc"
-	        include "math.inc"
-	        include "timer.inc"
-
-start 	        export
-strout          import
-bn2dec          import
+start           export
 
 	        section main
 
-;************************************************
+; Compile & run: lwasm -o merry.bin merry.asm && vcc merry.bin
+; 8 char tabs only pls
+
+FIRQ		equ	%01000000
+IRQ		equ	%00010000
+WAIT_DELAY	equ	6
+IRQ_VECTOR	equ	$fef7
+ADDR_START	equ	$400
+ADDR_END	equ	$400+32*16-1
+
 start
-                jsr     setup_timer_irq
-                ;sta     $ffd9
-;                ldx     #num0
+		jsr	setup_timer_irq
+		jsr	cls
+		jsr	show_msg	; seed the message
 
-loop
-                ldx     #timer_now
-                jsr     timer_val       ; current timer to timer_now
-                cmp32   timer_now,timer_delta   ; is now > delta?
-                bge     elapsed         ; branch if >=
-                bra     loop
+loop		ldx	#ADDR_START
+		ldy	#ADDR_START+1
+		ldb	,x		; remember top letter
+move_loop	lda	,y+
+		sta	,x+
+		cmpx	#ADDR_END
+		bne	move_loop
+		stb	,x		; put top letter at bottom
+		jsr	wait
+		bra	loop
 
-; reset wait time, and display current time
-elapsed         copy32  timer_delta,timer_now   ; copy now to delta
-                ldx     #timer_delta
-                lda     #30
-                jsr     add832          ; timer_delta += 60
+; Show the message, replace
+show_msg	ldx	#ADDR_START
+		ldy	#msg
+msg_loop	lda	,y+
+		beq	msg_done	; null character?
+		sta	,x+
+		bra	msg_loop
+msg_done	rts
 
-                ldd     timer_delta+2
-                ldx     #buffer
-                jsr     bn2dec
-                ldx     #buffer+1
-                jsr     strout
-                ldx     #msg
-                jsr     strout
+cls		lda	#$60
+		ldx	#$400
+cls1		sta	,x+
+		cmpx	#$400+32*16
+		bne	cls1
+		rts
 
-                bra     loop
+wait		ldd	timer
+		cmpd	#WAIT_DELAY
+		blo	wait
+		ldd	#0
+		std	timer
+		rts
 
+; Set the timer IRQ
+setup_timer_irq
+		orcc   #FIRQ|IRQ	; disable interrupts
+		lda    #$7e
+		sta    IRQ_VECTOR
+		ldd    #timerirq	; address of our new timer routine
+		std    IRQ_VECTOR+1	; install new irq address
+		andcc  #~(IRQ|FIRQ)	; enable interrupts
+		rts
 
+; timer irq handler
+timerirq	ldd	timer
+		addd	#1
+		std	timer
+		lda	$ff02		; ack interrupt by reading the PIA data register
+		rti
 
+timer		fdb	0		; irq timer
+msg		fcb	$48,$41,$50,$50,$59,$60,$48,$4F,$4C,$49,$44,$41,$59,$53,$00
 
-
-                cmp32   num0,num1
-                bge     yes@    ; no
-no@             lda     #0
-yes@            lda     #1
-
-                cmp32   num1,num0
-                bge     yes@    ; yes
-no@             lda     #0
-yes@            lda     #1
-
-                cmp32   num1,num2
-                bge     yes@    ; yes
-no@             lda     #0
-yes@            lda     #1
-
-                cmp32   num1,num2
-                beq     yes@    ; yes
-no@             lda     #0
-yes@            lda     #1
-
-                cmp32   num0,num3
-                bge     yes@    ; no
-no@             lda     #0
-yes@            lda     #1
-
-
-
-                ldd     #$eeff
-                std     num0+2
-                ldx     #num0
-                jsr     set_timer_val
-
-                ldd     #$1234
-                cmpd    #$1234
-                bge     bge_yes@
-                lda     #0
-bge_yes@        lda     #1
-
-                ldd     #$1234
-                cmpd    #$12ff
-                bge     bge_yes@
-                lda     #0
-bge_yes@        lda     #1
-
-                ldd     #$0000
-                cmpd    #$1234
-                bgt     bgt_yes@
-                lda     #0
-bgt_yes@        lda     #1
-
-                ldd     #$FFFF
-                cmpd    #$aaaa
-                bgt     bgt_yes@
-                lda     #0
-bgt_yes@        lda     #1
-
-                ldd     #$1234
-                cmpd    #$1234
-                bgt     bgt_yes@
-                lda     #0
-bgt_yes@        lda     #1
-
-infinate
-                jmp     infinate
-
-num0            fcb     1,$ff,$ff,$ff-4
-num1            fcb     5,6,7,8
-num2            fcb     5,6,7,8
-num3            fcb     9,9,9,9
-timer_delta     fcb     $00,$00,$00,$00 ; 32-bit What we are waiting for time to be (1 seconds)
-timer_now       fcb     0,0,0,0         ; 32-bit What the timer currently is
-
-buffer          zmb     10
-msg             fcc     /=DELTA/
-                fcb     13,0
 
              	endsection
