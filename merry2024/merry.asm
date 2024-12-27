@@ -15,17 +15,22 @@ IRQ_VECTOR      equ     $fef7
 ADDR_START      equ     $400
 ADDR_END        equ     $400+32*15-1
 ADDR_PLAYER     equ     ADDR_END+1
-
+POLCAT          equ     $a000
+VDGREG          equ     $ff22
+DAC             equ     $ff20
 ;************************************************
-start
-                jsr     setup_timer_irq
+start           jsr     setup_timer_irq
                 jsr     cls
                 jsr     show_msg        ; seed the message
 
 mainloop        jsr     draw
                 jsr     wait
+                jsr     keypress        ; go check for input
                 bra     mainloop
 
+;************************************************
+;
+;************************************************
 draw            ldx     #ADDR_END-1     ; source
                 ldy     #ADDR_END       ; destination
                 ldb     ADDR_END        ; remember top letter
@@ -37,11 +42,45 @@ move_loop       lda     ,x
                 bne     move_loop
                 stb     ADDR_START      ; put top letter at bottom
                 ldx     #ADDR_PLAYER
+
+;************************************************
+; delete ship at old posit and plot at new posit
+;************************************************
+                lda     oldposit
+                ldb     #$60            ; blank char
+                stb     a,x  
                 lda     position
                 ldb     ship
                 stb     a,x
                 rts
 
+;************************************************
+; check for input (left/right arrows/space)
+;************************************************
+keypress        jsr     [POLCAT]
+                cmpa    #9              ;right arrow 
+                beq     right
+                cmpa    #8              ;left arrow  
+                beq     left
+                cmpa    #32             ;space
+                bne     keydone
+                lda     VDGREG          ;flip css bit on vdg
+                eora    #8
+                sta     VDGREG  
+keydone         rts
+
+right           lda     position
+                sta     oldposit
+                cmpa    #31
+                beq     atright
+                inc     position
+atright         rts
+
+left            lda     position
+                sta     oldposit
+                beq     atleft 
+                dec     position
+atleft          rts
 ;************************************************
 ; Show the message
 show_msg        ldx     #ADDR_START
@@ -91,5 +130,6 @@ timer           fdb     0               ; irq timer
 msg             fcb     $48,$41,$50,$50,$59,$60,$48,$4F,$4C,$49,$44,$41,$59,$53,$00
 ship            fcb     '^'
 position        fcb     16
-
+oldposit        fcb     16
+fire            fcb     0
                 end     start
