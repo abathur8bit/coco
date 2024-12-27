@@ -8,3 +8,5 @@ lwasm -o merry.bin merry.asm && vcc merry.bin
 Coder8Bit created the initial version which had a message scrolling from the top to the bottom of the screen.
 
 Invisibleman added the ability to move a player left and right with the arrow keys, and flash the screen when you hit the space bar.
+
+[Paul Shoemaker](https://pshoemaker70.itch.io/) made it into a shooter, where you shoot the message.
