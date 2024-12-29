@@ -1,8 +1,8 @@
-@echo off
 cd ..
 call make.bat || exit /b
 cd pmode
 cp ..\*.lst .
+del *.bin
 
 echo Building libpmode1.a
 lwasm -9 -p c -f obj -lpmode1.lst -o pmode1.o pmode1.asm || exit /b
@@ -31,9 +31,9 @@ echo Building dodgetest (dodget)
 lwasm -9 -f obj -ldodgetest.lst -s -p c -I.. -I. -o dodgetest.o dodgetest.asm || exit /b
 lwlink -m dodgetest.map --script=linkscript.txt --entry=start -L.. -L. -llee -lpmode1 -o dodget.bin -b dodgetest.o || exit /b
 
-echo Building Dodge Game (dodge)
-lwasm -9 -f obj -ldodgegame.lst -s -p c -I.. -I. -o dodgegame.o dodgegame.asm || exit /b
-lwlink -m dodgegame.map --script=linkscript.txt --entry=start -L.. -L. -llee -lpmode1 -o dodge.bin -b dodgegame.o || exit /b
+echo Building Dodge Game (dodge) yeah
+lwasm -9 -f obj -ldodgegame.lst -s -p c -I.. -I. -o dodgegame.o dodgegame.asm
+lwlink -m dodgegame.map --script=linkscript.txt --entry=start -L.. -L. -llee -lpmode1 -o dodge.bin -b dodgegame.o
 
 echo Building pmode1test (pmt)
 lwasm -3 -f obj -lpmode1test.lst -s -p c -I.. -I. -o pmode1test.o pmode1test.asm || exit /b

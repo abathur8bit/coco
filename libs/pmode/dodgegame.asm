@@ -2,7 +2,7 @@
 ; Test scrolling box from right to left to see
 ; if things will be playable.
 
-                ;include "lee.inc"
+                include "lee.inc"
                 include "pmode1.inc"
                 include "timer.inc"
                 include "anim.inc"
@@ -24,12 +24,12 @@ BOX_POSY        equ     3
 BOX_DIRX        equ     4
 BOX_DIRY        equ     5
 
-BOX_MAX         equ     10              ; max number of active boxes
+BOX_MAX         equ     2       ;10              ; max number of active boxes
 BOX_STARTX      equ     $20             ; 32 just off screen
 BOX_ENDX        equ     $fa             ; -6
 
 PLAYER_TOP      equ     $20
-PLAYER_BOTTOM   equ     $50
+PLAYER_BOTTOM   equ     $54
 PLAYER_SPEED_UP equ     $f8
 PLAYER_SPEED_DN equ     8
 
@@ -48,24 +48,143 @@ start
 
                 jsr     box_add         ; get first box going
                 jsr     player_init
+
+;main loop
 draw
+                jsr     check_collision
+
                 jsr     pcls
                 jsr     draw_corners
-                jsr     box_showall
+                jsr     show_scores
                 jsr     process_player
-                jsr     show_timer      ; show what rnd number came up
-                jsr     show_fps        ; fps last, so it's on top
+                jsr     box_showall
+                ;jsr     show_timer
+                ;jsr     show_fps        ; fps last, so it is drawn on top of everything else
 
                 jsr     pageflip
-                jsr     box_moveall
+                jsr     check_collision
+                ;bcs                    ; todo do something about player hitting block
+                jsr     box_moveall     ; move boxes left
                 jsr     box_add_logic   ; should we add more boxes
-                jsr     wait
+                jsr     wait            ; twiddle thumbs, this should be gone, and everything run off timer
 
                 inc     fps_counter+1
                 bne     >
                 inc     fps_counter
 !
                 jmp     draw
+
+;************************************************
+; check if any box is colliding with player
+px0     fcb     0                       ; player posx
+py0     fcb     0                       ; player posy
+px1     fcb     0                       ; player posx+w
+py1     fcb     0                       ; player posy+h
+bx0     fcb     0                       ; box posx
+by0     fcb     0                       ; box posy
+bx1     fcb     0                       ; box posx+w
+by1     fcb     0                       ; box posy+h
+collided fcb     0
+check_collision
+                clra                    ; todo debug
+                sta     collided
+
+                ldd     playerxy
+                std     px0
+                std     px1
+                ldx     #dodgeball      ; point to player info
+                ldd     ,x              ; w,h
+                adda    px1
+                sta     px1
+                addb    py1
+                stb     py1
+
+; run through all boxes
+                clra
+                sta     index
+loop@           lda     index           ; load slot are we looking at
+                cmpa    #BOX_MAX        ; at end of list?
+                beq     done@
+                asla                    ; to word index
+                ldx     #box_list       ; start of the list
+                ldd     a,x             ; grab box posxy
+                cmpb    #0              ; check if box is active
+                beq     zero@           ; skip if zero
+                jsr     check_box
+                bcc     zero@           ; not colliding if carry clear
+                ; collision detected
+                lda     #%01010101
+                sta     collided
+                bra     done@
+zero@           inc     index
+                bra     loop@
+done@
+                lda     collided
+                sta     $400
+                rts
+
+; Check each corner of the player to see if it is contained in the box
+; set carry flag if it is. Width is in dodgeblock sprite info
+; IN:   D - box x,y
+; OUT:  Carry flag set if player collides, cleared otherwise.
+check_box
+                ; load temp vars with corner coordinates
+                std     bx0             ; x,y
+                std     bx1             ; x,y plus w,h
+                ldx     #dodgeblock     ; point to box info
+                ldd     ,x              ; w,h
+                adda    bx1
+                sta     bx1
+                addb    by1
+                stb     by1
+
+                lda     px1             ; check top right
+                ldb     py0
+                jsr     check_corner
+                bcs     check_hit
+
+                lda     px1             ; check bottom right
+                ldb     py1
+                jsr     check_corner
+                bcs     check_hit
+
+                lda     px0             ; check top left
+                ldb     py0
+                jsr     check_corner
+                bcs     check_hit
+
+                lda     px1             ; check bottom left
+                ldb     py1
+                jsr     check_corner
+                bcs     check_hit
+
+                ; getting here means box isn't colliding
+                clc
+                rts
+
+check_hit       sec                     ; set carry, we hit
+                rts
+
+
+
+; IN:   D player x,y corner to check. bx0,by0,bx1,by1 should all be set
+; OUT:  Carry set if hit, cleared otherwise.
+check_corner    cmpa    bx0             ; px>=bx0?
+                bge     yes1@
+                bra     nothit@
+yes1@           cmpa    bx1             ; px<=bx1?
+                ble     yes2@
+                bra     nothit@
+yes2@           cmpb    by0             ; py>=by0?
+                bge     yes3@
+                bra     nothit@
+yes3@           cmpb    by1             ; py<=by1
+                ble     yes4@
+                bra     nothit@
+yes4@           sec                     ; set carry
+                rts
+nothit@         clc                     ; clear carry
+                rts
 
 ;************************************************
 ; Copies page1 to page0
@@ -119,6 +238,16 @@ checky@         lda     playerxy+1              ; load posy
                 beq     done@                   ; yes
                 adda    player_dirxy+1          ; no, move player y
                 sta     playerxy+1              ; store
+                ; check player hasn't moved too far, and move back if so
+                lda     playerxy+1
+                cmpa    #PLAYER_TOP
+                bge     topokay@
+                lda     #PLAYER_TOP
+                sta     playerxy+1
+topokay@        cmpa    #PLAYER_BOTTOM
+                bls     done@
+                lda     #PLAYER_BOTTOM
+                sta     playerxy+1
 done@           rts
 
 process_input
@@ -199,7 +328,7 @@ box_showall
 	        clra
 	        sta	index
 loop@	        lda	index		; load slot are we looking at
-	        cmpa	#BOX_MAX	; and end of list?
+	        cmpa	#BOX_MAX	; at end of list?
 	        beq	done@		; branch if so
 	        asla			; to word index
 	        ldx	#box_list	; start of the list
@@ -266,8 +395,9 @@ third@          lda     #75
 done@           rts
 
 ;************************************************
-; Show the current FPS
-show_fps        blitstring #msg_fps,#$1a01
+; Show the current FPS and timer
+;
+show_fps        blitstring #msg_fps,#$1a00
                 ldd     fps_curr        ; last calced fps
                 ldx     #buffer         ; buffer for ascii
                 jsr     bn2dec          ; convert D to ascii, result in buffer
@@ -294,7 +424,32 @@ timer_elapsed   ldd     fps_counter
 show_fps_done   rts
 
 ;************************************************
-show_timer      blitstring #msg_timer,#$0001
+; Routines for showing the player score and high score
+;
+show_scores     jsr     show_player_score
+                jsr     show_high_score
+                rts
+
+show_player_score
+                blitstring #msg_1up,#$0000
+                ldx	score_player		; score to display
+                ldd	#$000f			; x&y in bytes
+                pshs	x,d
+                jsr	show_score
+                leas	4,s			; pull score and coords off stack
+                rts
+
+show_high_score
+                blitstring #msg_high,#$1800
+                ldx	score_high		; score to display
+                ldd	#$180f			; x&y in bytes
+                pshs	x,d
+                jsr	show_score
+                leas	4,s			; pull score and coords off stack
+                rts
+
+;************************************************
+show_timer      blitstring #msg_timer,#$0000
                 ldx     #fps_timer_now
                 jsr     timer_val       ; get current timer into fps_timer_now
                 ldd     fps_timer_now+2 ; just grab the last 2 bytes and use that value
@@ -317,31 +472,34 @@ done@           rts
 
 ;************************************************
 
-buffer		fcb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-rnd_val         fcb     0
-index           fcb     0
-temp            fcb     0
-posxy           fdb     0
-counter         fcb     0
-playerxy        fdb     $0020
-player_dirxy    fdb     $0004
-player_destxy   fdb     $0050
-jump_pressed    fcb     0
-player_score    fcb     0
-fps_counter     fdb     0               ; 16-bit how many times through our main loop
-fps_curr        fdb     0               ; 16-bit current frames per second we are running at
-fps_timer_delta      fcb     0,0,0,0    ; 32-bit What we are waiting for time to be
-fps_timer_now        fcb     0,0,0,0    ; 32-bit What the timer currently is
+buffer		        zmb	21
+rnd_val                 fcb     0
+index                   fcb     0
+temp                    fcb     0
+posxy                   fdb     0
+counter                 fcb     0
+playerxy                fdb     $0020
+player_dirxy            fdb     $0004
+player_destxy           fdb     $0054
+jump_pressed            fcb     0
+score_player            fdb     1234
+score_high              fdb     543
+fps_counter             fdb     0               ; 16-bit how many times through our main loop
+fps_curr                fdb     0               ; 16-bit current frames per second we are running at
+fps_timer_delta         fcb     0,0,0,0         ; 32-bit What we are waiting for time to be
+fps_timer_now           fcb     0,0,0,0         ; 32-bit What the timer currently is
 ; 32-bit timer data
-time_now        fcb     0,0,0,0		; Temp to hold current time
-time_wait       fcb     0,0,0,0		; holds time_now+WAIT_DELAY
+time_now                fcb     0,0,0,0		; Temp to hold current time
+time_wait               fcb     0,0,0,0		; holds time_now+WAIT_DELAY
 
-box             fdb     dodgeblock,$2510  ; image (w,y,data),posxy
+box                     fdb     dodgeblock,$2510 ; image (w,y,data),posxy
 ; List of box posxy. If the Y is zero (0) then the box is not active
-box_list        zmd     10              ; list of x,y coords
-
-msg_fps         fcn     /FPS/
-msg_timer       fcn     /TIMER/
+box_list                zmd     10              ; list of x,y coords
+;box_list                fcb     $fc,$20,$0a,$36,0,0   ; hex 2,32 10,54 w,h=$18x15
+msg_fps                 fcn     /FPS/
+msg_timer               fcn     /TIMER/
+msg_1up                 fcn     /1UP/
+msg_high                fcn     /HIGH/
 
 ;************************************************
 

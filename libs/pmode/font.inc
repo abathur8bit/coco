@@ -1,4 +1,5 @@
 blitstr         import
+show_score      import
 
 ;************************************************
 ; BLITSTRING - makes blitting a string a little easier.
