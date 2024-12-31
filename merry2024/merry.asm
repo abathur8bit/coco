@@ -36,21 +36,30 @@ endless_loop    bra     endless_loop    ; used for debugging
 
 ;************************************************
 draw_score
-                ldx     #buffer         ; point to score buffer
-                ldd     score           ; player score
-                jsr     bn2dec          ; convert score to ascii string
-                jsr     pad             ; pad with zeros if needed
-                ldx     #buffer+1       ; +1 as the first byte is the number of chars
-                ldy     #ADDR_SCORE
-                ; 4 bytes for the score
-                lda     ,x+             ; load from buffer
-                sta     ,y+             ; put on screen
-                lda     ,x+
-                sta     ,y+
-                lda     ,x+
-                sta     ,y+
-                lda     ,x+
-                sta     ,y+
+                ldx     #ADDR_SCORE     ; plot address
+                lda     score           ; get 1st score byte
+                lsra			; shift to lower nybble
+                lsra                    ; (1st digit)	 
+                lsra
+                lsra
+                ora     #$30            ; apply ascii transform
+                sta     ,x              ; store
+                lda     score           ; get 2nd digit		
+                anda    #$0f            ; mask off upper nybble
+                ora     #$30            ; convert to ascii
+                sta	1,x             ; store 
+
+                lda     score+1         ; get 2nd score byte
+                lsra			; shift to lower nybble
+                lsra	
+                lsra
+                lsra
+                ora     #$30            ; apply ascii transform
+                sta     2,x             ; store
+                lda     score+1         ; get 2nd digit		
+                anda    #$0f            ; mask off upper nybble
+                ora     #$30            ; convert to ascii
+                sta	3,x             ; store 
                 rts
 
 
@@ -103,11 +112,19 @@ move_loop_2     lda     ,x              ; check if the missile is over a byte th
                 beq     move_loop_4     ; if it's a background value, that means the missile hasn't hit anything, so skip ahead
                 lda     #$60            ; If we're here, then we've hit a letter!  Load accA with a blank to clear the missile
                 sta     32,x            ; clear the missile which is one row down
-                lda     score+1         ; load and add to lower byte
-                adda    #10             ; who only adds 1 point these days?
+
+
+add10           clra			; serves to clear CARRY
+                lda     #$10		; Number to add (BCD)
+                adca    score+1		; add to lower score byte
+                daa                     ; convert to BCD
                 sta     score+1         ; store back
-                bcc     done_score      ; done if no carry
-                inc     score           ; had carry, add to high byte
+                lda     #$00            ; 0 becuse we want to add any carry from prev.
+                adca    score           ; add carry from last
+                daa                     ; convert to BCD
+                sta     score           ; store
+
+
 done_score      lda     ,x              ; load the letter from the screen
                 anda    #%10111111      ; invert it
                 sta     ,x              ; write it back
@@ -169,7 +186,7 @@ keydone         rts
 
 right           lda     position
                 sta     oldposit
-                cmpa    #31
+                cmpa    #31-2           ; allow for ship width 
                 beq     atright
                 inc     position
 atright         rts
@@ -237,130 +254,6 @@ timerirq        ldd     timer
                 lda     $ff02           ; ack interrupt by reading the PIA data register
                 rti
 
-;************************************************
-; TITLE  : BINARY TO DECIMAL ASCII
-; NAME   : BN2DEC
-; SOURCE : 6809 ASSEMBLY LANGUAGE SUBROUTINES
-;
-; PURPOSE: CONVERTS A 16-BIT SIGNED BINARY NUMBER
-;          TO ASCII DATA
-;
-; IN :  D = VALUE TO CONVERT
-;       X = OUTPUT BUFFER ADDRESS
-; OUT:  THE FIRST BYTE OF THE BUFFER IS THE LENGTH
-;       FOLLOWED BY THE CHARACTERS AND A 0 TO NULL
-;       TERMINATE THE STRING.
-; MOD:  D,X,Y,CC
-; TIME: APPROXIMATELY 1000 CYCLES
-; SIZE: 99 PROGRAM BYTES, 5 BYTES ON THE STACK
-;***
-bn2dec
-                std     1,x     * save data in buffer
-                bpl     cnvert  * branch if data is positive
-                ldd     #0      * else take absolute value
-                subd    1,x
-
-cnvert          clr     ,x      * string length = zero
-
-* divid binary data by 10 by subtracting power so ten
-div10
-                ldy     #-1000  * start quotient at -1000
-
-                * find number of thousands in quotient
-thousd
-                leay    1000,y  * add 1000 to quotient
-                subd    #10000
-                bcc     thousd  * branch if difference still positive
-                addd    #10000  * else add back last 10000
-
-                * find number of hundreds in quotient
-                leay    -100,y
-hundd           leay    100,y
-                subd    #1000
-                bcc     hundd
-                addd    #1000
-
-                * find number of tens in quotient
-                leay    -10,y
-tensd           leay    10,y
-                subd    #100
-                bcc     tensd
-                addd    #100
-
-                * find number of ones on quotient
-                leay    -1,y
-onesd           leay    1,y
-                subd    #10
-                bcc     onesd
-                addd    #10
-                * save remainder in stack
-                * this is next digit, moving left
-                * least significant digit goes into stack
-                * first
-                stb     ,-s
-
-                inc     ,x      * add 1 to length
-                tfr     y,d     * make quotient into new dividend
-                cmpd    #0      * check if dividend zero
-                bne     div10   * branch of not - divid by 10 again
-
-                * check if original binary data was negative
-                * and if so put ascii '-' at front of buffer
-                lda     ,x+     * get length byte (not including sign)
-                ldb     ,x      * get high byte of data
-                bpl     bufld * branch if positive
-                ldb     #'-     * otherwise get ascii minus sign
-                stb     ,x+     * store minus sign in buffer
-                inc     -2,x    * add 1 to length for sign
-
-                * move string of digits from stack to buffer
-                * most significant digit is at top of stack
-                * convert digits to ascii by adding ascii '0'
-bufld
-                ldb     ,s+     * get next digit from stack, moving right
-                addb    #'0     * convert digit to ascii
-                stb     ,x+
-                deca
-                bne     bufld
-                ldb     #0      * null terminate string...
-                stb     ,x+     * ...in buffer
-                rts
-
-;************************************************
-; Pad the score string. Remember that the first
-; byte of the buffer contains the length of the
-; string. Padding doesn't have a length.
-;***
-pad             ldd     score           * score (stack moved because of jsr)
-                cmpd    #999            * can we skip padding?
-                bhi     padx            * if > 999 we can
-                ldd     #$3030          *"00"
-                std     padding
-                std     padding+2
-                ldd     score           * score (stack moved because of jsr)
-                cmpd    #9
-                bhi     pad0
-                lda     buffer+1        * 1 digit
-                sta     padding+3       * padded with 3 zeros
-                bra     padd
-pad0            cmpd    #99
-                bhi     pad1
-                ldd     buffer+1        * 2 digits
-                std     padding+2       * padded 2 zeros
-                bra     padd
-pad1            ldd     buffer+1        * pad 1 zero
-                std     padding+1
-                lda     buffer+3
-                std     padding+3
-padd            ldd     padding         * put padded value into string buffer
-                std     buffer+1
-                ldd     padding+2
-                std     buffer+3
-                lda     #0              * null terminate the string
-                sta     buffer+5
-                lda     #4              * set the string length
-                sta     buffer
-padx            rts
 
 ;************************************************
 timer           fdb     0               ; irq timer
@@ -373,9 +266,5 @@ missile_flag    fcb     0
 position        fcb     16
 oldposit        fcb     16
 message_pos     fdb     $0000
-fire            fcb     0
-score           fdb     90
-buffer          zmb     10
-padding         zmb     5
-
+score           fdb     $0000
                 end     start
