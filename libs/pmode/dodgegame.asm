@@ -24,14 +24,23 @@ BOX_POSY        equ     3
 BOX_DIRX        equ     4
 BOX_DIRY        equ     5
 
-BOX_MAX         equ     2       ;10              ; max number of active boxes
+BOX_MAX         equ     10              ; max number of active boxes
 BOX_STARTX      equ     $20             ; 32 just off screen
 BOX_ENDX        equ     $fa             ; -6
+
+BOX_YTOP        equ     32
+BOX_YMID        equ     54
+BOX_YBTM        equ     75
 
 PLAYER_TOP      equ     $20
 PLAYER_BOTTOM   equ     $54
 PLAYER_SPEED_UP equ     $f8
 PLAYER_SPEED_DN equ     8
+
+MODE_ATTRACT    equ     0               ; game has not started yet
+MODE_PLAYING    equ     1               ; game is underway
+MODE_STARTING   equ     2               ; game is about to start
+MODE_DEAD       equ     3               ; when player hits a block
 
 ;************************************************
 
@@ -50,11 +59,92 @@ start
                 jsr     player_init
 
 ;main loop
-draw
-                jsr     check_collision
+main_loop
+                lda     game_mode
+                cmpa    #MODE_ATTRACT
+                beq     attract
 
+                cmpa    #MODE_PLAYING
+                lbeq     playing
+
+                cmpa    #MODE_STARTING
+                beq     starting
+
+                jmp     main_loop
+
+
+;************************************************
+attract
+                jsr     inkey
+                cmpa    #32                     ; space bar
+                bne     show_attract            ; continue showing attract mode if no space bar pressed
+                lda     #MODE_STARTING
+                sta     game_mode
+                jmp     main_loop
+
+show_attract
                 jsr     pcls
-                jsr     draw_corners
+                blitstring #msg_start,#$01*$100+BOX_YMID+2
+
+                jsr     show_scores
+                jsr     box_showall
+
+                jsr     pageflip
+                jsr     box_moveall             ; move boxes left
+                jsr     box_add_logic           ; should we add more boxes
+                jsr     wait                    ; twiddle thumbs, this should be gone, and everything run off timer
+
+                inc     fps_counter+1
+                bne     >
+                inc     fps_counter
+!
+                jmp     main_loop
+
+;************************************************
+starting        jsr     count_active_boxes
+                beq     starting_done
+                ; let boxes continue scrolling off the screen
+                jsr     pcls
+                jsr     show_scores
+                jsr     box_showall
+
+                jsr     pageflip
+                jsr     box_moveall             ; move boxes left
+                jsr     wait                    ; TODO wait should be handled in the main loop, as we might switch to vsync
+                jmp     main_loop
+
+starting_done   lda     #MODE_PLAYING
+                sta     game_mode
+                jmp     main_loop
+
+;************************************************
+; count_active_boxes - Counts boxes that have a
+;       y coord > 0 which means it is active.
+; OUT:  A - Contains the number of active boxes
+;***
+count_active_boxes
+                clra
+                sta     index
+                sta     temp
+loop@           ldb     index
+	        cmpb	#BOX_MAX	; and end of list?
+	        beq	done@		; branch if so
+	        aslb			; to word index
+	        ldx	#box_list	; start of the list
+	        abx                     ; point X to correct location
+	        ldd	,x		; grab the box posxy
+	        cmpb    #0              ; posy == 0 means not active
+	        beq	zero@		; skip if zero
+	        inc     temp            ; active box
+zero@	        inc	index
+	        bra	loop@
+done@	        lda     temp
+                rts
+
+;************************************************
+playing
+                jsr     check_collision
+                jsr     pcls
                 jsr     show_scores
                 jsr     process_player
                 jsr     box_showall
@@ -72,22 +162,22 @@ draw
                 bne     >
                 inc     fps_counter
 !
-                jmp     draw
+                jmp     main_loop
 
 ;************************************************
 ; check if any box is colliding with player
-px0     fcb     0                       ; player posx
-py0     fcb     0                       ; player posy
-px1     fcb     0                       ; player posx+w
-py1     fcb     0                       ; player posy+h
-bx0     fcb     0                       ; box posx
-by0     fcb     0                       ; box posy
-bx1     fcb     0                       ; box posx+w
-by1     fcb     0                       ; box posy+h
-collided fcb     0
+px0             fcb     0               ; player posx
+py0             fcb     0               ; player posy
+px1             fcb     0               ; player posx+w
+py1             fcb     0               ; player posy+h
+bx0             fcb     0               ; box posx
+by0             fcb     0               ; box posy
+bx1             fcb     0               ; box posx+w
+by1             fcb     0               ; box posy+h
+collided        fcb     0
 check_collision
-                clra                    ; todo debug
-                sta     collided
+                clra                    ; todo debug showing a pixel to show the collided state
+                sta     collided        ; todo debug showing a pixel to show the collided state
 
                 ldd     playerxy
                 std     px0
@@ -387,11 +477,11 @@ box_loc_rnd     lda     #$FF            ; choose new location
                 bhi     third@
                 cmpa    #$55            ; 55-AA middle  (85)
                 bhi     second@
-first@          lda     #32             ; 00-55 top
+first@          lda     #BOX_YTOP       ; 00-55 top
                 bra     done@
-second@         lda     #54
+second@         lda     #BOX_YMID
                 bra     done@
-third@          lda     #75
+third@          lda     #BOX_YBTM
 done@           rts
 
 ;************************************************
@@ -451,10 +541,10 @@ show_high_score
 ;************************************************
 show_timer      blitstring #msg_timer,#$0000
                 ldx     #fps_timer_now
-                jsr     timer_val       ; get current timer into fps_timer_now
-                ldd     fps_timer_now+2 ; just grab the last 2 bytes and use that value
+                jsr     timer_val               ; get current timer into fps_timer_now
+                ldd     fps_timer_now+2         ; just grab the last 2 bytes and use that value
                 ldx     #buffer
-                jsr     bn2dec          ; convert to ascii
+                jsr     bn2dec                  ; convert to ascii
                 blitstring #buffer+1,#$000f
                 rts
 
@@ -476,14 +566,15 @@ buffer		        zmb	21
 rnd_val                 fcb     0
 index                   fcb     0
 temp                    fcb     0
+game_mode               fcb     MODE_ATTRACT            ; what mode the game is in
 posxy                   fdb     0
 counter                 fcb     0
 playerxy                fdb     $0020
 player_dirxy            fdb     $0004
 player_destxy           fdb     $0054
 jump_pressed            fcb     0
-score_player            fdb     1234
-score_high              fdb     543
+score_player            fdb     0
+score_high              fdb     0
 fps_counter             fdb     0               ; 16-bit how many times through our main loop
 fps_curr                fdb     0               ; 16-bit current frames per second we are running at
 fps_timer_delta         fcb     0,0,0,0         ; 32-bit What we are waiting for time to be
@@ -500,6 +591,7 @@ msg_fps                 fcn     /FPS/
 msg_timer               fcn     /TIMER/
 msg_1up                 fcn     /1UP/
 msg_high                fcn     /HIGH/
+msg_start               fcn     /SPACE TO START/
 
 ;************************************************
 

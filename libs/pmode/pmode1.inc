@@ -5,6 +5,7 @@ showpage 	import			* show page in reg A
 page		import
 c2x		import
 draw_corners	import
+;pageflip        import
 
 WIDTH		equ	32		* width in bytes
 HEIGHT		equ	96		* number of lines

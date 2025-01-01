@@ -7,6 +7,7 @@ showpage	export
 page		export
 c2x		export
 draw_corners	export
+pageflip        export
 
         section code
 
@@ -19,6 +20,20 @@ pmode1  lda     #%11000000	; VDG mode 3C
         sta     $ff22		; set vdg mode
         sta     $ffc5           ; set V2 of sam
         rts
+
+*************************************************
+pageflip
+        ldd	page
+        cmpd	#PAGE0
+        bne	flip1@
+flip0@  show1
+        set0
+        rts
+flip1@  show0
+        set1
+        rts
+
+
 
 *************************************************
 * Clears the current page by setting all to 0
