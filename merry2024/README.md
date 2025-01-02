@@ -12,3 +12,5 @@ Invisibleman added the ability to move a player left and right with the arrow ke
 [Paul Shoemaker](https://pshoemaker70.itch.io/) made it into a shooter, where you shoot the message.
 
 Coder8Bit added a score.
+
+Invisibleman changed score to use BCD.
