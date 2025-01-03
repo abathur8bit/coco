@@ -65,7 +65,7 @@ main_loop
                 beq     attract
 
                 cmpa    #MODE_PLAYING
-                lbeq     playing
+                lbeq    playing
 
                 cmpa    #MODE_STARTING
                 beq     starting
@@ -304,7 +304,7 @@ process_player
                 jsr     player_update
                 rts
 
-; draw the player sprite
+;************************************************
 player_draw
                 ldx     #playerxy
                 ldd     ,x
@@ -315,60 +315,58 @@ player_draw
                 leas    6,s             ; pop data
                 rts
 
-; move player if they need moving, stop movement when they
-; reach destination
-player_update   lda     jump_pressed
-                beq     player_move             ; jump not pressed
-                lda     playerxy+1              ; load posy
-                cmpa    player_destxy+1         ; is player at destination?
-                bne     player_move             ; no, so skip jump logic. Player must be stopped vertically.
-                ldd     #$00fc                  ; -4
-                std     player_dirxy            ; set new direction
-                lda     #PLAYER_TOP             ; set new destination
-                sta     player_destxy
-
-player_move     lda     playerxy                ; load posx
-                cmpa    player_destxy           ; at destination?
-                beq     checky@                 ; yes
-                adda    player_dirxy            ; no, move player x
-                sta     playerxy                ; store
-checky@         lda     playerxy+1              ; load posy
+;************************************************
+; move player if they need moving, stop movement
+; when they reach destination. Reset jump_pressed
+; when destination reached. Ensure they are not past
+; the dest, if so reset to dest.
+;***
+player_update   lda     playerxy+1              ; load posy
                 cmpa    player_destxy+1         ; at destination?
-                beq     done@                   ; yes
+                beq     at_dest@                ; yes
                 adda    player_dirxy+1          ; no, move player y
                 sta     playerxy+1              ; store
-                ; check player hasn't moved too far, and move back if so
-                lda     playerxy+1
-                cmpa    #PLAYER_TOP
-                bge     topokay@
-                lda     #PLAYER_TOP
+                ; check player has moved too far, and move back if so
+                lda     player_dirxy+1          ; grab dir
+                bpl     moving_down@
+moving_up@      lda     playerxy+1              ; load posy
+                cmpa    #PLAYER_TOP             ; check posy against TOP
+                bge     done@                   ; branch if >=,
+                lda     #PLAYER_TOP             ; posy < TOP so set player to top
                 sta     playerxy+1
-topokay@        cmpa    #PLAYER_BOTTOM
-                bls     done@
-                lda     #PLAYER_BOTTOM
+                bra     at_dest@                ; we are at our destination now
+moving_down@    lda     playerxy+1              ; load posy
+                cmpa    #PLAYER_BOTTOM          ; check posy against BOTTOM
+                bls     done@                   ; branch if <=
+                lda     #PLAYER_BOTTOM          ; posy > BOTTOM so set player to BOTTOM
                 sta     playerxy+1
+                bra     at_dest@                ; we are at our destination now
+at_dest@        clr     jump_pressed            ; clear flag so we can jump again
 done@           rts
 
+;************************************************
 process_input
-                jsr     inkey
-                cmpa    #9
-                bne     not9@
-                sta     jump_pressed
-                lda     #PLAYER_TOP
-                sta     player_destxy+1
-                lda     #PLAYER_SPEED_UP
-                sta     player_dirxy+1
-                rts
-not9@           cmpa    #8
-                bne     key_done@
-                sta     jump_pressed
+                lda     jump_pressed            ; are we already jumping?
+                bne     key_done@               ; yes, jump is already pressed
+                jsr     inkey                   ; read keyboard
+                cmpa    #32                     ; did we detect space bar?
+                bne     key_done@               ; nope, done
+                sta     jump_pressed            ; yup, set flag
+                ; figure out what direction we need to send player
+                lda     player_dirxy+1          ; get current direction
+                bpl     move_up                 ; we were moving down, so move up
+move_down
                 lda     #PLAYER_BOTTOM
                 sta     player_destxy+1
                 lda     #PLAYER_SPEED_DN
                 sta     player_dirxy+1
                 rts
-key_done@       clr     jump_pressed
-                rts
+move_up
+                lda     #PLAYER_TOP
+                sta     player_destxy+1
+                lda     #PLAYER_SPEED_UP
+                sta     player_dirxy+1
+key_done@       rts
 
 ;***
 ; Set player initial values
