@@ -76,8 +76,8 @@ main_loop
 ;************************************************
 attract
                 jsr     inkey
-                cmpa    #32                     ; space bar
-                bne     show_attract            ; continue showing attract mode if no space bar pressed
+                cmpa    #32                             ; space bar
+                bne     show_attract                    ; continue showing attract mode if no space bar pressed
                 lda     #MODE_STARTING
                 sta     game_mode
                 jmp     main_loop
@@ -115,6 +115,14 @@ starting        jsr     count_active_boxes
 
 starting_done   lda     #MODE_PLAYING
                 sta     game_mode
+                ldx     #time_now			; point to our temp
+                jsr     timer_val			; put current time into time_now
+                lda     #30
+                jsr     add832
+                copy32  time_wait,time_now
+waitloop@       jsr     timer_val
+                cmp32   time_now,time_wait		; 32-bit compare
+                blo     waitloop@       	        ; branch if now<wait
                 jmp     main_loop
 
 ;************************************************
