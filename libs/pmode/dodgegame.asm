@@ -115,6 +115,7 @@ starting        jsr     count_active_boxes
 
 starting_done   lda     #MODE_PLAYING
                 sta     game_mode
+                ; wait a short time
                 ldx     #time_now			; point to our temp
                 jsr     timer_val			; put current time into time_now
                 lda     #30
