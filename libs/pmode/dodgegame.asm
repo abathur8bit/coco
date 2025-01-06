@@ -70,6 +70,9 @@ main_loop
                 cmpa    #MODE_STARTING
                 beq     starting
 
+                cmpa    #MODE_DEAD
+                beq     starting                        ; wait for boxes to clear, just like mode starting
+
                 jmp     main_loop
 
 
@@ -93,24 +96,20 @@ show_attract
                 jsr     box_moveall             ; move boxes left
                 jsr     box_add_logic           ; should we add more boxes
                 jsr     wait                    ; twiddle thumbs, this should be gone, and everything run off timer
-
-                inc     fps_counter+1
-                bne     >
-                inc     fps_counter
-!
                 jmp     main_loop
 
 ;************************************************
 starting        jsr     count_active_boxes
                 beq     starting_done
+
                 ; let boxes continue scrolling off the screen
                 jsr     pcls
                 jsr     show_scores
                 jsr     box_showall
 
                 jsr     pageflip
-                jsr     box_moveall             ; move boxes left
-                jsr     wait                    ; TODO wait should be handled in the main loop, as we might switch to vsync
+                jsr     box_moveall                     ; move boxes
+                jsr     wait
                 jmp     main_loop
 
 starting_done   lda     #MODE_PLAYING
@@ -127,7 +126,7 @@ waitloop@       jsr     timer_val
                 jmp     main_loop
 
 ;************************************************
-; count_active_boxes - Counts boxes that have a
+; COUNT_ACTIVE_BOXES - Counts boxes that have a
 ;       y coord > 0 which means it is active.
 ; OUT:  A - Contains the number of active boxes
 ;***
@@ -162,7 +161,8 @@ playing
 
                 jsr     pageflip
                 jsr     check_collision
-                ;bcs                    ; todo do something about player hitting block
+                bcs     player_hit
+
                 jsr     box_moveall     ; move boxes left
                 jsr     box_add_logic   ; should we add more boxes
                 jsr     wait            ; twiddle thumbs, this should be gone, and everything run off timer
@@ -171,6 +171,10 @@ playing
                 bne     >
                 inc     fps_counter
 !
+                jmp     main_loop
+
+player_hit      lda     #MODE_DEAD
+		sta     game_mode
                 jmp     main_loop
 
 ;************************************************
@@ -183,10 +187,10 @@ bx0             fcb     0               ; box posx
 by0             fcb     0               ; box posy
 bx1             fcb     0               ; box posx+w
 by1             fcb     0               ; box posy+h
-collided        fcb     0
+collided        fcb     0               ; TODO debug collision
 check_collision
-                clra                    ; todo debug showing a pixel to show the collided state
-                sta     collided        ; todo debug showing a pixel to show the collided state
+                clra                    ; TODO debug collision
+                sta     collided        ; TODO debug collision
 
                 ldd     playerxy
                 std     px0
@@ -213,13 +217,13 @@ loop@           lda     index           ; load slot are we looking at
                 bcc     zero@           ; not colliding if carry clear
                 ; collision detected
                 lda     #%01010101
-                sta     collided
+                sta     collided        ; TODO debug collision
                 bra     done@
 zero@           inc     index
                 bra     loop@
 done@
-                lda     collided
-                sta     $400
+                lda     collided        ; TODO debug collision
+                sta     $400+32*30      ; TODO debug collision
                 rts
 
 ; Check each corner of the player to see if it is contained in the box
@@ -321,7 +325,9 @@ player_draw
 ; when destination reached. Ensure they are not past
 ; the dest, if so reset to dest.
 ;***
-player_update   lda     playerxy+1              ; load posy
+player_update   lda     jump_pressed            ; are we processing a jump?
+		beq     done@                   ; no
+		lda     playerxy+1              ; load posy
                 cmpa    player_destxy+1         ; at destination?
                 beq     at_dest@                ; yes
                 adda    player_dirxy+1          ; no, move player y
@@ -342,6 +348,9 @@ moving_down@    lda     playerxy+1              ; load posy
                 sta     playerxy+1
                 bra     at_dest@                ; we are at our destination now
 at_dest@        clr     jump_pressed            ; clear flag so we can jump again
+		ldd     score_player            ; load and update score
+		addd    #10
+		std     score_player
 done@           rts
 
 ;************************************************
@@ -370,7 +379,16 @@ key_done@       rts
 
 ;***
 ; Set player initial values
-player_init
+player_init     ldd     #0
+		std     score_player    ; reset score
+		ldd     #$0020
+		std     playerxy        ; put player at top of play area
+		ldd     #$0004
+		std     player_dirxy    ; make player move towards bottom
+		ldd     #$0054
+		std     player_destxy   ; destination is bottom
+		lda     #1
+		sta     jump_pressed    ; clear jump flag
                 rts
 
 ;************************************************
