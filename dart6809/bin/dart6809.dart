@@ -1,5 +1,7 @@
 import 'package:args/args.dart';
+import 'package:dart6809/cpu6809.dart';
 import 'package:dart6809/greet.dart';
+import 'package:dart6809/cpu.dart';
 
 const String version = '0.0.1';
 
@@ -63,4 +65,8 @@ void main(List<String> arguments) {
   Greet g=Greet();
   String s=g.greet("lee");
   print(s);
+
+  Cpu c = Cpu6809.expanded();
+  c.exec(0);
+  print("cpu type=${c.type}");
 }

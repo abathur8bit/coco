@@ -5,6 +5,10 @@ for a debugger; either console based or GUI. I might go console just for a retro
 feel. I haven't built a decent console app before so this might be a good project for 
 it.
 
+I had started [cocojem](https://github.com/abathur8bit/cocojem) but decided to drop 
+the idea of using Java Swing. While I love using Java, Swing is too old now. 
+Dart and Flutter are way better these days.
+
 # Goals
 First goal is to get the CPU, memory, and unit tests working with a handful of instructions.
 Next would be to get a text view of 0x400-0x5FF, the default 32x16 text display of a Coco.

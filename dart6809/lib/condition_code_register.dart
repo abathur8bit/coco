@@ -7,11 +7,12 @@
 ///                       FIRQ mask________|   |   |   |   |   |________Overflow
 ///                      Half carry____________|   |   |   |____________Zero
 ///                        IRQ mask________________|   |________________Negative
-class ConditionCodeRegister {
+import 'package:dart6809/registers.dart';
+class ConditionCodeRegister extends Register8bit {
   bool entire;
   bool firq;
   bool halfCarry;
-  bool irqMask;
+  bool irq;
   bool negative;
   bool zero;
   bool overflow;
@@ -21,16 +22,17 @@ class ConditionCodeRegister {
       this.entire,
       this.firq,
       this.halfCarry,
-      this.irqMask,
+      this.irq,
       this.negative,
       this.zero,
       this.overflow,
       this.carry);
+
   ConditionCodeRegister.zero() :
     entire=false,
     firq=false,
     halfCarry=false,
-    irqMask=false,
+    irq=false,
     negative=false,
     zero=false,
     overflow=false,
@@ -40,7 +42,7 @@ class ConditionCodeRegister {
     entire=false;
     firq=false;
     halfCarry=false;
-    irqMask=false;
+    irq=false;
     negative=false;
     zero=false;
     overflow=false;
@@ -56,66 +58,66 @@ class ConditionCodeRegister {
     return this;
   }
 
-  bool isFirq() {
-    return firq;
-  }
-
-  ConditionCodeRegister setFirq(bool firq) {
-    this.firq = firq;
-    return this;
-  }
-
-  bool isHalfCarry() {
-    return halfCarry;
-  }
-
-  ConditionCodeRegister setHalfCarry(bool halfCarry) {
-    this.halfCarry = halfCarry;
-    return this;
-  }
-
-  bool isIrqMask() {
-    return irqMask;
-  }
-
-  ConditionCodeRegister setIrqMask(bool irqMask) {
-    this.irqMask = irqMask;
-    return this;
-  }
-
-  bool isNegative() {
-    return negative;
-  }
-
-  ConditionCodeRegister setNegative(bool negative) {
-    this.negative = negative;
-    return this;
-  }
-
-  bool isZero() {
-    return zero;
-  }
-
-  ConditionCodeRegister setZero(bool zero) {
-    this.zero = zero;
-    return this;
-  }
-
-  bool isOverflow() {
-    return overflow;
-  }
-
-  ConditionCodeRegister setOverflow(bool overflow) {
-    this.overflow = overflow;
-    return this;
-  }
-
-  bool isCarry() {
-    return carry;
-  }
-
-  ConditionCodeRegister setCarry(bool carry) {
-    this.carry = carry;
-    return this;
-  }
+  // bool isFirq() {
+  //   return firq;
+  // }
+  //
+  // ConditionCodeRegister setFirq(bool firq) {
+  //   this.firq = firq;
+  //   return this;
+  // }
+  //
+  // bool isHalfCarry() {
+  //   return halfCarry;
+  // }
+  //
+  // ConditionCodeRegister setHalfCarry(bool halfCarry) {
+  //   this.halfCarry = halfCarry;
+  //   return this;
+  // }
+  //
+  // bool isIrqMask() {
+  //   return irq;
+  // }
+  //
+  // ConditionCodeRegister setIrqMask(bool irqMask) {
+  //   irq = irqMask;
+  //   return this;
+  // }
+  //
+  // bool isNegative() {
+  //   return negative;
+  // }
+  //
+  // ConditionCodeRegister setNegative(bool negative) {
+  //   this.negative = negative;
+  //   return this;
+  // }
+  //
+  // bool isZero() {
+  //   return zero;
+  // }
+  //
+  // ConditionCodeRegister setZero(bool zero) {
+  //   this.zero = zero;
+  //   return this;
+  // }
+  //
+  // bool isOverflow() {
+  //   return overflow;
+  // }
+  //
+  // ConditionCodeRegister setOverflow(bool overflow) {
+  //   this.overflow = overflow;
+  //   return this;
+  // }
+  //
+  // bool isCarry() {
+  //   return carry;
+  // }
+  //
+  // ConditionCodeRegister setCarry(bool carry) {
+  //   this.carry = carry;
+  //   return this;
+  // }
 }
