@@ -121,14 +121,15 @@ class Cpu6809 extends Cpu {
   int load8Indexed() {
     int postByte = memory[regs.pc.vinc()];
     if(postByte&0x80 == 0) {
-      return load5bitOffset(postByte);
+      return memory[address5bitOffset(postByte)];   // n,R 0RRnnnnn
     } else if(postByte&0x84==0x84) {
-      // 1RR0 0100
-      return loadNoOffset(postByte);
+      return memory[addressNoOffset(postByte)];     // ,R 1RR0 0100
     }
     return 0;
   }
-  int load5bitOffset(int postByte) {
+  /// Return the address pointed to by postByte with 5-bit signed offset.
+  /// Form n,R Opcode 0RRnnnnn 
+  int address5bitOffset(int postByte) {
     int registerBits = (postByte&0x60) >> 5;  //grab bits 65 and shift down (0110 0000)
     int offset = postByte&0x0f;   //grab bits 3210
     if(postByte&0x10 == 0x10) {
@@ -141,9 +142,11 @@ class Cpu6809 extends Cpu {
       case 2: address=regs.u.value;
       case 3: address=regs.s.value;
     }
-    return memory[address+offset];
+    return address+offset;
   }
-  int loadNoOffset(int postByte) {
+  /// Return the address pointed to by postByte with no offset
+  /// Form ,R Opcode 1RR00100
+  int addressNoOffset(int postByte) {
     int registerBits = (postByte&0x60) >> 5;  //grab bits 65 and shift down (0110 0000)
     int address=0;
     switch(registerBits) {
@@ -152,7 +155,7 @@ class Cpu6809 extends Cpu {
       case 2: address=regs.u.value;
       case 3: address=regs.s.value;
     }
-    return memory[address];
+    return address;
   }
   int load16Immediate() {
     return memory[regs.pc.vinc()]*0x100+memory[regs.pc.vinc()];
