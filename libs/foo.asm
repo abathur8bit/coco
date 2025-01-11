@@ -20,74 +20,17 @@ DAC             equ     $ff20
 
 ;************************************************
 start
-		ldd     $b01          # D extended
-		ldx     #data
+ ldd     $b01          # D extended
+ lds     #data
 
-		lda     ,x
-		lda     ,y
-
-		lda     ,x+
-		lda     ,y+
-
-		lda     ,x++
-		lda     ,y++
-
-		ldb     0x01,x
-		ldb     0x02,x
-		ldb     0x03,x
-		ldb     0x04,x
-		ldb     0x05,x
-		ldb     0x06,x
-		ldb     0x07,x
-		ldb     0x08,x
-		ldb     0x09,x
-		ldb     0x0a,x
-		ldb     0x0b,x
-		ldb     0x0c,x
-		ldb     0x0d,x
-		ldb     0x0e,x
-		ldb     0x0f,x
-		ldb     0x10,x
-		ldb     0x80,x
-		ldb     0x8f,x
-		ldb     0xa0,x
-		ldb     0xb0,x
-		ldb     0xc0,x
-		ldb     0xd0,x
-		ldb     0xe0,x
-		ldb     0xFe,x
-		ldb     0xFF,x
-		ldb      256,x
-		ldb     0x01,y
-		ldb     0x02,y
-		ldb     0x03,y
-		ldb     0x04,y
-		ldb     0x05,y
-		ldb     0x06,y
-		ldb     0x07,y
-		ldb     0x08,y
-		ldb     0x09,y
-		ldb     0x0a,y
-		ldb     0x0b,y
-		ldb     0x0c,y
-		ldb     0x0d,y
-		ldb     0x0e,y
-		ldb     0x0f,y
-		ldb     0x10,y
-		ldb     0xFF,y
-		ldb      256,y
-
-		lda     a,x
-		lda     a,y
-
-		lda     b,x
-		lda     b,y
-
-		lda     d,x
-		lda     d,y
+ lda -1,x
+ lda 1,x
+ lda 1,y
+ lda 1,u
+ lda 1,s
 
 		rts
-data            fcb     0,1,2,3,4,5,6,7,8,9
+data            fcb     0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99
 ;************************************************
 draw_score
                 ldx     #buffer         ; point to score buffer

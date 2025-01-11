@@ -53,6 +53,8 @@ void main() {
     expect(0x39,c.a);
   });
 
+
+
   test("ldb immediate",() {
     List<int> source = [0xC6,0xAB,0x39];
     List<int> data = [0x00,0x11,0x22,0x33];
@@ -196,4 +198,56 @@ void main() {
     c.exec(0);
     expect(c.x,0x1122);
   });
+
+  test("lda 1,u",() {
+    Cpu6809 c = Cpu6809.normal();
+    int dataAddress = 0x0b00;
+    int sourceAddress = 0x3f00;
+    c.regs.u.value = dataAddress;
+    setupTest([0xA6,0x41,0x39],[0x00,0x11,0x22,0x33],c,sourceAddress,dataAddress);
+    expect(c.a,0x11);
+  });
+  test("lda +/-1,xyus",() {
+    List<int> data = [0x10,0x11,0x22,0x33];
+    Cpu6809 c = Cpu6809.normal();
+    int dataAddress = 0x0b00;
+    int sourceAddress = 0x3f00;
+
+    // lda -1,x
+    c = Cpu6809.normal();
+    c.regs.x.value = dataAddress+1;
+    setupTest([0xA6,0x1f,0x39],data,c,sourceAddress,dataAddress);
+    expect(c.a,0x10);
+
+    // lda 1,x
+    c = Cpu6809.normal();
+    c.regs.x.value = dataAddress;
+    setupTest([0xA6,0x01,0x39],data,c,sourceAddress,dataAddress);
+    expect(c.a,0x11);
+
+    // lda 1,y
+    c = Cpu6809.normal();
+    c.regs.y.value = dataAddress;
+    setupTest([0xA6,0x21,0x39],data,c,sourceAddress,dataAddress);
+    expect(c.a,0x11);
+
+    // lda 1,u
+    c = Cpu6809.normal();
+    c.regs.u.value = dataAddress;
+    setupTest([0xA6,0x41,0x39],data,c,sourceAddress,dataAddress);
+    expect(c.a,0x11);
+
+    // lda 1,s
+    c = Cpu6809.normal();
+    c.regs.s.value = dataAddress;
+    setupTest([0xA6,0x61,0x39],data,c,sourceAddress,dataAddress);
+    expect(c.a,0x11);
+  });
+}
+
+void setupTest(List<int> source,List<int> data,Cpu6809 c,int sourceAddress,int dataAddress) {
+  c.regs.pc.value = sourceAddress;
+  c.setRange(dataAddress,data);
+  c.setRange(sourceAddress,source);
+  c.exec(0);
 }

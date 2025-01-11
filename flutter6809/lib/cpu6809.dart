@@ -119,13 +119,26 @@ class Cpu6809 extends Cpu {
     return memory[address];
   }
   int load8Indexed() {
-    // //look at what register (X,Y) is referenced
-    // //address is register (X or Y) + any offset
-    // switch(memory[regs.pc]) {
-    //   case 0x88: load8
-    // }
-    regs.pc.vinc();
+    int postByte = memory[regs.pc.vinc()];
+    if(postByte&0x80 == 0) {
+      return load5bitOffset(postByte);
+    }
     return 0;
+  }
+  int load5bitOffset(int postByte) {
+    int registerBits = (postByte&0x60) >> 5;  //grab bits 65 and shift down (0110 0000)
+    int offset = postByte&0x0f;   //grab bits 3210
+    if(postByte&0x10 == 0x10) {
+      offset = -(1+0xf-offset); // convert from twos complement
+    }
+    int address=0;
+    switch(registerBits) {
+      case 0: address=regs.x.value;
+      case 1: address=regs.y.value;
+      case 2: address=regs.u.value;
+      case 3: address=regs.s.value;
+    }
+    return memory[address+offset];
   }
   int load16Immediate() {
     return memory[regs.pc.vinc()]*0x100+memory[regs.pc.vinc()];

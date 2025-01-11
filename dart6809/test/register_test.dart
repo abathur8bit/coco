@@ -1,6 +1,15 @@
 import 'package:test/test.dart';
 import 'package:dart6809/registers.dart';
 void main() {
+  test('inc',() {
+    Register reg = Register8bit();
+    reg.value=1;
+    reg.inc();              //inc to 2
+    expect(2,reg.value);    //new value
+    expect(3,reg.inc());    //returns new value after increment
+    expect(3,reg.vinc());   //returns current value, then increments
+    expect(4,reg.value);    //new value
+  });
   test('reg 8 bit', () {
     Register reg = Register8bit();
     expect(8, reg.size());

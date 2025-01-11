@@ -9,6 +9,11 @@ abstract class Register {
   shiftLeft() => registerValue *= 2;
   shiftRight() => registerValue = registerValue ~/ 2;
   Register({this.registerValue = 0});
+  /// Returns the value after an increment. If `v=5` then `inc()` will return `6`.
+  int inc() {return ++registerValue;}
+  /// Returns the current value, and increments. If `registerValue=5` then `vinc()`
+  /// will return `5` and `registerValue` will be `6` after the call.
+  int vinc() {int n=registerValue++; return n;}
 }
 class Register8bit extends Register {
   @override
@@ -33,7 +38,7 @@ class RegisterCombined extends Register {
   int size() => 16;
   @override
   int get value {return high.value*0x100+low.value;}
-  set regD(value) {high.value = (value&0xff00)/0x100; low.value = value&low.mask();}
+  set regD(newValue) {high.value = (newValue&0xff00)/0x100; low.value = newValue&low.mask();}
   RegisterCombined(this.high,this.low);
 }
 

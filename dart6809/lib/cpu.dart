@@ -9,9 +9,7 @@ class Cpu extends EmulatorDevice {
         memory = ram,
         super(name:name,type:deviceType);
 
-  void exec(int now) {
-    print("CPU tick $now");
-  }
+  void exec(int now) {}
   void addCycleCounter(int amount) {
     cycleCounter += amount;
   }
