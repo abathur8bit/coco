@@ -23,6 +23,14 @@ start
  ldd     $b01          # D extended
  lds     #data
 
+ lda ,x
+ sta ,x
+ ldb ,y
+ lda ,u
+ ldb ,s
+
+ lda ,x+
+ lda ,x++
  lda -1,x
  lda 1,x
  lda 1,y

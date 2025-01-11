@@ -122,6 +122,9 @@ class Cpu6809 extends Cpu {
     int postByte = memory[regs.pc.vinc()];
     if(postByte&0x80 == 0) {
       return load5bitOffset(postByte);
+    } else if(postByte&0x84==0x84) {
+      // 1RR0 0100
+      return loadNoOffset(postByte);
     }
     return 0;
   }
@@ -139,6 +142,17 @@ class Cpu6809 extends Cpu {
       case 3: address=regs.s.value;
     }
     return memory[address+offset];
+  }
+  int loadNoOffset(int postByte) {
+    int registerBits = (postByte&0x60) >> 5;  //grab bits 65 and shift down (0110 0000)
+    int address=0;
+    switch(registerBits) {
+      case 0: address=regs.x.value;
+      case 1: address=regs.y.value;
+      case 2: address=regs.u.value;
+      case 3: address=regs.s.value;
+    }
+    return memory[address];
   }
   int load16Immediate() {
     return memory[regs.pc.vinc()]*0x100+memory[regs.pc.vinc()];

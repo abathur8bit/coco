@@ -207,7 +207,7 @@ void main() {
     setupTest([0xA6,0x41,0x39],[0x00,0x11,0x22,0x33],c,sourceAddress,dataAddress);
     expect(c.a,0x11);
   });
-  test("lda +/-1,xyus",() {
+  test("lda 5-bit signed offset",() {
     List<int> data = [0x10,0x11,0x22,0x33];
     Cpu6809 c = Cpu6809.normal();
     int dataAddress = 0x0b00;
@@ -242,6 +242,37 @@ void main() {
     c.regs.s.value = dataAddress;
     setupTest([0xA6,0x61,0x39],data,c,sourceAddress,dataAddress);
     expect(c.a,0x11);
+  });
+
+  test("LD no offset",() {
+    List<int> data = [0x10,0x11,0x22,0x33];
+    Cpu6809 c = Cpu6809.normal();
+    int dataAddress = 0x0b00;
+    int sourceAddress = 0x3f00;
+
+    // lda ,x
+    c = Cpu6809.normal();
+    c.regs.x.value = dataAddress; //point to element 0
+    setupTest([0xA6,0x84,0x39],data,c,sourceAddress,dataAddress);
+    expect(c.a,0x10);
+
+    // ldb ,y
+    c = Cpu6809.normal();
+    c.regs.y.value = dataAddress+2; //point to element 2
+    setupTest([0xE6,0xA4,0x39],data,c,sourceAddress,dataAddress);
+    expect(c.b,0x22);
+
+    // lda ,u
+    c = Cpu6809.normal();
+    c.regs.u.value = dataAddress+1; //point to element 1
+    setupTest([0xA6,0xC4,0x39],data,c,sourceAddress,dataAddress);
+    expect(c.a,0x11);
+
+    // ldb ,s
+    c = Cpu6809.normal();
+    c.regs.s.value = dataAddress+3; //point to element 3
+    setupTest([0xE6,0xE4,0x39],data,c,sourceAddress,dataAddress);
+    expect(c.b,0x33);
   });
 }
 
