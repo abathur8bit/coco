@@ -274,6 +274,20 @@ void main() {
     setupTest([0xE6,0xE4,0x39],data,c,sourceAddress,dataAddress);
     expect(c.b,0x33);
   });
+
+  test("ST direct",() {
+    List<int> data = [0x10,0x11,0x22,0x33];
+    Cpu6809 c = Cpu6809.normal();
+    int dataAddress = 0x0b00;
+    int sourceAddress = 0x3f00;
+
+    // sta <$01
+    c = Cpu6809.normal();
+    c.regs.dp.value = 0x0b;
+    c.regs.a.value = 0xaa;
+    setupTest([0x97,0x01,0x39],data,c,sourceAddress,dataAddress);
+    expect(c.memory[0x0b01],0xaa);
+  });
 }
 
 void setupTest(List<int> source,List<int> data,Cpu6809 c,int sourceAddress,int dataAddress) {

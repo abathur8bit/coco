@@ -20,25 +20,13 @@ DAC             equ     $ff20
 
 ;************************************************
 start
- ldd     $b01          # D extended
- lds     #data
-
- lda ,x
- sta ,x
- ldb ,y
- lda ,u
- ldb ,s
-
- lda ,x+
- lda ,x++
- lda -1,x
- lda 1,x
- lda 1,y
- lda 1,u
- lda 1,s
-
-		rts
-data            fcb     0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99
+ ldd #$1234
+ lda #1
+ lda $5
+ sta <$01
+ rts
+data
+ fcb 0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99
 ;************************************************
 draw_score
                 ldx     #buffer         ; point to score buffer
