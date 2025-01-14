@@ -1,8 +1,7 @@
 # Color Computer Projects
 
-Coco and other retro related projects. 
+Coco and other retro related projects. Not particularly well organized. Have a look at my [articles](http://www.axorion.com/articles) for a high level of projects worth looking at.
 
-www.8BitCoder.com
 
 # Tools
 Listed below are tools I use.
